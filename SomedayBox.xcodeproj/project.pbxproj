@@ -1,0 +1,120 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000001 /* SomedayBoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* SomedayBoxApp.swift */; };
+		A00000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* RootTabView.swift */; };
+		A00000000000000000000003 /* BoxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* BoxItem.swift */; };
+		A00000000000000000000004 /* DrawPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* DrawPolicy.swift */; };
+		A00000000000000000000005 /* CapturePaperUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000005 /* CapturePaperUseCase.swift */; };
+		A00000000000000000000006 /* StoreGenerationConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* StoreGenerationConfiguration.swift */; };
+		A00000000000000000000007 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* HomeView.swift */; };
+		A00000000000000000000008 /* BoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008 /* BoxView.swift */; };
+		A00000000000000000000009 /* MemoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* MemoriesView.swift */; };
+		A0000000000000000000000A /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000A /* Brand.swift */; };
+		A0000000000000000000000B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* Localizable.xcstrings */; };
+		A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000C /* PrivacyInfo.xcprivacy */; };
+		A0000000000000000000000D /* DrawPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000E /* DrawPolicyTests.swift */; };
+		A0000000000000000000000E /* AppLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000F /* AppLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000001 /* SomedayBoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SomedayBoxApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		A10000000000000000000003 /* BoxItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxItem.swift; sourceTree = "<group>"; };
+		A10000000000000000000004 /* DrawPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawPolicy.swift; sourceTree = "<group>"; };
+		A10000000000000000000005 /* CapturePaperUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaperUseCase.swift; sourceTree = "<group>"; };
+		A10000000000000000000006 /* StoreGenerationConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreGenerationConfiguration.swift; sourceTree = "<group>"; };
+		A10000000000000000000007 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A10000000000000000000008 /* BoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxView.swift; sourceTree = "<group>"; };
+		A10000000000000000000009 /* MemoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoriesView.swift; sourceTree = "<group>"; };
+		A1000000000000000000000A /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
+		A1000000000000000000000B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		A1000000000000000000000C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A1000000000000000000000D /* SomedayBox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SomedayBox.entitlements; sourceTree = SOURCE_ROOT; };
+		A1000000000000000000000E /* DrawPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawPolicyTests.swift; sourceTree = "<group>"; };
+		A1000000000000000000000F /* AppLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchTests.swift; sourceTree = "<group>"; };
+		A10000000000000000000010 /* SomedayBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SomedayBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000011 /* SomedayBoxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SomedayBoxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000012 /* SomedayBoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SomedayBoxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A20000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A20000000000000000000002 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A20000000000000000000003 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A30000000000000000000001 = {isa = PBXGroup; children = (
+			A30000000000000000000002 /* App */, A30000000000000000000003 /* Domain */, A30000000000000000000004 /* Application */, A30000000000000000000005 /* Data */, A30000000000000000000006 /* Features */, A30000000000000000000007 /* DesignSystem */, A30000000000000000000008 /* Resources */, A30000000000000000000009 /* SomedayBoxTests */, A3000000000000000000000A /* SomedayBoxUITests */, A1000000000000000000000D /* SomedayBox.entitlements */, A3000000000000000000000B /* Products */
+		); sourceTree = "<group>"; };
+		A30000000000000000000002 /* App */ = {isa = PBXGroup; children = (A10000000000000000000001, A10000000000000000000002); path = App; sourceTree = "<group>"; };
+		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004); path = Domain; sourceTree = "<group>"; };
+		A30000000000000000000004 /* Application */ = {isa = PBXGroup; children = (A10000000000000000000005); path = Application; sourceTree = "<group>"; };
+		A30000000000000000000005 /* Data */ = {isa = PBXGroup; children = (A10000000000000000000006); path = Data; sourceTree = "<group>"; };
+		A30000000000000000000006 /* Features */ = {isa = PBXGroup; children = (A3000000000000000000000C, A3000000000000000000000D, A3000000000000000000000E); path = Features; sourceTree = "<group>"; };
+		A30000000000000000000007 /* DesignSystem */ = {isa = PBXGroup; children = (A1000000000000000000000A); path = DesignSystem; sourceTree = "<group>"; };
+		A30000000000000000000008 /* Resources */ = {isa = PBXGroup; children = (A1000000000000000000000B, A1000000000000000000000C); path = Resources; sourceTree = "<group>"; };
+		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E); path = SomedayBoxTests; sourceTree = "<group>"; };
+		A3000000000000000000000A /* SomedayBoxUITests */ = {isa = PBXGroup; children = (A1000000000000000000000F); path = SomedayBoxUITests; sourceTree = "<group>"; };
+		A3000000000000000000000B /* Products */ = {isa = PBXGroup; children = (A10000000000000000000010, A10000000000000000000011, A10000000000000000000012); name = Products; sourceTree = "<group>"; };
+		A3000000000000000000000C /* Home */ = {isa = PBXGroup; children = (A10000000000000000000007); path = Home; sourceTree = "<group>"; };
+		A3000000000000000000000D /* Box */ = {isa = PBXGroup; children = (A10000000000000000000008); path = Box; sourceTree = "<group>"; };
+		A3000000000000000000000E /* Memories */ = {isa = PBXGroup; children = (A10000000000000000000009); path = Memories; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A40000000000000000000001 /* SomedayBox */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000002 /* Build configuration list for PBXNativeTarget "SomedayBox" */; buildPhases = (A60000000000000000000001 /* Sources */, A20000000000000000000001 /* Frameworks */, A70000000000000000000001 /* Resources */); buildRules = (); dependencies = (); name = SomedayBox; productName = SomedayBox; productReference = A10000000000000000000010 /* SomedayBox.app */; productType = "com.apple.product-type.application"; };
+		A40000000000000000000002 /* SomedayBoxTests */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000003 /* Build configuration list for PBXNativeTarget "SomedayBoxTests" */; buildPhases = (A60000000000000000000002 /* Sources */, A20000000000000000000002 /* Frameworks */); buildRules = (); dependencies = (A80000000000000000000001 /* PBXTargetDependency */); name = SomedayBoxTests; productName = SomedayBoxTests; productReference = A10000000000000000000011 /* SomedayBoxTests.xctest */; productType = "com.apple.product-type.bundle.unit-test"; };
+		A40000000000000000000003 /* SomedayBoxUITests */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000004 /* Build configuration list for PBXNativeTarget "SomedayBoxUITests" */; buildPhases = (A60000000000000000000003 /* Sources */, A20000000000000000000003 /* Frameworks */); buildRules = (); dependencies = (A80000000000000000000002 /* PBXTargetDependency */); name = SomedayBoxUITests; productName = SomedayBoxUITests; productReference = A10000000000000000000012 /* SomedayBoxUITests.xctest */; productType = "com.apple.product-type.bundle.ui-testing"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A90000000000000000000001 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = { A40000000000000000000001 = { CreatedOnToolsVersion = 26.0; }; A40000000000000000000002 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; A40000000000000000000003 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; }; }; buildConfigurationList = A50000000000000000000001 /* Build configuration list for PBXProject "SomedayBox" */; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, "zh-Hans"); mainGroup = A30000000000000000000001; productRefGroup = A3000000000000000000000B /* Products */; projectDirPath = ""; projectRoot = ""; targets = (A40000000000000000000001, A40000000000000000000002, A40000000000000000000003); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70000000000000000000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000B, A0000000000000000000000C); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000E); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A80000000000000000000001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = A40000000000000000000001 /* SomedayBox */; targetProxy = A80000000000000000000003 /* PBXContainerItemProxy */; };
+		A80000000000000000000002 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = A40000000000000000000001 /* SomedayBox */; targetProxy = A80000000000000000000004 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		A80000000000000000000003 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A90000000000000000000001 /* Project object */; proxyType = 1; remoteGlobalIDString = A40000000000000000000001; remoteInfo = SomedayBox; };
+		A80000000000000000000004 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A90000000000000000000001 /* Project object */; proxyType = 1; remoteGlobalIDString = A40000000000000000000001; remoteInfo = SomedayBox; };
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+		B00000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		B00000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+		B00000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = SomedayBox.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_ASSET_PATHS = ""; DEVELOPMENT_TEAM = ""; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "someday-box"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle"; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		B00000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = SomedayBox.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "someday-box"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle"; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+		B00000000000000000000005 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.tests; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SomedayBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SomedayBox"; }; name = Debug; };
+		B00000000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.tests; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SomedayBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SomedayBox"; }; name = Release; };
+		B00000000000000000000007 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.uitests; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = SomedayBox; }; name = Debug; };
+		B00000000000000000000008 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.uitests; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = SomedayBox; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A50000000000000000000001 /* Build configuration list for PBXProject "SomedayBox" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000001, B00000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A50000000000000000000002 /* Build configuration list for PBXNativeTarget "SomedayBox" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000003, B00000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A50000000000000000000003 /* Build configuration list for PBXNativeTarget "SomedayBoxTests" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000005, B00000000000000000000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A50000000000000000000004 /* Build configuration list for PBXNativeTarget "SomedayBoxUITests" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000007, B00000000000000000000008); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A90000000000000000000001 /* Project object */;
+}

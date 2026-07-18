@@ -1,0 +1,30 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Home" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "主页" } }
+      }
+    },
+    "Box" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Box" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "盲盒" } }
+      }
+    },
+    "Memories" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Memories" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "回忆" } }
+      }
+    },
+    "Put it in. Draw it out." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Put it in. Draw it out." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "收进去，抽出来。" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
