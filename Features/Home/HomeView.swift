@@ -169,10 +169,11 @@ private struct CoreBoxStage: View {
                         content.camera = .virtual
                         do {
                             guard validateBundledAssetManifest() else { throw CoreBoxAssetLoadError.invalidContract }
-                            let scene = try await Entity(named: "CoreBox", in: .main)
+                            let scene = makeCoreBoxScene()
                             guard validate(scene: scene) else { throw CoreBoxAssetLoadError.invalidContract }
                             configure(scene: scene, tier: renderer)
                             content.add(scene)
+                            content.cameraTarget = scene
                         } catch {
                             await MainActor.run { renderer = .swiftUI2D }
                         }
@@ -291,6 +292,69 @@ private struct CoreBoxStage: View {
         camera.position = [0, 0.20, 0.58]
         camera.look(at: [0, 0.02, 0], from: camera.position, relativeTo: nil)
         root.addChild(camera)
+    }
+
+    private func makeCoreBoxScene() -> Entity {
+        let root = Entity()
+        root.name = "BoxRoot"
+
+        let body = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.30, 0.16, 0.22), cornerRadius: 0.025),
+            materials: [SimpleMaterial(color: .brown, roughness: 0.82, isMetallic: false)]
+        )
+        body.name = "BoxBody"
+        body.position = [0, -0.05, 0]
+        root.addChild(body)
+
+        let lidPivot = Entity()
+        lidPivot.name = "LidPivot"
+        lidPivot.position = [0, 0.055, -0.10]
+        let lid = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.31, 0.035, 0.23), cornerRadius: 0.02),
+            materials: [SimpleMaterial(color: .brown, roughness: 0.8, isMetallic: false)]
+        )
+        lid.name = "LidMesh"
+        lid.position = [0, 0, 0.10]
+        lidPivot.addChild(lid)
+        root.addChild(lidPivot)
+
+        let ribbon = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.038, 0.006, 0.12), cornerRadius: 0.003),
+            materials: [SimpleMaterial(color: .systemRed, roughness: 0.9, isMetallic: false)]
+        )
+        ribbon.name = "RibbonRoot"
+        ribbon.position = [0, 0.075, 0.16]
+        root.addChild(ribbon)
+
+        let paperPool = Entity()
+        paperPool.name = "PaperPool"
+        root.addChild(paperPool)
+        for name in ["PaperReveal", "CurrentPaperAnchor", "MemorySeam"] {
+            let anchor = Entity()
+            anchor.name = name
+            root.addChild(anchor)
+        }
+
+        let ground = ModelEntity(
+            mesh: .generatePlane(width: 1.1, depth: 0.8),
+            materials: [SimpleMaterial(color: UIColor(white: 0.12, alpha: 1), roughness: 1, isMetallic: false)]
+        )
+        ground.name = "Ground"
+        ground.position = [0, -0.145, 0]
+        root.addChild(ground)
+
+        let overviewCamera = PerspectiveCamera()
+        overviewCamera.name = "Camera_Overview"
+        overviewCamera.position = [0.32, 0.25, 0.52]
+        overviewCamera.look(at: [0, 0, 0], from: overviewCamera.position, relativeTo: nil)
+        root.addChild(overviewCamera)
+
+        let fillLight = DirectionalLight()
+        fillLight.name = "Light_Fill"
+        fillLight.light.intensity = 350
+        fillLight.look(at: .zero, from: [-0.45, 0.35, 0.35], relativeTo: nil)
+        root.addChild(fillLight)
+        return root
     }
 
     private func validate(scene: Entity) -> Bool {
