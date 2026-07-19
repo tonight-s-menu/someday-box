@@ -1584,7 +1584,29 @@
           }
         }
       }
-    }
+    },
+    "Active papers": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Active papers" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "活跃纸条" } } } },
+    "A local data operation is already in progress.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "A local data operation is already in progress." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "另一项本地数据操作正在进行。" } } } },
+    "Backup format": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Backup format" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "备份格式" } } } },
+    "Create a backup first if you may want these papers and memories again.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Create a backup first if you may want these papers and memories again." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "如果以后可能需要这些纸条和回忆，请先创建备份。" } } } },
+    "Continue": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Continue" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "继续" } } } },
+    "Draw policy": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Draw policy" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抽取策略" } } } },
+    "Drawable papers": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Drawable papers" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "可抽纸条" } } } },
+    "Erase all data": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all data" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有数据" } } } },
+    "Erase all data permanently?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all data permanently?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "永久抹掉所有数据？" } } } },
+    "Erase all local data": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all local data" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有本地数据" } } } },
+    "Erase all local data?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all local data?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有本地数据？" } } } },
+    "Export backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Export backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "导出备份" } } } },
+    "Replace everything in this Box?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Replace everything in this Box?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "替换盲盒里的全部内容？" } } } },
+    "Replace with this backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Replace with this backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "使用此备份替换" } } } },
+    "Restore backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Restore backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "恢复备份" } } } },
+    "Schema": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Schema" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "数据架构" } } } },
+    "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "应用会切换到已验证的空存储，再移除之前的本地数据代。已导出的文件和系统备份不受本应用控制。" } } } },
+    "This backup contains %lld papers and %lld memories. Your current Box will be replaced only after the restored data is verified.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup contains %1$lld papers and %2$lld memories. Your current Box will be replaced only after the restored data is verified." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份包含 %1$lld 张纸条和 %2$lld 条回忆。只有在恢复数据验证通过后，当前盲盒才会被替换。" } } } },
+    "This backup is damaged or was changed after export.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup is damaged or was changed after export." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份已损坏，或在导出后被修改。" } } } },
+    "This backup was created by a newer, unsupported format.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup was created by a newer, unsupported format." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份使用了当前版本不支持的较新格式。" } } } },
+    "This file is not a valid someday-box backup.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This file is not a valid someday-box backup." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此文件不是有效的改天盲盒备份。" } } } },
+    "Your Box has reached a local format limit. Export or remove content before adding more.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Your Box has reached a local format limit. Export or remove content before adding more." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。" } } } }
   },
   "version": "1.0"
 }

@@ -192,8 +192,58 @@ final class AppModel {
         await mutate { try await self.deleteUseCase.execute(itemID: itemID) }
     }
 
+    func exportBackupData() async -> Data? {
+        guard !isMutating else { return nil }
+        isMutating = true
+        defer { isMutating = false }
+        do {
+            let snapshot = try await repository.exportSnapshot()
+            let info = Bundle.main.infoDictionary ?? [:]
+            let metadata = BackupDocumentMetadataV1(
+                exportedAt: Date(),
+                appMarketingVersion: info["CFBundleShortVersionString"] as? String ?? "0",
+                appBuild: info["CFBundleVersion"] as? String ?? "0",
+                schemaVersion: BackupSchemaVersionV1(major: 1, minor: 0, patch: 0),
+                selectionPolicyVersion: DrawSelectionPolicy.version
+            )
+            let data = try await Task.detached {
+                try BackupDocumentCodecV1().encode(state: snapshot, metadata: metadata)
+            }.value
+            errorMessage = nil
+            return data
+        } catch {
+            errorMessage = message(for: error)
+            return nil
+        }
+    }
+
+    func prepareRestore(data: Data) async -> PersistedProductState? {
+        do {
+            let restoredState = try await Task.detached {
+                try BackupDocumentCodecV1().decode(data)
+            }.value
+            errorMessage = nil
+            return restoredState
+        } catch {
+            errorMessage = message(for: error)
+            return nil
+        }
+    }
+
+    func restoreBackup(_ restoredState: PersistedProductState) async -> Bool {
+        await replaceProductData { try await self.repository.restore(validatedState: restoredState) }
+    }
+
+    func eraseAllData() async -> Bool {
+        await replaceProductData { try await self.repository.eraseAll() }
+    }
+
     func clearError() {
         errorMessage = nil
+    }
+
+    func report(_ error: Error) {
+        errorMessage = message(for: error)
     }
 
     private func mutate(_ operation: () async throws -> Void) async -> Bool {
@@ -203,6 +253,22 @@ final class AppModel {
         do {
             try await operation()
             state = try await repository.snapshot()
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = message(for: error)
+            return false
+        }
+    }
+
+    private func replaceProductData(
+        _ operation: () async throws -> PersistedProductState
+    ) async -> Bool {
+        guard !isMutating else { return false }
+        isMutating = true
+        defer { isMutating = false }
+        do {
+            state = try await operation()
             errorMessage = nil
             return true
         } catch {
@@ -229,6 +295,16 @@ final class AppModel {
             String(localized: "This result came from an older draw version. You can do it or dismiss it.")
         case ApplicationError.invalidContent:
             String(localized: "Check the title and note limits, then try again.")
+        case ApplicationError.capacityExceeded:
+            String(localized: "Your Box has reached a local format limit. Export or remove content before adding more.")
+        case BackupDocumentError.invalidChecksum, BackupDocumentError.nonCanonicalEncoding:
+            String(localized: "This backup is damaged or was changed after export.")
+        case BackupDocumentError.unsupportedFormatVersion:
+            String(localized: "This backup was created by a newer, unsupported format.")
+        case BackupDocumentError, BackupFileReaderError:
+            String(localized: "This file is not a valid someday-box backup.")
+        case GenerationRepositoryError.operationInProgress:
+            String(localized: "A local data operation is already in progress.")
         default:
             String(localized: "Something went wrong locally. Your previous state was kept.")
         }

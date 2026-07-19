@@ -36,7 +36,7 @@ The repository currently contains:
 - A connected persisted core workflow for capture, relaunch/refetch, draw/reveal, redraw, accept/dismiss, complete, put back, edit, archive/restore, permanent-delete closure, Box browsing, and Memories.
 - Unit, application, persistence, backup, and launch-test sources in the shared Xcode scheme.
 
-Settings currently communicates the local-data boundary; it does not yet provide user-facing export, safe staged restore, or journaled erase controls. The canonical backup codec is a data contract, not a claim that restore/erase operations or their interruption recovery are complete. Source presence and host checks also do not prove the connected workflow in an iOS runtime, accessibility, offline behavior, physical-device behavior, or a signed packaged candidate. Xcode tests, runtime journeys, safe data-management closure, and packaged acceptance remain open until candidate-specific evidence is recorded in [the release checklist](docs/release/acceptance-checklist.md).
+Settings exposes bounded file export, validated full-replacement restore, journaled empty-generation erase, and version/count status. Restore and erase use an independently reopened generation and a durable manifest boundary, but rollback exports, disk-space preflight, and the full forced-termination injection matrix are still open. Source presence and host checks also do not prove the connected workflow in an iOS runtime, accessibility, offline behavior, physical-device behavior, or a signed packaged candidate. Xcode tests, runtime journeys, remaining recovery closure, and packaged acceptance stay open until candidate-specific evidence is recorded in [the release checklist](docs/release/acceptance-checklist.md).
 
 ## Commands
 

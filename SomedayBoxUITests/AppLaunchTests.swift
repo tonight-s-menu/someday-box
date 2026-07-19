@@ -26,4 +26,18 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(save.exists)
         XCTAssertFalse(save.isEnabled)
     }
+
+    @MainActor
+    func testSettingsExposesExplicitLocalDataControls() {
+        let app = XCUIApplication()
+        app.launch()
+
+        let settings = app.buttons["Settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        settings.tap()
+
+        XCTAssertTrue(app.buttons["Export backup"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Restore backup"].exists)
+        XCTAssertTrue(app.buttons["Erase all local data"].exists)
+    }
 }

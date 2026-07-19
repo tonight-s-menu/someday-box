@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeView: View {
     @Environment(AppModel.self) private var appModel
@@ -219,24 +220,153 @@ struct CaptureView: View {
 }
 
 private struct SettingsView: View {
+    @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
+    @State private var exportedDocument: SomedayBoxBackupFile?
+    @State private var presentsExporter = false
+    @State private var presentsImporter = false
+    @State private var pendingRestore: PersistedProductState?
+    @State private var confirmsRestore = false
+    @State private var confirmsErase = false
+    @State private var confirmsEraseAgain = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section("Local data") {
                     Label("Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests.", systemImage: "lock.shield")
+                    Button("Export backup", systemImage: "square.and.arrow.up") {
+                        Task {
+                            guard let data = await appModel.exportBackupData() else { return }
+                            exportedDocument = SomedayBoxBackupFile(data: data)
+                            presentsExporter = true
+                        }
+                    }
+                    Button("Restore backup", systemImage: "arrow.counterclockwise") {
+                        presentsImporter = true
+                    }
                 }
                 Section("About") {
                     LabeledContent("Storage", value: "On this device")
+                    LabeledContent("Schema", value: "1.0.0")
+                    LabeledContent("Backup format", value: "1")
+                    LabeledContent("Draw policy", value: DrawSelectionPolicy.version)
+                    LabeledContent("Active papers", value: appModel.state.items.filter { $0.lifecycle == .active }.count.formatted())
+                    LabeledContent("Drawable papers", value: appModel.drawableCount.formatted())
+                    LabeledContent("Memories", value: appModel.state.memories.count.formatted())
+                }
+                Section {
+                    Button("Erase all local data", role: .destructive) {
+                        confirmsErase = true
+                    }
                 }
             }
             .navigationTitle("Settings")
+            .disabled(appModel.isMutating)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }
+            .fileExporter(
+                isPresented: $presentsExporter,
+                document: exportedDocument,
+                contentType: .somedayBoxBackup,
+                defaultFilename: "someday-box-backup"
+            ) { result in
+                if case let .failure(error) = result { appModel.report(error) }
+                exportedDocument = nil
+            }
+            .fileImporter(
+                isPresented: $presentsImporter,
+                allowedContentTypes: [.somedayBoxBackup, .json],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case let .success(urls):
+                    guard let url = urls.first else { return }
+                    Task { await prepareRestore(from: url) }
+                case let .failure(error):
+                    appModel.report(error)
+                }
+            }
+            .confirmationDialog(
+                "Replace everything in this Box?",
+                isPresented: $confirmsRestore,
+                titleVisibility: .visible
+            ) {
+                Button("Replace with this backup", role: .destructive) {
+                    guard let pendingRestore else { return }
+                    Task {
+                        if await appModel.restoreBackup(pendingRestore) {
+                            self.pendingRestore = nil
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) { pendingRestore = nil }
+            } message: {
+                if let pendingRestore {
+                    Text("This backup contains \(pendingRestore.items.count) papers and \(pendingRestore.memories.count) memories. Your current Box will be replaced only after the restored data is verified.")
+                }
+            }
+            .confirmationDialog(
+                "Erase all local data?",
+                isPresented: $confirmsErase,
+                titleVisibility: .visible
+            ) {
+                Button("Continue", role: .destructive) { confirmsEraseAgain = true }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Create a backup first if you may want these papers and memories again.")
+            }
+            .alert("Erase all data permanently?", isPresented: $confirmsEraseAgain) {
+                Button("Erase all data", role: .destructive) {
+                    Task {
+                        if await appModel.eraseAllData() { dismiss() }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control.")
+            }
         }
+    }
+
+    private func prepareRestore(from url: URL) async {
+        let accessed = url.startAccessingSecurityScopedResource()
+        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+        do {
+            let data = try await Task.detached { try BackupFileReader().read(from: url) }.value
+            guard let restoredState = await appModel.prepareRestore(data: data) else { return }
+            pendingRestore = restoredState
+            confirmsRestore = true
+        } catch {
+            appModel.report(error)
+        }
+    }
+}
+
+private extension UTType {
+    static let somedayBoxBackup = UTType(
+        exportedAs: "com.somedaybox.backup",
+        conformingTo: .json
+    )
+}
+
+private struct SomedayBoxBackupFile: FileDocument {
+    static var readableContentTypes: [UTType] { [.somedayBoxBackup, .json] }
+
+    let data: Data
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        data = configuration.file.regularFileContents ?? Data()
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
