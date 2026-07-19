@@ -4,7 +4,7 @@
 
 | Field | Decision |
 | --- | --- |
-| Document status | Product and engineering baseline for the MVP |
+| Document status | Product and engineering baseline for the MVP; selected post-MVP features are specified separately |
 | Product name | `someday-box` in English; `改天盲盒` in Simplified Chinese |
 | Product category | A serendipity-driven activity box for free time |
 | Primary platform | iPhone, portrait-first |
@@ -23,6 +23,7 @@ This document translates the initial concept into a bounded product specificatio
 - **Verification and operation:** Sections 17–19 define tests, delivery gates, release evidence, rollback, and recovery.
 - **Product validation and readiness:** Sections 20–23 define scenarios, risks, Definition of Done, and the final MVP acceptance statement.
 - **Platform sources:** Section 24 records the dated Apple references behind the technical baseline.
+- **Selected post-MVP feature:** [Share to Box](features/share-to-box.md) defines the first major expansion without changing the original MVP acceptance claim.
 
 ---
 
@@ -114,6 +115,7 @@ These are product contracts, not optional tone guidelines.
 - The app does not guess duration because the MVP has no LLM or classifier.
 - The duration requirement is the smallest honest input contract that makes time-safe drawing possible.
 - An optional note stays collapsed by default and never becomes a save gate.
+- A future external-share path must collect the same explicit duration before it may create a Paper; transport state is not a drawable Paper and must not become a user-managed Inbox.
 
 ### 3.3 Constrained surprise
 
@@ -126,6 +128,7 @@ These are product contracts, not optional tone guidelines.
 
 - A label such as “fits 30 minutes” is shown only when the stored metadata supports it.
 - A paper cannot enter the Box without an explicit duration choice; the app never disguises a guess as user input.
+- A Share Extension may report only the local atomic-publication state it has actually verified; it cannot imply that the containing app has completed a product-store transaction while only a transport envelope exists.
 - A completed memory is backed by a persisted completion record.
 - A “local only” claim is backed by the shipped dependency graph, capabilities, runtime network evidence, and privacy manifest—not by interface copy alone.
 
@@ -179,7 +182,6 @@ The next releases should be chosen from observed user friction, not from the siz
 
 | Candidate | Earliest phase | Required evidence before work begins |
 | --- | --- | --- |
-| Share Extension for text and URLs | Post-MVP | Manual capture from other apps is a repeated source of abandonment |
 | Three-choice draw | Post-MVP | Single draws feel coercive or repeated redraw is common |
 | Snooze and skip reasons | Post-MVP | People repeatedly see temporarily unsuitable papers |
 | Manual place and energy context | Post-MVP | Time-only draws are repeatedly unsuitable and users accept the extra capture fields |
@@ -188,7 +190,13 @@ The next releases should be chosen from observed user friction, not from the siz
 | Long-term ideas and manual next actions | Later | Users repeatedly try to capture projects that cannot be expressed as one finite paper |
 | Attachments | Later | Text and optional pasted source text are insufficient |
 | On-device heuristics | Later, separate decision | Rule-based MVP evidence shows a concrete classification burden |
-| Any LLM or cloud capability | Separate product, privacy, and architecture review | It must not be introduced as an invisible dependency or a fallback |
+| Any LLM or cloud capability | Not on this product roadmap | It is outside the local, no-LLM product boundary and must not appear as an enhancement or fallback |
+
+### 4.4 Selected post-MVP feature
+
+Share to Box is the first selected major expansion. Its complete product, interaction, data, privacy, migration, rollback, and acceptance contract is maintained in [the feature specification](features/share-to-box.md), with the cross-process authority decision recorded in [ADR 0003](adr/0003-share-extension-local-import-mailbox.md).
+
+This selection does not retroactively add a Share Extension to the original MVP or claim that implementation has started. The first feature release accepts only system-provided HTTP(S) URLs and plain text, requires the same explicit title-plus-duration truth as manual capture, and adds no webpage fetching, attachment, automatic classification, inferred context, platform account access, or LLM path.
 
 ---
 
@@ -828,15 +836,18 @@ Avoid “任务,” “待办,” “逾期,” “失败,” “效率,” and 
 
 The precise product promise is:
 
-> The app creates no account and contains no developer server, sync, analytics, advertising, or product network request. Product data is stored in the app sandbox. System-level device backup and a file location explicitly selected by the user remain under iOS and user control.
+> The app creates no account and contains no developer server, sync, analytics, advertising, or product network request. Product data is stored in the app’s on-device containers. System-level device backup and a file location explicitly selected by the user remain under iOS and user control.
+
+When an approved embedded extension is present, the on-device boundary includes the app’s dedicated App Group container. [Share to Box](features/share-to-box.md) permits one such container only for a bounded capture mailbox; authoritative SwiftData generations remain in the containing app’s private container.
 
 This wording matters. iOS may include app data in a user-controlled iCloud or Finder device backup, and the system file picker may let the user export to iCloud Drive or another File Provider. Apple may also make system crash diagnostics available according to the person's OS sharing settings. Those are platform or user-controlled boundaries rather than app-operated sync or an embedded telemetry SDK, but they mean the product must not make the false absolute claim that data can never leave the physical device.
 
 Release acceptance requires:
 
 - No `URLSession`, web view, networking client, analytics SDK, ad SDK, or remote configuration in the product dependency path.
-- No iCloud, CloudKit, App Group, Background Modes, Remote Notifications, Associated Domains, location, camera, microphone, Photos, Contacts, or calendar capability.
-- SwiftData explicitly configured with no managed CloudKit database and no shared group container.
+- No iCloud, CloudKit, Background Modes, Remote Notifications, Associated Domains, location, camera, microphone, Photos, Contacts, or calendar capability.
+- No App Group in the original MVP. A later candidate may contain only the exact reviewed Share to Box App Group entitlement in both signed targets; no other group or shared purpose is permitted.
+- SwiftData explicitly configured with no managed CloudKit database and no shared group container, including after Share to Box is added.
 - Complete airplane-mode functionality.
 - Runtime network inspection of the archived build.
 - A clear Settings explanation that deleting the app may remove local data and that recovery depends on a manual export or the person's system-level device backup.
@@ -1103,7 +1114,7 @@ This is a target shape for future implementation, not a request to create empty 
 
 - Use a SwiftData `ModelContainer` with an explicit schema and migration plan.
 - Explicitly configure managed CloudKit as none.
-- Explicitly configure no shared App Group container.
+- Explicitly configure no shared SwiftData App Group container. The selected Share to Box feature may use its dedicated App Group only for the non-SwiftData capture mailbox defined by ADR 0003.
 - Store durable support data in the app's Application Support area, not Caches or temporary directories.
 - Place each physical SwiftData store in its own app-owned generation directory and open it through an explicit URL. A small checksummed active-generation manifest identifies the authoritative generation, schema version, and last clean-launch state; it is replaced atomically rather than edited in place.
 - Keep an operation journal beside the manifest for migration and restore phases. The journal contains generation IDs, phase, versions, counts, and checksums, never titles or notes.

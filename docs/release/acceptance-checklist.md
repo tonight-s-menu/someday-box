@@ -65,3 +65,24 @@ Local runtime evidence is not packaged acceptance.
 - [ ] Rollback/containment and known limitations are approved.
 
 Only this section can close packaged acceptance. Green source scans, unit tests, simulator runs, or a successful archive command cannot substitute for the installed signed-candidate journey.
+
+## 9. Conditional Share to Box evidence
+
+Complete this section only when the candidate manifest declares Share to Box as shipped. Marking the feature “not shipped” is not a substitute if the archive embeds or advertises the extension.
+
+- [ ] The App Group is registered and associated with both App IDs/provisioning profiles under the same development team.
+- [ ] The extension has its own bundle identifier, is embedded as the intended `.appex` under the archived app’s `PlugIns` directory, and passes archive validation.
+- [ ] The production extension uses `com.apple.share-services`, activation dictionary v2, strict matching, URL max 1, and text support; it contains no `TRUEPREDICATE`, image/movie/file/webpage declaration, or `UIBackgroundModes`.
+- [ ] Signed entitlements—not the project capability UI—show the exact same reviewed App Group and Complete Data Protection on app and extension; SwiftData remains outside the group with CloudKit disabled.
+- [ ] `APPLICATION_EXTENSION_API_ONLY=YES` covers the extension and every shared module, which contain no networking, WebKit, source-platform SDK, analytics, ads, or unapproved sensitive capability.
+- [ ] URL-only, text-only, URL-plus-text, empty/unsupported, provider-error, cancellation, validation, capacity, low-storage, and repeated-save states are verified.
+- [ ] Forced termination before final envelope publication yields zero final captures; termination after publication yields one readable envelope; active-window replay materializes exactly one Paper plus Source Reference.
+- [ ] Main-app ingestion, drawable count, source detail, source removal, Paper deletion, and source-neutral draw behavior use persisted records.
+- [ ] Immediate-predecessor migration (using the exact public binary when one exists), promised older-backup import, current backup cutoff/round trip, restore interruption, Erase All, corrupt/future envelope, and mailbox cleanup matrices pass.
+- [ ] Protected Data unavailable is injected during provider load, temporary write, publication, and readback; no case reports false success or leaves a permanent coordination owner.
+- [ ] Given the same delivered representation, airplane-mode publication and ingestion plus runtime inspection prove that neither app nor extension initiates a connection; host-side offline differences and Open Original are recorded separately.
+- [ ] English/Simplified Chinese, light/dark appearance, largest Dynamic Type, VoiceOver, Voice Control, Reduce Motion, iPhone, and required universal-extension host layouts pass.
+- [ ] Physical-device evidence records the actual representations and outcome for Safari, Xiaohongshu, Instagram, TikTok, YouTube, Google Maps, Apple Maps, and a plain-text host; unavailable or partial results remain labeled honestly.
+- [ ] The installed signed candidate survives immediate-predecessor upgrade, host dismissal, app suspension, device locking, and later containing-app launch without losing or duplicating the active capture.
+
+This conditional gate is closed only by the installed packaged app and extension. Main-app unit tests, a synthetic host, Debug signing, or an extension screenshot do not prove real-host payloads, entitlements, lifecycle, or packaged ingestion.

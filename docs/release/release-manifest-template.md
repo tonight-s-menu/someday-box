@@ -44,10 +44,22 @@ Values below describe the current source contract and must be checked against th
 | Production feature flags | `none`, or list owner/default/introduction/removal versions |
 | Oldest readable data version | `REQUIRED` |
 | Migration fixture versions | `REQUIRED` |
+| Share to Box | `not shipped`, or `shipped` with the fields below completed |
+| Share Capture Envelope / canonicalization | `not shipped`, or `REQUIRED` |
+| Share mailbox manifest / operation contract | `not shipped`, or `REQUIRED` |
+| Share mailbox count / byte limits | `not shipped`, or `REQUIRED` |
+| Source Reference schema contract | `not shipped`, or `REQUIRED` |
+| Share product-graph / backup v2 byte budgets | `not shipped`, or `REQUIRED` |
+| Share Extension bundle identifier and version | `not shipped`, or `REQUIRED` |
+| App Group identifier | `not shipped`, or `REQUIRED` |
+| Activation-rule contract and supported UTTypes | `not shipped`, or `REQUIRED` |
+| Oldest readable Share Capture Envelope | `not shipped`, or `REQUIRED` |
 
 ## Evidence ledger
 
 Use only `pass`, `fail`, `blocked`, or `not run`. A lower evidence level never substitutes for a higher one.
+
+When Share to Box is not shipped, use `not run` for its conditional evidence row, `not shipped` as the procedure, and an archive-inspection artifact proving there is no embedded Share Extension or App Group entitlement. This is the standard not-applicable representation; do not add an undeclared fifth status.
 
 | Evidence level | Status | Command or procedure | Immutable artifact |
 | --- | --- | --- | --- |
@@ -60,6 +72,7 @@ Use only `pass`, `fail`, `blocked`, or `not run`. A lower evidence level never s
 | Physical device | `not run` | Oldest and current reference devices | `REQUIRED` |
 | Network/privacy runtime | `not run` | Instruments and App Privacy Report | `REQUIRED` |
 | Packaged | `not run` | Signed Release/TestFlight journey | `REQUIRED` |
+| Share to Box (conditional) | `not run` | Real-host app/extension/mailbox/ingestion journey, or `not shipped` | `REQUIRED` |
 
 ## Known limitations and exceptions
 

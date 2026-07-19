@@ -2,6 +2,14 @@
 
 Native, local-only iPhone app for capturing an idea now and drawing a suitable one later. The product contract is in [docs/product-requirements-and-technical-foundation.md](docs/product-requirements-and-technical-foundation.md).
 
+## Product documents
+
+- [MVP product and technical baseline](docs/product-requirements-and-technical-foundation.md)
+- [Share to Box feature specification](docs/features/share-to-box.md) — selected post-MVP feature; not implemented
+- [Share Extension local-mailbox authority decision](docs/adr/0003-share-extension-local-import-mailbox.md) — accepted implementation boundary
+
+The feature specification is a development contract, not current-runtime evidence. The implementation and verification boundaries below describe the repository as it exists today.
+
 ## Development setup
 
 The app target is intentionally native: Swift 6, SwiftUI, SwiftData, iOS 18.0, and Apple frameworks only. The pinned production toolchain is Xcode 26.6; before making an archive or submission, refresh the toolchain requirement against Apple's current guidance.
