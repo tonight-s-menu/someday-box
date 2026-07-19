@@ -115,6 +115,7 @@ final class AppModel {
     private let shareMailboxReader = ShareMailboxReader()
     private let shareMailboxMaintenance = ShareMailboxMaintenance()
     private let sharedJournalStore: SharedProductDataJournalStore
+    private var isRefreshingSharedCaptures = false
 
     var state = PersistedProductState(items: [])
     var isLoading = true
@@ -236,11 +237,15 @@ final class AppModel {
     }
 
     func acceptDraw() async -> Bool {
-        await mutate { try await self.acceptUseCase.execute() }
+        let accepted = await mutate { try await self.acceptUseCase.execute() }
+        if accepted { await refreshSharedCaptures() }
+        return accepted
     }
 
     func dismissDraw() async -> Bool {
-        await mutate { try await self.dismissUseCase.execute() }
+        let dismissed = await mutate { try await self.dismissUseCase.execute() }
+        if dismissed { await refreshSharedCaptures() }
+        return dismissed
     }
 
     func complete(itemID: UUID) async -> Bool {
@@ -391,6 +396,22 @@ final class AppModel {
         guard case let .invalid(problem) = currentShareRecovery else { return nil }
         do { return try shareMailboxReader.rawRecoveryData(problem) }
         catch { errorMessage = message(for: error); return nil }
+    }
+
+    func refreshSharedCaptures() async {
+        guard !isLoading,
+              !isMutating,
+              unresolvedAttempt == nil,
+              !isRefreshingSharedCaptures else { return }
+        isRefreshingSharedCaptures = true
+        defer { isRefreshingSharedCaptures = false }
+
+        await ingestSharedCaptures()
+        do {
+            state = try await repository.snapshot()
+        } catch {
+            errorMessage = message(for: error)
+        }
     }
 
     private func ingestSharedCaptures() async {

@@ -113,6 +113,62 @@ final class SharePayloadExtractionTests: XCTestCase {
         XCTAssertEqual(try reader.inspect(at: root), ShareMailboxInspection(entries: [], problems: []))
     }
 
+    @MainActor
+    func testForegroundRefreshImportsCapturePublishedAfterInitialLoad() async throws {
+        let fixture = try await makeAppModelFixture()
+        let root = fixture.root
+        addTeardownBlock { try? FileManager.default.removeItem(at: root) }
+        await fixture.appModel.load()
+        let envelope = try envelope(title: "Shared while backgrounded")
+        _ = try ShareMailboxWriter().publish(envelope, at: fixture.mailbox)
+
+        XCTAssertTrue(fixture.appModel.state.items.isEmpty)
+        await fixture.appModel.refreshSharedCaptures()
+
+        XCTAssertEqual(fixture.appModel.state.items.map(\.title), ["Shared while backgrounded"])
+        XCTAssertEqual(fixture.appModel.state.sources.first?.importEnvelopeID, envelope.envelopeID)
+        XCTAssertTrue(try ShareMailboxReader().entries(at: fixture.mailbox).isEmpty)
+    }
+
+    @MainActor
+    func testResolvingRevealImportsCaptureDeferredByGate() async throws {
+        let fixture = try await makeAppModelFixture()
+        let root = fixture.root
+        addTeardownBlock { try? FileManager.default.removeItem(at: root) }
+        let now = Date(timeIntervalSince1970: 4_000_000)
+        var item = BoxItem(
+            title: "Drawn paper",
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+            createdAt: now,
+            updatedAt: now
+        )
+        let session = DrawSession(startedAt: now, availableTime: .upTo30Minutes)
+        let attempt = DrawAttempt(
+            sessionID: session.id,
+            sequence: 1,
+            itemID: item.id,
+            eligibleCount: 1,
+            shownAt: now,
+            outcome: .unresolved
+        )
+        item.lastShownAt = now
+        let unresolvedState = PersistedProductState(items: [item], sessions: [session], attempts: [attempt])
+        _ = try await fixture.repository.withTransaction {
+            $0 = unresolvedState
+        }
+        let envelope = try envelope(title: "Deferred share")
+        _ = try ShareMailboxWriter().publish(envelope, at: fixture.mailbox)
+
+        await fixture.appModel.load()
+        XCTAssertEqual(fixture.appModel.state.items.count, 1)
+        XCTAssertEqual(try ShareMailboxReader().entries(at: fixture.mailbox).count, 1)
+
+        let dismissed = await fixture.appModel.dismissDraw()
+        XCTAssertTrue(dismissed)
+        XCTAssertEqual(Set(fixture.appModel.state.items.map(\.title)), ["Drawn paper", "Deferred share"])
+        XCTAssertTrue(try ShareMailboxReader().entries(at: fixture.mailbox).isEmpty)
+    }
+
     private func envelope(title: String) throws -> ShareCaptureEnvelopeV1 {
         try ShareCaptureEnvelopeV1(
             appBuild: "1",
@@ -122,5 +178,26 @@ final class SharePayloadExtractionTests: XCTestCase {
             acceptedURLString: nil,
             sourceKindRaw: "shared_text"
         )
+    }
+
+    @MainActor
+    private func makeAppModelFixture() async throws -> (
+        appModel: AppModel,
+        repository: GenerationProductRepository,
+        root: URL,
+        mailbox: URL
+    ) {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let support = root.appendingPathComponent("support", isDirectory: true)
+        let mailbox = root.appendingPathComponent("mailbox", isDirectory: true)
+        let repository = try await GenerationProductRepository.open(
+            configuration: StoreGenerationConfiguration(applicationSupportURL: support)
+        )
+        let appModel = AppModel(
+            repository: repository,
+            shareGroupContainerURL: mailbox,
+            sharedJournalStore: SharedProductDataJournalStore(applicationSupportURL: support)
+        )
+        return (appModel, repository, root, mailbox)
     }
 }

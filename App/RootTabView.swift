@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct RootTabView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.scenePhase) private var scenePhase
     @State private var presentsCapture = false
     @State private var presentsDrawContext = false
 
@@ -48,6 +49,10 @@ struct RootTabView: View {
             }
         }
         .task { await appModel.load() }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task { await appModel.refreshSharedCaptures() }
+        }
         .alert(
             "Your Box was not changed",
             isPresented: Binding(
