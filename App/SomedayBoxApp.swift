@@ -83,10 +83,14 @@ final class AppModel {
     var hapticsEnabled: Bool {
         didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled") }
     }
+    var hasSeenIntroduction: Bool {
+        didSet { UserDefaults.standard.set(hasSeenIntroduction, forKey: "hasSeenIntroduction") }
+    }
 
     init(repository: GenerationProductRepository) {
         self.repository = repository
         hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
+        hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
         let arbiter = MutationArbiter(repository: repository)
         captureUseCase = CapturePaperUseCase(arbiter: arbiter)
         editUseCase = EditPaperUseCase(arbiter: arbiter)
@@ -239,7 +243,18 @@ final class AppModel {
     }
 
     func eraseAllData() async -> Bool {
-        await replaceProductData { try await self.repository.eraseAll() }
+        let erased = await replaceProductData { try await self.repository.eraseAll() }
+        if erased {
+            hapticsEnabled = true
+            hasSeenIntroduction = false
+            UserDefaults.standard.removeObject(forKey: "hapticsEnabled")
+            UserDefaults.standard.removeObject(forKey: "hasSeenIntroduction")
+        }
+        return erased
+    }
+
+    func finishIntroduction() {
+        hasSeenIntroduction = true
     }
 
     func clearError() {

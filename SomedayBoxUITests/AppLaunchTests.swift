@@ -5,6 +5,7 @@ final class AppLaunchTests: XCTestCase {
     func testFreshLaunchShowsPrimaryProductActions() {
         let app = XCUIApplication()
         app.launch()
+        openBoxIfNeeded(app)
 
         XCTAssertTrue(app.buttons["Draw a paper"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Put in an idea"].exists)
@@ -16,6 +17,7 @@ final class AppLaunchTests: XCTestCase {
     func testCaptureCannotSaveWithoutDuration() {
         let app = XCUIApplication()
         app.launch()
+        openBoxIfNeeded(app)
         app.buttons["Put in an idea"].tap()
 
         let title = app.textFields["Paper title"]
@@ -31,6 +33,7 @@ final class AppLaunchTests: XCTestCase {
     func testSettingsExposesExplicitLocalDataControls() {
         let app = XCUIApplication()
         app.launch()
+        openBoxIfNeeded(app)
 
         let settings = app.buttons["Settings"]
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
@@ -45,11 +48,21 @@ final class AppLaunchTests: XCTestCase {
     func testHomeAndSettingsPassAutomatedAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
+        openBoxIfNeeded(app)
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
 
         try app.performAccessibilityAudit()
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         try app.performAccessibilityAudit()
+    }
+
+    @MainActor
+    private func openBoxIfNeeded(_ app: XCUIApplication) {
+        let openButton = app.buttons["Open my Box"]
+        if openButton.waitForExistence(timeout: 2) {
+            XCTAssertTrue(app.staticTexts["Put it in. Draw it out."].exists)
+            openButton.tap()
+        }
     }
 }

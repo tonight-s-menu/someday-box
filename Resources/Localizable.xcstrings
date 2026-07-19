@@ -1608,7 +1608,10 @@
     "This file is not a valid someday-box backup.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This file is not a valid someday-box backup." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此文件不是有效的改天盲盒备份。" } } } },
     "Your Box has reached a local format limit. Export or remove content before adding more.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Your Box has reached a local format limit. Export or remove content before adding more." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。" } } } },
     "Experience": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Experience" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "体验" } } } },
-    "Haptics": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Haptics" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "触感反馈" } } } }
+    "Haptics": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Haptics" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "触感反馈" } } } },
+    "Open my Box": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Open my Box" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开我的盲盒" } } } },
+    "Save a possibility without scheduling it. When free time appears, draw one that fits.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Save a possibility without scheduling it. When free time appears, draw one that fits." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "先收下一种可能，不必安排日期。有空时，再抽一张适合当下的纸条。" } } } },
+    "someday-box": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "someday-box" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "改天盲盒" } } } }
   },
   "version": "1.0"
 }

@@ -21,6 +21,8 @@ struct RootTabView: View {
                 }
             } else if appModel.unresolvedAttempt != nil {
                 DrawRevealGate()
+            } else if !appModel.hasSeenIntroduction {
+                IntroductionView()
             } else {
                 TabView {
                     HomeView(
@@ -53,6 +55,40 @@ struct RootTabView: View {
             Button("OK", role: .cancel) { appModel.clearError() }
         } message: {
             Text(appModel.errorMessage ?? "")
+        }
+    }
+}
+
+private struct IntroductionView: View {
+    @Environment(AppModel.self) private var appModel
+
+    var body: some View {
+        ZStack {
+            SomedayBoxBrand.canvas.ignoresSafeArea()
+            VStack(spacing: 30) {
+                Spacer()
+                Image(systemName: "shippingbox.fill")
+                    .font(.system(size: 76))
+                    .foregroundStyle(SomedayBoxBrand.tint)
+                    .accessibilityHidden(true)
+                VStack(spacing: 12) {
+                    Text("someday-box")
+                        .font(.largeTitle.bold())
+                    Text("Put it in. Draw it out.")
+                        .font(.title2.weight(.semibold))
+                    Text("Save a possibility without scheduling it. When free time appears, draw one that fits.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Button("Open my Box") { appModel.finishIntroduction() }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .frame(minHeight: 44)
+                Spacer()
+            }
+            .padding(28)
+            .frame(maxWidth: 560)
         }
     }
 }
