@@ -167,7 +167,14 @@ private struct CoreBoxStage: View {
                 } else {
                     RealityView { content in
                         content.camera = .virtual
-                        content.add(makeScene(tier: renderer))
+                        do {
+                            let scene = try await Entity(named: "CoreBox", in: .main)
+                            guard validate(scene: scene) else { throw CoreBoxAssetLoadError.invalidContract }
+                            configure(scene: scene, tier: renderer)
+                            content.add(scene)
+                        } catch {
+                            await MainActor.run { renderer = .swiftUI2D }
+                        }
                     }
                     .transition(.opacity)
                 }
@@ -211,38 +218,14 @@ private struct CoreBoxStage: View {
         renderer = ProcessInfo.processInfo.isLowPowerModeEnabled ? preferredRenderer.degraded : preferredRenderer
     }
 
-    private func makeScene(tier: CoreBoxRendererTier) -> Entity {
-        let root = Entity()
-        root.name = "BoxRoot"
-
-        let body = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.30, 0.16, 0.22), cornerRadius: 0.025),
-            materials: [SimpleMaterial(color: UIColor(red: 0.62, green: 0.38, blue: 0.23, alpha: 1), roughness: 0.82, isMetallic: false)]
-        )
-        body.name = "BoxBody"
-        body.position = [0, -0.05, 0]
-        root.addChild(body)
-
-        let lidPivot = Entity()
-        lidPivot.name = "LidPivot"
-        lidPivot.position = [0, 0.055, -0.10]
-        let lid = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.31, 0.035, 0.23), cornerRadius: 0.025),
-            materials: [SimpleMaterial(color: UIColor(red: 0.69, green: 0.44, blue: 0.27, alpha: 1), roughness: 0.8, isMetallic: false)]
-        )
-        lid.name = "LidMesh"
-        lid.position = [0, 0, 0.10]
-        lidPivot.addChild(lid)
-        root.addChild(lidPivot)
-
-        let ribbon = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.038, 0.006, 0.12), cornerRadius: 0.003),
-            materials: [SimpleMaterial(color: UIColor(red: 0.91, green: 0.72, blue: 0.58, alpha: 1), roughness: 0.9, isMetallic: false)]
-        )
-        ribbon.name = "RibbonRoot"
-        ribbon.position = [0, 0.055, 0.16]
-        root.addChild(ribbon)
-
+    private func configure(scene root: Entity, tier: CoreBoxRendererTier) {
+        let boxMaterial = SimpleMaterial(color: UIColor(red: 0.62, green: 0.38, blue: 0.23, alpha: 1), roughness: 0.82, isMetallic: false)
+        let lidMaterial = SimpleMaterial(color: UIColor(red: 0.69, green: 0.44, blue: 0.27, alpha: 1), roughness: 0.8, isMetallic: false)
+        let ribbonMaterial = SimpleMaterial(color: UIColor(red: 0.91, green: 0.72, blue: 0.58, alpha: 1), roughness: 0.9, isMetallic: false)
+        (root.findEntity(named: "BoxBody") as? ModelEntity)?.model?.materials = [boxMaterial]
+        (root.findEntity(named: "LidMesh") as? ModelEntity)?.model?.materials = [lidMaterial]
+        (root.findEntity(named: "RibbonRoot") as? ModelEntity)?.model?.materials = [ribbonMaterial]
+        let paperPool = root.findEntity(named: "PaperPool") ?? root
         let paperCount = min(inBoxCount, tier.maximumVisiblePapers)
         for index in 0..<paperCount {
             let paper = ModelEntity(
@@ -255,7 +238,7 @@ private struct CoreBoxStage: View {
             let z = Float(index % 3 - 1) * 0.028
             paper.position = SIMD3<Float>(x, y, z)
             paper.orientation = simd_quatf(angle: Float(index) * 0.17, axis: [0, 1, 0])
-            root.addChild(paper)
+            paperPool.addChild(paper)
         }
 
         let keyLight = DirectionalLight()
@@ -269,8 +252,16 @@ private struct CoreBoxStage: View {
         camera.position = [0, 0.20, 0.58]
         camera.look(at: [0, 0.02, 0], from: camera.position, relativeTo: nil)
         root.addChild(camera)
-        return root
     }
+
+    private func validate(scene: Entity) -> Bool {
+        let required = ["BoxRoot", "BoxBody", "LidPivot", "LidMesh", "RibbonRoot", "PaperPool", "PaperReveal", "CurrentPaperAnchor", "MemorySeam", "Ground", "Camera_Default", "Camera_Overview", "Light_Key", "Light_Fill"]
+        return required.allSatisfy { name in scene.name == name || scene.findEntity(named: name) != nil }
+    }
+}
+
+private enum CoreBoxAssetLoadError: Error {
+    case invalidContract
 }
 
 private struct CoreBox2DStage: View {

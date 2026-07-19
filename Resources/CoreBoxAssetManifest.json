@@ -1,0 +1,33 @@
+{
+  "assetVersion": "core-box-asset-v1",
+  "sourceFormat": "usda",
+  "metersPerUnit": 1,
+  "upAxis": "Y",
+  "maximumFullVisiblePapers": 24,
+  "maximumLiteVisiblePapers": 10,
+  "triangleCeiling": 80000,
+  "materialCeiling": 12,
+  "textureMemoryCeilingBytes": 33554432,
+  "requiredEntities": [
+    "BoxRoot",
+    "BoxBody",
+    "LidPivot",
+    "LidMesh",
+    "RibbonRoot",
+    "PaperPool",
+    "PaperReveal",
+    "CurrentPaperAnchor",
+    "MemorySeam",
+    "Ground",
+    "Camera_Default",
+    "Camera_Overview",
+    "Light_Key",
+    "Light_Fill"
+  ],
+  "provenance": {
+    "author": "someday-box project",
+    "license": "project-owned",
+    "remoteDependencies": false,
+    "realityComposerProRequired": false
+  }
+}

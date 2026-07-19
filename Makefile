@@ -16,6 +16,7 @@ help:
 audit:
 	./scripts/audit-local-only.sh
 	./scripts/audit-build-structure.sh
+	./scripts/audit-core-box-assets.sh
 
 test:
 	swift run someday-box-domain-checks

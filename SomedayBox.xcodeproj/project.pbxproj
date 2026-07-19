@@ -56,6 +56,8 @@
 		J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000002 /* CoreBoxPresentationTests.swift */; };
 		J00000000000000000000003 /* LegacyV2ProductReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000003 /* LegacyV2ProductReader.swift */; };
 		J00000000000000000000004 /* BackupDocumentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000004 /* BackupDocumentV3.swift */; };
+		J00000000000000000000005 /* CoreBox.usda in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000005 /* CoreBox.usda */; };
+		J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000006 /* CoreBoxAssetManifest.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +151,8 @@
 		J10000000000000000000002 /* CoreBoxPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationTests.swift; sourceTree = "<group>"; };
 		J10000000000000000000003 /* LegacyV2ProductReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyV2ProductReader.swift; sourceTree = "<group>"; };
 		J10000000000000000000004 /* BackupDocumentV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupDocumentV3.swift; sourceTree = "<group>"; };
+		J10000000000000000000005 /* CoreBox.usda */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBox.usda; sourceTree = "<group>"; };
+		J10000000000000000000006 /* CoreBoxAssetManifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CoreBoxAssetManifest.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -280,6 +284,8 @@
 				G10000000000000000000002 /* Info.plist */,
 				A1000000000000000000000B /* Localizable.xcstrings */,
 				A1000000000000000000000C /* PrivacyInfo.xcprivacy */,
+				J10000000000000000000005 /* CoreBox.usda */,
+				J10000000000000000000006 /* CoreBoxAssetManifest.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -479,6 +485,8 @@
 			files = (
 				A0000000000000000000000B /* Localizable.xcstrings in Resources */,
 				A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */,
+				J00000000000000000000005 /* CoreBox.usda in Resources */,
+				J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
