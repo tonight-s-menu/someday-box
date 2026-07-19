@@ -1,4 +1,4 @@
-SIMULATOR_DESTINATION ?= platform=iOS Simulator,name=iPhone 16 Pro,OS=latest
+SIMULATOR_DESTINATION ?= platform=iOS Simulator,name=iPhone 17 Pro,OS=latest
 
 .DEFAULT_GOAL := help
 

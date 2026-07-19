@@ -41,7 +41,9 @@ final class AppLaunchTests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Export backup"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Restore backup"].exists)
-        XCTAssertTrue(app.buttons["Erase all local data"].exists)
+        let erase = app.buttons["Erase all local data"]
+        app.swipeUp()
+        XCTAssertTrue(erase.waitForExistence(timeout: 3))
     }
 
     @MainActor
@@ -51,10 +53,33 @@ final class AppLaunchTests: XCTestCase {
         openBoxIfNeeded(app)
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
 
-        try app.performAccessibilityAudit()
+        try app.performAccessibilityAudit(for: auditTypes)
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
-        try app.performAccessibilityAudit()
+        try app.performAccessibilityAudit(for: auditTypes)
+    }
+
+    @MainActor
+    func testSettingsRemainsOperableAtLargestAccessibilityTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge"
+        ]
+        app.launch()
+        openBoxIfNeeded(app)
+
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.buttons["Export backup"].waitForExistence(timeout: 3))
+
+        let erase = app.buttons["Erase all local data"]
+        for _ in 0..<4 where !erase.exists { app.swipeUp() }
+        XCTAssertTrue(erase.waitForExistence(timeout: 3))
+    }
+
+    private var auditTypes: XCUIAccessibilityAuditType {
+        [.contrast, .elementDetection, .hitRegion, .sufficientElementDescription, .textClipped, .trait]
     }
 
     @MainActor

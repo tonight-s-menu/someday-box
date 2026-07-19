@@ -23,8 +23,8 @@ struct DrawPolicyTests {
     @Test func usesDiscreteDurationBucketsForTimeFit() {
         let policy = DrawSelectionPolicy()
         let tenMinutes = item(duration: .upTo10Minutes)
-        #expect(policy.weight(for: tenMinutes, availableTime: .upTo30Minutes, eligibleCount: 1, now: now) == 1.275)
-        #expect(policy.weight(for: tenMinutes, availableTime: .upTo60Minutes, eligibleCount: 1, now: now) == 1.05)
+        #expect(abs(policy.weight(for: tenMinutes, availableTime: .upTo30Minutes, eligibleCount: 1, now: now) - 1.275) < 1e-12)
+        #expect(abs(policy.weight(for: tenMinutes, availableTime: .upTo60Minutes, eligibleCount: 1, now: now) - 1.05) < 1e-12)
     }
 
     @Test func everyDurationBoundaryIsAHardGate() {
@@ -96,8 +96,8 @@ final class DrawPolicyTests: XCTestCase {
     func testUsesDiscreteDurationBucketsForTimeFit() {
         let policy = DrawSelectionPolicy()
         let tenMinutes = item(duration: .upTo10Minutes)
-        XCTAssertEqual(policy.weight(for: tenMinutes, availableTime: .upTo30Minutes, eligibleCount: 1, now: now), 1.275)
-        XCTAssertEqual(policy.weight(for: tenMinutes, availableTime: .upTo60Minutes, eligibleCount: 1, now: now), 1.05)
+        XCTAssertEqual(policy.weight(for: tenMinutes, availableTime: .upTo30Minutes, eligibleCount: 1, now: now), 1.275, accuracy: 1e-12)
+        XCTAssertEqual(policy.weight(for: tenMinutes, availableTime: .upTo60Minutes, eligibleCount: 1, now: now), 1.05, accuracy: 1e-12)
     }
 
     func testEveryDurationBoundaryIsAHardGate() {

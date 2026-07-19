@@ -15,7 +15,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         let itemID = try await CapturePaperUseCase(arbiter: arbiter, clock: FixedClock(value: now))
             .execute(title: "  Read outside  ", note: nil, durationBucketRaw: DurationBucket.upTo30Minutes.rawValue)
 
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(state.items.count, 1)
         XCTAssertEqual(state.items.first?.id, itemID)
         XCTAssertEqual(state.items.first?.title, "Read outside")
@@ -36,7 +36,7 @@ final class ApplicationUseCaseTests: XCTestCase {
             note: nil,
             durationBucketRaw: DurationBucket.upTo30Minutes.rawValue
         )
-        let atLimit = try await repository.snapshot()
+        let atLimit = await repository.snapshot()
         XCTAssertEqual(atLimit.items.count, DomainLimits.boxItemCount)
 
         do {
@@ -52,7 +52,7 @@ final class ApplicationUseCaseTests: XCTestCase {
                 .capacityExceeded(resource: .boxItems, limit: DomainLimits.boxItemCount)
             )
         }
-        let afterRejectedCapture = try await repository.snapshot()
+        let afterRejectedCapture = await repository.snapshot()
         XCTAssertEqual(afterRejectedCapture, atLimit)
     }
 
@@ -81,7 +81,7 @@ final class ApplicationUseCaseTests: XCTestCase {
             XCTAssertEqual(error as? ApplicationError, .drawResolutionRequired)
         }
 
-        let stateAfterFailures = try await repository.snapshot()
+        let stateAfterFailures = await repository.snapshot()
         XCTAssertEqual(stateAfterFailures, fixture)
     }
 
@@ -97,7 +97,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         guard case let .revealed(returnedAttempt) = result else {
             return XCTFail("Expected a persisted reveal.")
         }
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(state.attempts, [returnedAttempt])
         XCTAssertEqual(state.items.first?.lastShownAt, returnedAttempt.shownAt)
         XCTAssertEqual(returnedAttempt.outcome, .unresolved)
@@ -122,7 +122,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         guard case let .revealed(nextAttempt) = result else {
             return XCTFail("Expected the unseen paper.")
         }
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(Set(state.attempts.map(\.itemID)), [first.id, second.id])
         XCTAssertEqual(nextAttempt.itemID, second.id)
         XCTAssertEqual(state.attempts.first?.outcome, .redrawn)
@@ -139,7 +139,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         ).execute(availableTime: .upTo30Minutes)
         try await AcceptDrawUseCase(arbiter: arbiter, clock: FixedClock(value: now.addingTimeInterval(1))).execute()
 
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(state.currentPick?.itemID, source.id)
         XCTAssertEqual(state.attempts.first?.outcome, .accepted)
         XCTAssertNotNil(state.sessions.first?.endedAt)
@@ -158,7 +158,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         try await CompletePaperUseCase(arbiter: arbiter, clock: FixedClock(value: now.addingTimeInterval(-1)))
             .execute(itemID: source.id)
 
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertNil(state.currentPick)
         XCTAssertEqual(state.items.first?.lifecycle, .completed)
         XCTAssertEqual(state.memories.first?.titleSnapshot, source.title)
@@ -191,7 +191,7 @@ final class ApplicationUseCaseTests: XCTestCase {
                 .capacityExceeded(resource: .completionMemories, limit: DomainLimits.completionMemoryCount)
             )
         }
-        let afterRejectedCompletion = try await repository.snapshot()
+        let afterRejectedCompletion = await repository.snapshot()
         XCTAssertEqual(afterRejectedCompletion, original)
     }
 
@@ -225,7 +225,7 @@ final class ApplicationUseCaseTests: XCTestCase {
             randomUnitInterval: { 0 }
         ).execute(availableTime: .upTo30Minutes)
 
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(
             state.sessions.count,
             DrawJournalCompactionPolicy.maximumEndedSessionCount + 1
@@ -264,7 +264,7 @@ final class ApplicationUseCaseTests: XCTestCase {
         let arbiter = MutationArbiter(repository: repository)
         try await DeletePaperUseCase(arbiter: arbiter).execute(itemID: target.id)
 
-        let state = try await repository.snapshot()
+        let state = await repository.snapshot()
         XCTAssertEqual(state.items.map(\.id), [survivor.id])
         XCTAssertTrue(state.sessions.isEmpty)
         XCTAssertTrue(state.attempts.isEmpty)

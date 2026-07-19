@@ -25,7 +25,7 @@ final class SwiftDataPersistenceTests: XCTestCase {
 
     func testRepositoryCommitsAndRollsBackAsOneStateTransaction() async throws {
         let repository = SwiftDataProductRepository(
-            container: StoreGenerationBootstrap.makeInMemoryContainer()
+            container: try StoreGenerationBootstrap.makeInMemoryContainer()
         )
         let item = makeItem()
 

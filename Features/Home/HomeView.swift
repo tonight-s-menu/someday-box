@@ -18,7 +18,7 @@ struct HomeView: View {
                             .font(.largeTitle.bold())
                             .multilineTextAlignment(.center)
                         Text(drawableSummary)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary)
                     }
 
                     if let current = appModel.currentItem {
@@ -32,7 +32,7 @@ struct HomeView: View {
                             Label("Draw a paper", systemImage: "sparkles")
                                 .frame(maxWidth: .infinity, minHeight: 54)
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(SomedayPrimaryActionButtonStyle())
                         .disabled(appModel.drawableCount == 0 || appModel.currentItem != nil)
 
                         Button {
@@ -236,8 +236,14 @@ private struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Local data") {
-                    Label("Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests.", systemImage: "lock.shield")
+                Section {
+                    settingsSectionTitle("Local data")
+                    Label {
+                        Text("Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests.")
+                            .fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: "lock.shield")
+                    }
                     Button("Export backup", systemImage: "square.and.arrow.up") {
                         Task {
                             guard let data = await appModel.exportBackupData() else { return }
@@ -249,20 +255,22 @@ private struct SettingsView: View {
                         presentsImporter = true
                     }
                 }
-                Section("Experience") {
+                Section {
+                    settingsSectionTitle("Experience")
                     Toggle("Haptics", isOn: Binding(
                         get: { appModel.hapticsEnabled },
                         set: { appModel.hapticsEnabled = $0 }
                     ))
                 }
-                Section("About") {
-                    LabeledContent("Storage", value: "On this device")
-                    LabeledContent("Schema", value: "1.0.0")
-                    LabeledContent("Backup format", value: "1")
-                    LabeledContent("Draw policy", value: DrawSelectionPolicy.version)
-                    LabeledContent("Active papers", value: appModel.state.items.filter { $0.lifecycle == .active }.count.formatted())
-                    LabeledContent("Drawable papers", value: appModel.drawableCount.formatted())
-                    LabeledContent("Memories", value: appModel.state.memories.count.formatted())
+                Section {
+                    settingsSectionTitle("About")
+                    SettingsValueRow(label: "Storage", value: "On this device")
+                    SettingsValueRow(label: "Schema", value: "1.0.0")
+                    SettingsValueRow(label: "Backup format", value: "1")
+                    SettingsValueRow(label: "Draw policy", value: DrawSelectionPolicy.version)
+                    SettingsValueRow(label: "Active papers", value: appModel.state.items.filter { $0.lifecycle == .active }.count.formatted())
+                    SettingsValueRow(label: "Drawable papers", value: appModel.drawableCount.formatted())
+                    SettingsValueRow(label: "Memories", value: appModel.state.memories.count.formatted())
                 }
                 Section {
                     Button("Erase all local data", role: .destructive) {
@@ -275,6 +283,8 @@ private struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
+                        .font(.body)
+                        .tint(.primary)
                 }
             }
             .fileExporter(
@@ -352,6 +362,36 @@ private struct SettingsView: View {
         } catch {
             appModel.report(error)
         }
+    }
+
+    private func settingsSectionTitle(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.headline)
+            .foregroundStyle(.primary)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+private struct SettingsValueRow: View {
+    let label: LocalizedStringKey
+    let value: String
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(label)
+                Spacer(minLength: 16)
+                Text(value)
+                    .fontWeight(.medium)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                Text(value)
+                    .fontWeight(.medium)
+            }
+        }
+        .font(.body)
+        .accessibilityElement(children: .combine)
     }
 }
 

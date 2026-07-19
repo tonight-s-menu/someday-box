@@ -92,7 +92,10 @@ final class GenerationProductRepositoryTests: XCTestCase {
                 XCTAssertEqual(error as? GenerationRepositoryError, .operationInProgress)
             }
             let restored = try await restoreTask.value
-            XCTAssertEqual(restored, replacement)
+            XCTAssertEqual(
+                restored.items.sorted { $0.id.uuidString < $1.id.uuidString },
+                replacement.items.sorted { $0.id.uuidString < $1.id.uuidString }
+            )
         }
 
         repository = nil

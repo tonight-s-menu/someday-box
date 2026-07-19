@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SomedayBoxBrand {
-    static let tint = Color(red: 0.73, green: 0.30, blue: 0.16)
+    static let tint = Color(red: 0.58, green: 0.18, blue: 0.06)
     static let canvas = Color(uiColor: .systemGroupedBackground)
     static let paper = Color(uiColor: .secondarySystemGroupedBackground)
     static let box = Color(red: 0.72, green: 0.44, blue: 0.25)
@@ -24,6 +24,23 @@ struct SomedayChoiceButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(SomedayBoxBrand.tint.opacity(isSelected ? 0 : 0.32), lineWidth: 1)
             }
+            .opacity(configuration.isPressed ? 0.72 : 1)
+            .contentShape(Rectangle())
+    }
+}
+
+struct SomedayPrimaryActionButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundStyle(isEnabled ? Color.white : Color.primary)
+            .padding(.horizontal, 16)
+            .background(
+                isEnabled ? SomedayBoxBrand.tint : Color(uiColor: .tertiarySystemFill),
+                in: RoundedRectangle(cornerRadius: 14)
+            )
             .opacity(configuration.isPressed ? 0.72 : 1)
             .contentShape(Rectangle())
     }

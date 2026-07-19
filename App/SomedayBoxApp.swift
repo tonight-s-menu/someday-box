@@ -320,7 +320,7 @@ final class AppModel {
             String(localized: "This backup is damaged or was changed after export.")
         case BackupDocumentError.unsupportedFormatVersion:
             String(localized: "This backup was created by a newer, unsupported format.")
-        case BackupDocumentError, BackupFileReaderError:
+        case is BackupDocumentError, is BackupFileReaderError:
             String(localized: "This file is not a valid someday-box backup.")
         case GenerationRepositoryError.operationInProgress:
             String(localized: "A local data operation is already in progress.")
