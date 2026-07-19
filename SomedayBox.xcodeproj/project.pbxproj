@@ -54,6 +54,8 @@
 		I00000000000000000000002 /* ShareMailbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = I10000000000000000000001 /* ShareMailbox.swift */; };
 		J00000000000000000000001 /* CoreBoxPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000001 /* CoreBoxPresentation.swift */; };
 		J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000002 /* CoreBoxPresentationTests.swift */; };
+		J00000000000000000000003 /* LegacyV2ProductReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000003 /* LegacyV2ProductReader.swift */; };
+		J00000000000000000000004 /* BackupDocumentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000004 /* BackupDocumentV3.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +147,8 @@
 		I10000000000000000000001 /* ShareMailbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMailbox.swift; sourceTree = "<group>"; };
 		J10000000000000000000001 /* CoreBoxPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentation.swift; sourceTree = "<group>"; };
 		J10000000000000000000002 /* CoreBoxPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationTests.swift; sourceTree = "<group>"; };
+		J10000000000000000000003 /* LegacyV2ProductReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyV2ProductReader.swift; sourceTree = "<group>"; };
+		J10000000000000000000004 /* BackupDocumentV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupDocumentV3.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +250,8 @@
 				G10000000000000000000001 /* BackupFileReader.swift */,
 				F10000000000000000000001 /* GenerationProductRepository.swift */,
 				F10000000000000000000002 /* StoreGenerationOperationJournal.swift */,
+				J10000000000000000000003 /* LegacyV2ProductReader.swift */,
+				J10000000000000000000004 /* BackupDocumentV3.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -508,6 +514,8 @@
 				G00000000000000000000001 /* BackupFileReader.swift in Sources */,
 				F00000000000000000000001 /* GenerationProductRepository.swift in Sources */,
 				F00000000000000000000002 /* StoreGenerationOperationJournal.swift in Sources */,
+				J00000000000000000000003 /* LegacyV2ProductReader.swift in Sources */,
+				J00000000000000000000004 /* BackupDocumentV3.swift in Sources */,
 				A00000000000000000000007 /* HomeView.swift in Sources */,
 				A00000000000000000000008 /* BoxView.swift in Sources */,
 				A00000000000000000000009 /* MemoriesView.swift in Sources */,

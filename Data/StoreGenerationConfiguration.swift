@@ -34,12 +34,12 @@ public struct StoreGenerationConfiguration: Sendable {
         generationURL(id: generationID).appendingPathComponent(Self.storeFileName)
     }
 
-    public func modelConfiguration(generationID: UUID) -> ModelConfiguration {
+    public func modelConfiguration(generationID: UUID, schema: Schema) -> ModelConfiguration {
         // SwiftData's explicit-URL initializer selects GroupContainer.none and does not
         // expose a groupContainer parameter. The postcondition guards that local-only contract.
         let configuration = ModelConfiguration(
             "SomedayBox-\(generationID.uuidString)",
-            schema: Schema(versionedSchema: SomedayBoxSchemaV2.self),
+            schema: schema,
             url: storeURL(generationID: generationID),
             allowsSave: true,
             cloudKitDatabase: .none
@@ -52,7 +52,7 @@ public struct StoreGenerationConfiguration: Sendable {
     public static func inMemoryModelConfiguration() -> ModelConfiguration {
         ModelConfiguration(
             "SomedayBox-InMemory",
-            schema: Schema(versionedSchema: SomedayBoxSchemaV2.self),
+            schema: Schema(versionedSchema: SomedayBoxSchemaV3.self),
             isStoredInMemoryOnly: true,
             allowsSave: true,
             groupContainer: .none,

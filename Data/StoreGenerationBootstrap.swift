@@ -53,17 +53,23 @@ public struct StoreGenerationBootstrap: Sendable {
             at: configuration.generationURL(id: generation.id),
             withIntermediateDirectories: true
         )
+        let v3 = StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
+        if generation.schemaVersion == v3 {
+            let schema = Schema(versionedSchema: SomedayBoxSchemaV3.self)
+            return try ModelContainer(for: schema, configurations: [configuration.modelConfiguration(generationID: generation.id, schema: schema)])
+        }
+        let schema = Schema(versionedSchema: SomedayBoxSchemaV2.self)
         return try ModelContainer(
-            for: Schema(versionedSchema: SomedayBoxSchemaV2.self),
+            for: schema,
             migrationPlan: SomedayBoxSchemaMigrationPlan.self,
-            configurations: [configuration.modelConfiguration(generationID: generation.id)]
+            configurations: [configuration.modelConfiguration(generationID: generation.id, schema: schema)]
         )
     }
 
     public func createGeneration(id: UUID = UUID()) throws -> ActiveStoreGeneration {
         let generation = ActiveStoreGeneration(
             id: id,
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
         )
         try FileManager.default.createDirectory(
             at: configuration.generationURL(id: id),
@@ -99,7 +105,7 @@ public struct StoreGenerationBootstrap: Sendable {
 
         let generation = ActiveStoreGeneration(
             id: UUID(),
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
         )
         try fileManager.createDirectory(
             at: configuration.generationURL(id: generation.id),
@@ -111,8 +117,7 @@ public struct StoreGenerationBootstrap: Sendable {
 
     public static func makeInMemoryContainer() throws -> ModelContainer {
         try ModelContainer(
-            for: Schema(versionedSchema: SomedayBoxSchemaV2.self),
-            migrationPlan: SomedayBoxSchemaMigrationPlan.self,
+            for: Schema(versionedSchema: SomedayBoxSchemaV3.self),
             configurations: [StoreGenerationConfiguration.inMemoryModelConfiguration()]
         )
     }
@@ -130,6 +135,7 @@ public struct StoreGenerationBootstrap: Sendable {
         let supported = [
             StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier),
             StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier),
+            StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier),
         ]
         guard supported.contains(version) else {
             throw StoreGenerationBootstrapError.unsupportedSchemaVersion(

@@ -178,3 +178,73 @@ extension SomedayBoxSchemaV2.SourceRecord {
     public convenience init(domain: SourceReference) { self.init(id: domain.id, itemID: domain.itemID, importEnvelopeID: domain.importEnvelopeID, acceptedURLString: domain.acceptedURLString, sourceKindRaw: domain.sourceKindRaw, capturedAt: domain.capturedAt) }
     public func domainValue() -> SourceReference { SourceReference(id: id, itemID: itemID, importEnvelopeID: importEnvelopeID, acceptedURLString: acceptedURLString, sourceKindRaw: sourceKindRaw, capturedAt: capturedAt) }
 }
+
+extension SomedayBoxSchemaV3.ItemRecord {
+    public convenience init(domain: BoxItem) {
+        self.init(id: domain.id, title: domain.title, note: domain.note, durationBucketRaw: domain.durationBucketRaw, lifecycleRaw: domain.lifecycleRaw, createdAt: domain.createdAt, updatedAt: domain.updatedAt, completedAt: domain.completedAt, lastShownAt: domain.lastShownAt)
+    }
+    public func domainValue() throws -> BoxItem {
+        guard let lifecycle = PaperLifecycle(rawValue: lifecycleRaw) else { throw SwiftDataMappingError.unsupportedLifecycle(rawValue: lifecycleRaw, itemID: id) }
+        return BoxItem(id: id, title: title, note: note, durationBucketRaw: durationBucketRaw, lifecycle: lifecycle, createdAt: createdAt, updatedAt: updatedAt, completedAt: completedAt, lastShownAt: lastShownAt)
+    }
+}
+
+extension SomedayBoxSchemaV3.CurrentPickRecord {
+    public convenience init(domain: CurrentPick) { self.init(itemID: domain.itemID, acceptedAt: domain.acceptedAt) }
+    public func domainValue() -> CurrentPick { CurrentPick(itemID: itemID, acceptedAt: acceptedAt) }
+}
+
+extension SomedayBoxSchemaV3.SessionRecord {
+    public convenience init(domain: DrawSession) {
+        self.init(
+            id: domain.id,
+            startedAt: domain.startedAt,
+            endedAt: domain.endedAt,
+            contextModeRaw: domain.context.mode.rawValue,
+            maximumMinutes: domain.context.maximumMinutes,
+            presentationPresetRaw: domain.context.presentationPreset?.rawValue,
+            policyVersion: domain.policyVersion
+        )
+    }
+
+    public func domainValue() throws -> DrawSession {
+        guard let mode = DrawContextMode(rawValue: contextModeRaw) else {
+            throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: contextModeRaw, sessionID: id)
+        }
+        let context: DrawContext
+        switch mode {
+        case .preset:
+            guard let raw = presentationPresetRaw, let preset = DrawPresentationPreset(rawValue: raw), preset.maximumMinutes == maximumMinutes else {
+                throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: contextModeRaw, sessionID: id)
+            }
+            context = DrawContext(preset: preset)
+        case .custom:
+            guard let maximumMinutes else { throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: contextModeRaw, sessionID: id) }
+            context = DrawContext(customMinutes: maximumMinutes)
+        case .notSure:
+            context = .notSure
+        }
+        guard context.isValid, context.maximumMinutes == maximumMinutes, context.presentationPreset?.rawValue == presentationPresetRaw else {
+            throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: contextModeRaw, sessionID: id)
+        }
+        return DrawSession(id: id, startedAt: startedAt, endedAt: endedAt, context: context, policyVersion: policyVersion)
+    }
+}
+
+extension SomedayBoxSchemaV3.AttemptRecord {
+    public convenience init(domain: DrawAttempt) { self.init(id: domain.id, sessionID: domain.sessionID, sequence: domain.sequence, itemID: domain.itemID, eligibleCount: domain.eligibleCount, policyVersion: domain.policyVersion, shownAt: domain.shownAt, outcomeRaw: domain.outcomeRaw, resolvedAt: domain.resolvedAt) }
+    public func domainValue() throws -> DrawAttempt {
+        guard DrawAttemptOutcome(rawValue: outcomeRaw) != nil else { throw SwiftDataMappingError.unsupportedAttemptOutcome(rawValue: outcomeRaw, attemptID: id) }
+        return DrawAttempt(id: id, sessionID: sessionID, sequence: sequence, itemID: itemID, eligibleCount: eligibleCount, policyVersion: policyVersion, shownAt: shownAt, outcomeRaw: outcomeRaw, resolvedAt: resolvedAt)
+    }
+}
+
+extension SomedayBoxSchemaV3.MemoryRecord {
+    public convenience init(domain: CompletionMemory) { self.init(id: domain.id, sourceItemID: domain.sourceItemID, titleSnapshot: domain.titleSnapshot, noteSnapshot: domain.noteSnapshot, durationSnapshotRaw: domain.durationSnapshotRaw, completedAt: domain.completedAt) }
+    public func domainValue() -> CompletionMemory { CompletionMemory(id: id, sourceItemID: sourceItemID, titleSnapshot: titleSnapshot, noteSnapshot: noteSnapshot, durationSnapshotRaw: durationSnapshotRaw, completedAt: completedAt) }
+}
+
+extension SomedayBoxSchemaV3.SourceRecord {
+    public convenience init(domain: SourceReference) { self.init(id: domain.id, itemID: domain.itemID, importEnvelopeID: domain.importEnvelopeID, acceptedURLString: domain.acceptedURLString, sourceKindRaw: domain.sourceKindRaw, capturedAt: domain.capturedAt) }
+    public func domainValue() -> SourceReference { SourceReference(id: id, itemID: itemID, importEnvelopeID: importEnvelopeID, acceptedURLString: acceptedURLString, sourceKindRaw: sourceKindRaw, capturedAt: capturedAt) }
+}

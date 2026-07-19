@@ -291,14 +291,14 @@ final class AppModel {
                 exportedAt: Date(),
                 appMarketingVersion: info["CFBundleShortVersionString"] as? String ?? "0",
                 appBuild: info["CFBundleVersion"] as? String ?? "0",
-                schemaVersion: BackupSchemaVersionV1(major: 2, minor: 0, patch: 0),
+                schemaVersion: BackupSchemaVersionV1(major: 3, minor: 0, patch: 0),
                 selectionPolicyVersion: DrawSelectionPolicy.version
             )
             let groupURL = shareGroupContainerURL
             let reader = shareMailboxReader
             let data = try await repository.exportSnapshotWithParticipant { snapshot in
                 let envelopes = try groupURL.map { try reader.entries(at: $0).map(\.envelope) } ?? []
-                return try BackupDocumentCodecV2().encode(
+                return try BackupDocumentCodecV3().encode(
                     state: snapshot,
                     pendingEnvelopes: envelopes,
                     metadata: metadata
@@ -315,7 +315,7 @@ final class AppModel {
     func prepareRestore(data: Data) async -> BackupRestorePayload? {
         do {
             let restoredPayload = try await Task.detached {
-                try BackupDocumentCodecV2().decode(data)
+                try BackupDocumentCodecV3().decode(data)
             }.value
             errorMessage = nil
             return restoredPayload
@@ -480,6 +480,7 @@ final class AppModel {
         guard let groupURL = shareGroupContainerURL else {
             guard envelopes.isEmpty else { throw ShareCaptureError.publicationFailed }
             switch kind {
+            case .migration: throw GenerationRepositoryError.recoveryRequired
             case .restore: return try await repository.restore(validatedState: productState)
             case .erase: return try await repository.eraseAll()
             }
@@ -502,6 +503,8 @@ final class AppModel {
             try sharedJournalStore.write(journal)
             let result: PersistedProductState
             switch kind {
+            case .migration:
+                throw GenerationRepositoryError.recoveryRequired
             case .restore:
                 result = try await repository.restore(
                     validatedState: productState,

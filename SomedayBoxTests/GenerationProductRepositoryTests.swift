@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import XCTest
 
 #if canImport(SomedayBox)
@@ -23,6 +24,37 @@ final class GenerationProductRepositoryTests: XCTestCase {
         XCTAssertNotEqual(newGeneration.id, priorGeneration.id)
         XCTAssertFalse(FileManager.default.fileExists(atPath: configuration(root).generationURL(id: priorGeneration.id).path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: configuration(root).operationJournalURL.path))
+
+        repository = nil
+        try FileManager.default.removeItem(at: root)
+    }
+
+    func testV2GenerationMigratesToIndependentCanonicalV3Generation() async throws {
+        let root = temporaryRoot()
+        let config = configuration(root)
+        let bootstrap = StoreGenerationBootstrap(configuration: config)
+        let legacy = ActiveStoreGeneration(id: UUID(), schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier))
+        let container = try bootstrap.openContainer(for: legacy)
+        let context = ModelContext(container)
+        let paper = item(title: "Legacy paper")
+        let session = DrawSession(startedAt: instant, endedAt: instant, availableTime: .upTo120Minutes, policyVersion: "mvp-v1")
+        let attempt = DrawAttempt(sessionID: session.id, sequence: 1, itemID: paper.id, eligibleCount: 1, policyVersion: "mvp-v1", shownAt: instant, outcome: .dismissed, resolvedAt: instant)
+        context.insert(SomedayBoxSchemaV2.ItemRecord(domain: paper))
+        context.insert(SomedayBoxSchemaV2.SessionRecord(domain: session))
+        context.insert(SomedayBoxSchemaV2.AttemptRecord(domain: attempt))
+        try context.save()
+        try bootstrap.activate(legacy)
+
+        var repository: GenerationProductRepository? = try await .open(configuration: config)
+        let migrated = try await repository?.snapshot()
+        let active = await repository?.activeGeneration()
+        XCTAssertEqual(migrated?.items, [paper])
+        XCTAssertEqual(migrated?.sessions.first?.context, DrawContext(customMinutes: 120))
+        XCTAssertEqual(migrated?.sessions.first?.policyVersion, "mvp-v1")
+        XCTAssertEqual(active?.schemaVersion, StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier))
+        XCTAssertNotEqual(active?.id, legacy.id)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: config.generationURL(id: legacy.id).path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: config.operationJournalURL.path))
 
         repository = nil
         try FileManager.default.removeItem(at: root)

@@ -9,6 +9,24 @@ final class BackupDocumentTests: XCTestCase {
     private let codec = BackupDocumentCodecV1()
     private let instant = Date(timeIntervalSince1970: 2_000_000)
 
+    func testV3RoundTripStoresCanonicalContextUnionAndReadsV2() throws {
+        let item = BoxItem(id: UUID(uuidString: "00000000-0000-0000-0000-000000000011")!, title: "Exact time", durationBucketRaw: DurationBucket.upTo30Minutes.rawValue, createdAt: instant, updatedAt: instant, lastShownAt: instant)
+        let session = DrawSession(id: UUID(uuidString: "00000000-0000-0000-0000-000000000012")!, startedAt: instant, endedAt: instant, context: DrawContext(customMinutes: 45))
+        let attempt = DrawAttempt(id: UUID(uuidString: "00000000-0000-0000-0000-000000000013")!, sessionID: session.id, sequence: 1, itemID: item.id, eligibleCount: 1, shownAt: instant, outcome: .dismissed, resolvedAt: instant)
+        let state = PersistedProductState(items: [item], sessions: [session], attempts: [attempt])
+        let v3 = BackupDocumentCodecV3()
+        let data = try v3.encode(state: state, pendingEnvelopes: [], metadata: BackupDocumentMetadataV1(exportedAt: instant, appMarketingVersion: "0.3.0", appBuild: "3", schemaVersion: .init(major: 3, minor: 0, patch: 0), selectionPolicyVersion: DrawSelectionPolicy.version))
+        XCTAssertEqual(try v3.decode(data).state, state)
+        let document = try JSONDecoder().decode(BackupDocumentV3.self, from: data)
+        let product = try JSONDecoder().decode(BackupProductV3.self, from: document.productV3CanonicalData)
+        XCTAssertEqual(product.sessions.first?.contextModeRaw, "custom")
+        XCTAssertEqual(product.sessions.first?.maximumMinutes, 45)
+        XCTAssertNil(product.sessions.first?.presentationPresetRaw)
+
+        let v2 = try BackupDocumentCodecV2().encode(state: state, pendingEnvelopes: [], metadata: metadata())
+        XCTAssertEqual(try v3.decode(v2).state, state)
+    }
+
     func testCanonicalRoundTripPreservesCompleteDomainStateAndOpenDurationValues() throws {
         let state = completeState()
         let first = try codec.encode(state: state, metadata: metadata())

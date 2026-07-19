@@ -2,6 +2,7 @@ import CryptoKit
 import Foundation
 
 public enum StoreGenerationOperationKind: String, Codable, Equatable, Sendable {
+    case migration
     case restore
     case erase
 }

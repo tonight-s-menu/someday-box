@@ -68,14 +68,18 @@ public actor GenerationProductRepository: ProductRepository {
             }
         }
 
+        let currentSchema = StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
+        if active.schemaVersion != currentSchema {
+            active = try await migrateToV3(
+                active: active,
+                bootstrap: bootstrap,
+                journalStore: journalStore
+            )
+        }
+
         let container = try bootstrap.openContainer(for: active)
         let repository = SwiftDataProductRepository(container: container)
         _ = try await repository.snapshot()
-        let currentSchema = StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
-        if active.schemaVersion != currentSchema {
-            active = ActiveStoreGeneration(id: active.id, schemaVersion: currentSchema)
-            try bootstrap.activate(active)
-        }
         return GenerationProductRepository(
             configuration: configuration,
             generation: active,
@@ -168,7 +172,7 @@ public actor GenerationProductRepository: ProductRepository {
         let priorGeneration = currentGeneration
         let newGeneration = ActiveStoreGeneration(
             id: targetGenerationID,
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
         )
         var journal = StoreGenerationOperationJournal(
             operationID: UUID(),
@@ -256,15 +260,68 @@ public actor GenerationProductRepository: ProductRepository {
         }
     }
 
+    private static func migrateToV3(
+        active: ActiveStoreGeneration,
+        bootstrap: StoreGenerationBootstrap,
+        journalStore: StoreGenerationJournalStore
+    ) async throws -> ActiveStoreGeneration {
+        let legacyContainer = try bootstrap.openContainer(for: active)
+        let legacyState = try await LegacyV2ProductReader(container: legacyContainer).snapshot()
+        let expectedDigest = try productDigest(legacyState)
+        let target = ActiveStoreGeneration(
+            id: UUID(),
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV3.versionIdentifier)
+        )
+        var journal = StoreGenerationOperationJournal(
+            operationID: UUID(),
+            kind: .migration,
+            priorGeneration: active,
+            newGeneration: target,
+            phase: .prepared,
+            expectedProductDigest: expectedDigest
+        )
+        do {
+            try journalStore.write(journal)
+            _ = try bootstrap.createGeneration(id: target.id)
+            try await populate(legacyState, generation: target, bootstrap: bootstrap)
+            let reopened = SwiftDataProductRepository(container: try bootstrap.openContainer(for: target))
+            guard try productDigest(try await reopened.snapshot()) == expectedDigest else {
+                throw GenerationRepositoryError.stagedDigestMismatch
+            }
+            journal.phase = .validated
+            try journalStore.write(journal)
+            journal.phase = .switching
+            try journalStore.write(journal)
+            try bootstrap.activate(target)
+            journal.phase = .switched
+            try journalStore.write(journal)
+            journal.phase = .committed
+            try journalStore.write(journal)
+            journal.phase = .cleaning
+            try journalStore.write(journal)
+            try bootstrap.removeGeneration(id: active.id)
+            journal.phase = .finalized
+            try journalStore.write(journal)
+            try journalStore.remove()
+            return target
+        } catch {
+            if journal.phase.isCommitted { throw GenerationRepositoryError.committedCleanupIncomplete }
+            try? bootstrap.activate(active)
+            try? bootstrap.removeGeneration(id: target.id)
+            try? journalStore.remove()
+            throw error
+        }
+    }
+
     private static func productDigest(_ state: PersistedProductState) throws -> String {
-        let data = try BackupDocumentCodecV2().encode(
+        let data = try BackupDocumentCodecV3().encode(
             state: state,
             pendingEnvelopes: [],
             metadata: BackupDocumentMetadataV1(
                 exportedAt: Date(timeIntervalSince1970: 0),
-                appMarketingVersion: "generation-digest-v2",
+                appMarketingVersion: "generation-digest-v3",
                 appBuild: "1",
-                schemaVersion: BackupSchemaVersionV1(major: 2, minor: 0, patch: 0),
+                schemaVersion: BackupSchemaVersionV1(major: 3, minor: 0, patch: 0),
                 selectionPolicyVersion: DrawSelectionPolicy.version
             )
         )

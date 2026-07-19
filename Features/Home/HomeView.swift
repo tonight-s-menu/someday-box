@@ -496,8 +496,8 @@ private struct SettingsView: View {
                 Section {
                     settingsSectionTitle("About")
                     SettingsValueRow(label: "Storage", value: "On this device")
-                    SettingsValueRow(label: "Schema", value: "2.0.0")
-                    SettingsValueRow(label: "Backup format", value: "2")
+                    SettingsValueRow(label: "Schema", value: "3.0.0")
+                    SettingsValueRow(label: "Backup format", value: "3")
                     SettingsValueRow(label: "Draw policy", value: DrawSelectionPolicy.version)
                     SettingsValueRow(label: "Active papers", value: appModel.state.items.filter { $0.lifecycle == .active }.count.formatted())
                     SettingsValueRow(label: "Drawable papers", value: appModel.drawableCount.formatted())
