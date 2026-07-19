@@ -532,7 +532,7 @@ public struct BackupDocumentCodecV1: Sendable {
             )
         }
         let sessions = try document.sessions.map { session -> DrawSession in
-            guard AvailableTime(rawValue: session.availableTimeRaw) != nil else {
+            guard DrawContext(storageValue: session.availableTimeRaw) != nil else {
                 throw BackupDocumentError.unsupportedAvailableTime(rawValue: session.availableTimeRaw)
             }
             return DrawSession(

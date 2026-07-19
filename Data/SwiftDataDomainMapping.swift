@@ -61,7 +61,7 @@ extension SomedayBoxSchemaV1.SessionRecord {
     }
 
     public func domainValue() throws -> DrawSession {
-        guard AvailableTime(rawValue: availableTimeRaw) != nil else {
+        guard DrawContext(storageValue: availableTimeRaw) != nil else {
             throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: availableTimeRaw, sessionID: id)
         }
         return DrawSession(
@@ -152,7 +152,7 @@ extension SomedayBoxSchemaV2.CurrentPickRecord {
 extension SomedayBoxSchemaV2.SessionRecord {
     public convenience init(domain: DrawSession) { self.init(id: domain.id, startedAt: domain.startedAt, endedAt: domain.endedAt, availableTimeRaw: domain.availableTimeRaw, policyVersion: domain.policyVersion) }
     public func domainValue() throws -> DrawSession {
-        guard AvailableTime(rawValue: availableTimeRaw) != nil else {
+        guard DrawContext(storageValue: availableTimeRaw) != nil else {
             throw SwiftDataMappingError.unsupportedAvailableTime(rawValue: availableTimeRaw, sessionID: id)
         }
         return DrawSession(id: id, startedAt: startedAt, endedAt: endedAt, availableTimeRaw: availableTimeRaw, policyVersion: policyVersion)

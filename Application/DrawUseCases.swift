@@ -34,6 +34,14 @@ public struct StartDrawUseCase: Sendable {
     }
 
     public func execute(availableTime: AvailableTime) async throws -> StartDrawResult {
+        guard let context = DrawContext(storageValue: availableTime.rawValue) else {
+            throw ApplicationError.emptyPool(.overTimeBudget)
+        }
+        return try await execute(context: context)
+    }
+
+    public func execute(context: DrawContext) async throws -> StartDrawResult {
+        guard context.isValid else { throw ApplicationError.emptyPool(.overTimeBudget) }
         let sessionID = makeID()
         let attemptID = makeID()
         let timestamp = clock.now()
@@ -45,7 +53,7 @@ public struct StartDrawUseCase: Sendable {
             let candidates: [BoxItem]
             switch CandidatePoolBuilder().build(
                 items: state.items,
-                availableTime: availableTime,
+                context: context,
                 currentPick: nil,
                 reservedItemID: nil,
                 shownItemIDs: []
@@ -57,7 +65,7 @@ public struct StartDrawUseCase: Sendable {
             var generator = SuppliedUnitRandomGenerator(value: randomValue)
             guard let selected = DrawSelectionPolicy().select(
                 from: candidates,
-                availableTime: availableTime,
+                context: context,
                 now: timestamp,
                 using: &generator
             ) else {
@@ -74,7 +82,7 @@ public struct StartDrawUseCase: Sendable {
             )
 
             state.sessions.append(
-                DrawSession(id: sessionID, startedAt: timestamp, availableTime: availableTime)
+                DrawSession(id: sessionID, startedAt: timestamp, context: context)
             )
             state.attempts.append(
                 DrawAttempt(
@@ -124,7 +132,8 @@ public struct RedrawUseCase: Sendable {
                 throw ApplicationError.unsupportedPolicy(unresolved.policyVersion)
             }
             let sessionIndex = try ApplicationDomainRules.sessionIndex(id: unresolved.sessionID, in: state)
-            guard let availableTime = state.sessions[sessionIndex].availableTime else {
+            let context = state.sessions[sessionIndex].context
+            guard context.isValid else {
                 throw ApplicationError.invalidPersistedState(.invalidSession(id: unresolved.sessionID))
             }
 
@@ -133,7 +142,7 @@ public struct RedrawUseCase: Sendable {
             )
             let pool = CandidatePoolBuilder().build(
                 items: state.items,
-                availableTime: availableTime,
+                context: context,
                 currentPick: nil,
                 reservedItemID: nil,
                 shownItemIDs: shownItemIDs
@@ -149,7 +158,7 @@ public struct RedrawUseCase: Sendable {
             var generator = SuppliedUnitRandomGenerator(value: randomValue)
             guard let selected = DrawSelectionPolicy().select(
                 from: candidates,
-                availableTime: availableTime,
+                context: context,
                 now: timestamp,
                 using: &generator
             ) else {

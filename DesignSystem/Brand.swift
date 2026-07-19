@@ -108,6 +108,17 @@ extension AvailableTime {
     }
 }
 
+extension DrawPresentationPreset {
+    var localizedLabel: String {
+        switch self {
+        case .fewMinutes: String(localized: "A few minutes")
+        case .aboutAnHour: String(localized: "About an hour")
+        case .aFewHours: String(localized: "A few hours")
+        case .mostOfTheDay: String(localized: "Most of the day")
+        }
+    }
+}
+
 extension BoxItem {
     var durationLabel: String {
         supportedDuration?.localizedLabel ?? String(localized: "Duration needs updating")

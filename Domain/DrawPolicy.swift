@@ -17,7 +17,7 @@ public struct CandidatePoolBuilder: Sendable {
 
     public func build(
         items: [BoxItem],
-        availableTime: AvailableTime,
+        context: DrawContext,
         currentPick: CurrentPick?,
         reservedItemID: UUID?,
         shownItemIDs: Set<UUID>
@@ -31,7 +31,7 @@ public struct CandidatePoolBuilder: Sendable {
         guard !actionable.isEmpty else { return .empty(.unsupportedDurations) }
 
         let timeFitting = actionable.filter { item in
-            guard let limit = availableTime.maximumMinutes else { return true }
+            guard let limit = context.maximumMinutes else { return true }
             return item.supportedDuration!.maximumMinutes <= limit
         }
         guard !timeFitting.isEmpty else { return .empty(.overTimeBudget) }
@@ -39,6 +39,11 @@ public struct CandidatePoolBuilder: Sendable {
         let unseen = timeFitting.filter { !shownItemIDs.contains($0.id) }
         guard !unseen.isEmpty else { return .empty(.alreadyShownInSession) }
         return .candidates(unseen)
+    }
+
+    public func build(items: [BoxItem], availableTime: AvailableTime, currentPick: CurrentPick?, reservedItemID: UUID?, shownItemIDs: Set<UUID>) -> CandidatePoolResult {
+        guard let context = DrawContext(storageValue: availableTime.rawValue) else { return .empty(.overTimeBudget) }
+        return build(items: items, context: context, currentPick: currentPick, reservedItemID: reservedItemID, shownItemIDs: shownItemIDs)
     }
 }
 
@@ -76,22 +81,22 @@ private struct SystemRandomNumberGeneratorBase {
 }
 
 public struct DrawSelectionPolicy: Sendable {
-    public static let version = "mvp-v1"
-    public static let supportedVersions: Set<String> = [version]
+    public static let version = "time-context-v2"
+    public static let supportedVersions: Set<String> = ["mvp-v1", version]
 
     public init() {}
 
     public func weight(
         for item: BoxItem,
-        availableTime: AvailableTime,
+        context: DrawContext,
         eligibleCount: Int,
         now: Date
     ) -> Double {
         guard let bucket = item.supportedDuration else { return 0 }
         let timeFit: Double
-        if let available = availableTime.maximumMinutes {
+        if let available = context.maximumMinutes {
             guard bucket.maximumMinutes <= available,
-                  let availableBucket = DurationBucket(rawValue: availableTime.rawValue) else {
+                  let availableBucket = context.effectiveFitBucket else {
                 return 0
             }
             let stepsShorter = availableBucket.policyIndex - bucket.policyIndex
@@ -119,13 +124,18 @@ public struct DrawSelectionPolicy: Sendable {
         return timeFit * freshness * recentRepeat
     }
 
+    public func weight(for item: BoxItem, availableTime: AvailableTime, eligibleCount: Int, now: Date) -> Double {
+        guard let context = DrawContext(storageValue: availableTime.rawValue) else { return 0 }
+        return weight(for: item, context: context, eligibleCount: eligibleCount, now: now)
+    }
+
     public func select<Generator: RandomNumberGenerating>(
         from candidates: [BoxItem],
-        availableTime: AvailableTime,
+        context: DrawContext,
         now: Date,
         using generator: inout Generator
     ) -> BoxItem? {
-        let weights = candidates.map { weight(for: $0, availableTime: availableTime, eligibleCount: candidates.count, now: now) }
+        let weights = candidates.map { weight(for: $0, context: context, eligibleCount: candidates.count, now: now) }
         let total = weights.reduce(0, +)
         guard total > 0 else { return nil }
 
@@ -138,5 +148,10 @@ public struct DrawSelectionPolicy: Sendable {
             if threshold < cumulativeWeight { return item }
         }
         return candidates.last
+    }
+
+    public func select<Generator: RandomNumberGenerating>(from candidates: [BoxItem], availableTime: AvailableTime, now: Date, using generator: inout Generator) -> BoxItem? {
+        guard let context = DrawContext(storageValue: availableTime.rawValue) else { return nil }
+        return select(from: candidates, context: context, now: now, using: &generator)
     }
 }

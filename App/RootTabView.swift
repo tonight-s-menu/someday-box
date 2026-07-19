@@ -262,7 +262,9 @@ private struct IntroductionView: View {
 struct DrawContextView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
-    @State private var selection: AvailableTime?
+    @State private var selection: DrawContext?
+    @State private var showsCustom = false
+    @State private var customMinutes = 45
 
     var body: some View {
         NavigationStack {
@@ -275,11 +277,19 @@ struct DrawContextView: View {
                         .foregroundStyle(.secondary)
 
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 145), spacing: 12)], spacing: 12) {
-                        ForEach(AvailableTime.allCases, id: \.self) { value in
+                        ForEach(DrawPresentationPreset.allCases, id: \.self) { preset in
+                            let value = DrawContext(preset: preset)
+                            let label = preset.localizedLabel
+                            let maximum = preset.maximumMinutes
                             Button {
                                 selection = value
                             } label: {
-                                Text(value.localizedLabel)
+                                VStack(spacing: 3) {
+                                    Text(label)
+                                    Text("Up to \(maximum) min")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                                     .frame(maxWidth: .infinity, minHeight: 52)
                                     .contentShape(Rectangle())
                             }
@@ -288,10 +298,18 @@ struct DrawContextView: View {
                         }
                     }
 
+                    Button("Custom time") { showsCustom = true }
+                        .buttonStyle(.bordered)
+                    if selection == .notSure {
+                        Text("Not sure keeps every supported paper available.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Button {
                         guard let selection else { return }
                         Task {
-                            if await appModel.startDraw(availableTime: selection) { dismiss() }
+                            if await appModel.startDraw(context: selection) { dismiss() }
                         }
                     } label: {
                         Label("Draw a paper", systemImage: "sparkles")
@@ -308,6 +326,27 @@ struct DrawContextView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                }
+            }
+            .sheet(isPresented: $showsCustom) {
+                NavigationStack {
+                    Form {
+                        Section("Available time") {
+                            Stepper("\(customMinutes) minutes", value: $customMinutes, in: 10...480, step: 5)
+                        }
+                        Section {
+                            Button("Use this time") {
+                                selection = DrawContext(customMinutes: customMinutes)
+                                showsCustom = false
+                            }
+                            Button("Not sure") {
+                                selection = .notSure
+                                showsCustom = false
+                            }
+                        }
+                    }
+                    .navigationTitle("Custom time")
+                    .toolbar { Button("Cancel") { showsCustom = false } }
                 }
             }
         }

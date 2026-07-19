@@ -7,11 +7,111 @@ public enum DrawAttemptOutcome: String, Codable, CaseIterable, Sendable {
     case dismissed
 }
 
+public enum DrawContextMode: String, Codable, CaseIterable, Sendable {
+    case preset
+    case custom
+    case notSure = "not_sure"
+}
+
+public enum DrawPresentationPreset: String, Codable, CaseIterable, Sendable {
+    case fewMinutes = "few_minutes"
+    case aboutAnHour = "about_an_hour"
+    case aFewHours = "a_few_hours"
+    case mostOfTheDay = "most_of_the_day"
+
+    public var maximumMinutes: Int {
+        switch self {
+        case .fewMinutes: 30
+        case .aboutAnHour: 60
+        case .aFewHours: 240
+        case .mostOfTheDay: 480
+        }
+    }
+}
+
+/// The canonical time contract for newly created Draw Sessions.
+public struct DrawContext: Codable, Equatable, Hashable, Sendable {
+    public let mode: DrawContextMode
+    public let maximumMinutes: Int?
+    public let presentationPreset: DrawPresentationPreset?
+
+    public init(preset: DrawPresentationPreset) {
+        mode = .preset
+        maximumMinutes = preset.maximumMinutes
+        presentationPreset = preset
+    }
+
+    public init(customMinutes: Int) {
+        mode = .custom
+        maximumMinutes = customMinutes
+        presentationPreset = nil
+    }
+
+    public static let notSure = DrawContext(mode: .notSure, maximumMinutes: nil, presentationPreset: nil)
+
+    private init(mode: DrawContextMode, maximumMinutes: Int?, presentationPreset: DrawPresentationPreset?) {
+        self.mode = mode
+        self.maximumMinutes = maximumMinutes
+        self.presentationPreset = presentationPreset
+    }
+
+    public var isValid: Bool {
+        switch mode {
+        case .preset:
+            return presentationPreset?.maximumMinutes == maximumMinutes
+        case .custom:
+            guard let maximumMinutes else { return false }
+            return presentationPreset == nil && (10...480).contains(maximumMinutes) && maximumMinutes.isMultiple(of: 5)
+        case .notSure:
+            return maximumMinutes == nil && presentationPreset == nil
+        }
+    }
+
+    public var effectiveFitBucket: DurationBucket? {
+        guard let maximumMinutes else { return nil }
+        return DurationBucket.allCases.filter { $0.maximumMinutes <= maximumMinutes }.max { $0.maximumMinutes < $1.maximumMinutes }
+    }
+
+    public var storageValue: String {
+        switch mode {
+        case .preset: "preset:\(presentationPreset!.rawValue)"
+        case .custom: "custom:\(maximumMinutes!)"
+        case .notSure: "not_sure"
+        }
+    }
+
+    public init?(storageValue: String) {
+        if let legacy = AvailableTime(rawValue: storageValue) {
+            switch legacy {
+            case .upTo30Minutes: self.init(preset: .fewMinutes)
+            case .upTo60Minutes: self.init(preset: .aboutAnHour)
+            case .upTo240Minutes: self.init(preset: .aFewHours)
+            case .upTo480Minutes: self.init(preset: .mostOfTheDay)
+            case .upTo10Minutes: self.init(customMinutes: 10)
+            case .upTo120Minutes: self.init(customMinutes: 120)
+            case .notSure: self = .notSure
+            }
+            return
+        }
+        if storageValue == "not_sure" { self = .notSure; return }
+        let parts = storageValue.split(separator: ":", maxSplits: 1).map(String.init)
+        guard parts.count == 2 else { return nil }
+        if parts[0] == "preset", let preset = DrawPresentationPreset(rawValue: parts[1]) {
+            self.init(preset: preset)
+        } else if parts[0] == "custom", let minutes = Int(parts[1]) {
+            self.init(customMinutes: minutes)
+        } else {
+            return nil
+        }
+        guard isValid else { return nil }
+    }
+}
+
 public struct DrawSession: Codable, Equatable, Identifiable, Sendable {
     public let id: UUID
     public let startedAt: Date
     public var endedAt: Date?
-    public let availableTimeRaw: String
+    public let context: DrawContext
     public let policyVersion: String
 
     public init(
@@ -24,7 +124,10 @@ public struct DrawSession: Codable, Equatable, Identifiable, Sendable {
         self.id = id
         self.startedAt = startedAt
         self.endedAt = endedAt
-        self.availableTimeRaw = availableTimeRaw
+        guard let context = DrawContext(storageValue: availableTimeRaw) else {
+            preconditionFailure("Invalid Draw context")
+        }
+        self.context = context
         self.policyVersion = policyVersion
     }
 
@@ -45,7 +148,32 @@ public struct DrawSession: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var availableTime: AvailableTime? {
-        AvailableTime(rawValue: availableTimeRaw)
+        switch context.mode {
+        case .preset:
+            guard let preset = context.presentationPreset else { return nil }
+            switch preset {
+            case .fewMinutes: return .upTo30Minutes
+            case .aboutAnHour: return .upTo60Minutes
+            case .aFewHours: return .upTo240Minutes
+            case .mostOfTheDay: return .upTo480Minutes
+            }
+        case .custom:
+            guard let minutes = context.maximumMinutes else { return nil }
+            return AvailableTime(rawValue: "up_to_\(minutes)_minutes")
+        case .notSure:
+            return .notSure
+        }
+    }
+
+    public var availableTimeRaw: String { context.storageValue }
+
+    public init(id: UUID = UUID(), startedAt: Date, endedAt: Date? = nil, context: DrawContext, policyVersion: String = DrawSelectionPolicy.version) {
+        precondition(context.isValid)
+        self.id = id
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.context = context
+        self.policyVersion = policyVersion
     }
 }
 

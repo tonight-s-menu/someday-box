@@ -155,7 +155,7 @@ public struct PersistedStateValidator: Sendable {
 
         for session in state.sessions {
             do {
-                guard session.availableTime != nil else { throw RawValueValidationFailure.empty }
+                guard session.context.isValid else { throw RawValueValidationFailure.empty }
                 try OpenRawValueValidator().validate(session.policyVersion, requiresPrintableASCII: true)
             } catch {
                 throw PersistedStateValidationIssue.invalidSession(id: session.id)

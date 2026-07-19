@@ -232,6 +232,10 @@ final class AppModel {
         await mutate { _ = try await self.startDrawUseCase.execute(availableTime: availableTime) }
     }
 
+    func startDraw(context: DrawContext) async -> Bool {
+        await mutate { _ = try await self.startDrawUseCase.execute(context: context) }
+    }
+
     func redraw() async -> Bool {
         await mutate { _ = try await self.redrawUseCase.execute() }
     }
