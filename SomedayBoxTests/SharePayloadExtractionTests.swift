@@ -39,4 +39,24 @@ final class SharePayloadExtractionTests: XCTestCase {
             XCTAssertEqual(error as? SharePayloadValidationFailure, .textTooLarge(limit: 32 * 1_024, actual: 32 * 1_024 + 1))
         }
     }
+
+    func testMailboxReaderReturnsPublishedEnvelopeAndRemovesOnlyMatchingFile() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let envelope = try ShareCaptureEnvelopeV1(
+            appBuild: "1",
+            title: "Read this later",
+            note: nil,
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+            acceptedURLString: "https://example.com/read",
+            sourceKindRaw: "url"
+        )
+
+        _ = try ShareMailboxWriter().publish(envelope, at: root)
+        let reader = ShareMailboxReader()
+        let entries = try reader.entries(at: root)
+        XCTAssertEqual(entries.map(\.envelope), [envelope])
+        try reader.remove(try XCTUnwrap(entries.first), at: root)
+        XCTAssertTrue(try reader.entries(at: root).isEmpty)
+    }
 }

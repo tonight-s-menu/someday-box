@@ -39,7 +39,7 @@ public struct StoreGenerationConfiguration: Sendable {
         // expose a groupContainer parameter. The postcondition guards that local-only contract.
         let configuration = ModelConfiguration(
             "SomedayBox-\(generationID.uuidString)",
-            schema: Schema(versionedSchema: SomedayBoxSchemaV1.self),
+            schema: Schema(versionedSchema: SomedayBoxSchemaV2.self),
             url: storeURL(generationID: generationID),
             allowsSave: true,
             cloudKitDatabase: .none
@@ -52,7 +52,7 @@ public struct StoreGenerationConfiguration: Sendable {
     public static func inMemoryModelConfiguration() -> ModelConfiguration {
         ModelConfiguration(
             "SomedayBox-InMemory",
-            schema: Schema(versionedSchema: SomedayBoxSchemaV1.self),
+            schema: Schema(versionedSchema: SomedayBoxSchemaV2.self),
             isStoredInMemoryOnly: true,
             allowsSave: true,
             groupContainer: .none,

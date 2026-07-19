@@ -55,7 +55,10 @@ enum AppComposition {
         let repository = try await GenerationProductRepository.open(
             configuration: StoreGenerationConfiguration(applicationSupportURL: supportRoot)
         )
-        return AppModel(repository: repository)
+        let groupContainerURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.somedaybox.app.share"
+        )
+        return AppModel(repository: repository, shareGroupContainerURL: groupContainerURL)
     }
 }
 
@@ -74,6 +77,10 @@ final class AppModel {
     private let archiveUseCase: ArchivePaperUseCase
     private let restoreUseCase: RestorePaperUseCase
     private let deleteUseCase: DeletePaperUseCase
+    private let importSharedPaperUseCase: ImportSharedPaperUseCase
+    private let removeSourceUseCase: RemoveSourceUseCase
+    private let shareGroupContainerURL: URL?
+    private let shareMailboxReader = ShareMailboxReader()
 
     var state = PersistedProductState(items: [])
     var isLoading = true
@@ -87,8 +94,9 @@ final class AppModel {
         didSet { UserDefaults.standard.set(hasSeenIntroduction, forKey: "hasSeenIntroduction") }
     }
 
-    init(repository: GenerationProductRepository) {
+    init(repository: GenerationProductRepository, shareGroupContainerURL: URL? = nil) {
         self.repository = repository
+        self.shareGroupContainerURL = shareGroupContainerURL
         hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
         let arbiter = MutationArbiter(repository: repository)
@@ -103,6 +111,8 @@ final class AppModel {
         archiveUseCase = ArchivePaperUseCase(arbiter: arbiter)
         restoreUseCase = RestorePaperUseCase(arbiter: arbiter)
         deleteUseCase = DeletePaperUseCase(arbiter: arbiter)
+        importSharedPaperUseCase = ImportSharedPaperUseCase(arbiter: arbiter)
+        removeSourceUseCase = RemoveSourceUseCase(arbiter: arbiter)
     }
 
     var unresolvedAttempt: DrawAttempt? {
@@ -130,10 +140,18 @@ final class AppModel {
         state.items.first { $0.id == id }
     }
 
+    func source(itemID: UUID) -> SourceReference? {
+        state.sources.first { $0.itemID == itemID }
+    }
+
     func load() async {
         isLoading = true
         do {
             state = try await repository.snapshot()
+            if unresolvedAttempt == nil {
+                try await ingestSharedCaptures()
+                state = try await repository.snapshot()
+            }
             errorMessage = nil
             loadFailed = false
         } catch {
@@ -200,6 +218,10 @@ final class AppModel {
         await mutate { try await self.deleteUseCase.execute(itemID: itemID) }
     }
 
+    func removeSource(itemID: UUID) async -> Bool {
+        await mutate { try await self.removeSourceUseCase.execute(itemID: itemID) }
+    }
+
     func exportBackupData() async -> Data? {
         guard !isMutating else { return nil }
         isMutating = true
@@ -263,6 +285,14 @@ final class AppModel {
 
     func report(_ error: Error) {
         errorMessage = message(for: error)
+    }
+
+    private func ingestSharedCaptures() async throws {
+        guard let shareGroupContainerURL else { return }
+        for entry in try shareMailboxReader.entries(at: shareGroupContainerURL) {
+            _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+            try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
+        }
     }
 
     private func mutate(_ operation: () async throws -> Void) async -> Bool {

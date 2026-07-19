@@ -56,6 +56,64 @@ final class ApplicationUseCaseTests: XCTestCase {
         XCTAssertEqual(afterRejectedCapture, atLimit)
     }
 
+    func testSharedImportCreatesOneItemAndSourceAndReplaysIdempotently() async throws {
+        let repository = InMemoryProductRepository()
+        let itemID = UUID()
+        let sourceID = UUID()
+        let envelope = try ShareCaptureEnvelopeV1(
+            envelopeID: UUID(),
+            createdAt: now.addingTimeInterval(-60),
+            appBuild: "1",
+            title: "Visit the gallery",
+            note: "On a quiet afternoon",
+            durationBucketRaw: DurationBucket.upTo120Minutes.rawValue,
+            acceptedURLString: "https://example.com/gallery",
+            sourceKindRaw: "url"
+        )
+        let useCase = ImportSharedPaperUseCase(
+            arbiter: MutationArbiter(repository: repository),
+            clock: FixedClock(value: now),
+            makeItemID: { itemID },
+            makeSourceID: { sourceID }
+        )
+
+        let imported = try await useCase.execute(envelope: envelope)
+        let replayed = try await useCase.execute(envelope: envelope)
+        XCTAssertEqual(imported, .imported(itemID: itemID))
+        XCTAssertEqual(replayed, .alreadyImported(itemID: itemID))
+
+        let state = await repository.snapshot()
+        XCTAssertEqual(state.items.count, 1)
+        XCTAssertEqual(state.sources.count, 1)
+        XCTAssertEqual(state.sources.first?.itemID, itemID)
+        XCTAssertEqual(state.sources.first?.importEnvelopeID, envelope.envelopeID)
+        XCTAssertEqual(state.items.first?.createdAt, now)
+        XCTAssertEqual(state.sources.first?.capturedAt, now.addingTimeInterval(-60))
+    }
+
+    func testSharedImportCannotBypassUnresolvedRevealGate() async throws {
+        let fixture = unresolvedFixture(items: [item()])
+        let repository = InMemoryProductRepository(state: fixture)
+        let envelope = try ShareCaptureEnvelopeV1(
+            appBuild: "1",
+            title: "Blocked import",
+            note: nil,
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+            acceptedURLString: nil,
+            sourceKindRaw: "shared_text"
+        )
+
+        do {
+            _ = try await ImportSharedPaperUseCase(arbiter: MutationArbiter(repository: repository))
+                .execute(envelope: envelope)
+            XCTFail("Import should be blocked by the unresolved draw.")
+        } catch {
+            XCTAssertEqual(error as? ApplicationError, .drawResolutionRequired)
+        }
+        let preserved = await repository.snapshot()
+        XCTAssertEqual(preserved, fixture)
+    }
+
     func testUnresolvedGateTakesPriorityOverCaptureAndEditValidation() async throws {
         let fixture = unresolvedFixture(items: [item()])
         let repository = InMemoryProductRepository(state: fixture)

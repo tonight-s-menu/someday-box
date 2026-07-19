@@ -122,6 +122,7 @@ public struct DeletePaperUseCase: Sendable {
             )
             state.items.removeAll { $0.id == itemID }
             state.memories.removeAll { $0.sourceItemID == itemID }
+            state.sources.removeAll { $0.itemID == itemID }
             state.sessions.removeAll { sessionIDs.contains($0.id) }
             state.attempts.removeAll { sessionIDs.contains($0.sessionID) }
             if state.currentPick?.itemID == itemID { state.currentPick = nil }

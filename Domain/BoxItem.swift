@@ -97,3 +97,28 @@ public struct CurrentPick: Codable, Equatable, Sendable {
     public let itemID: UUID
     public let acceptedAt: Date
 }
+
+public struct SourceReference: Codable, Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let itemID: UUID
+    public let importEnvelopeID: UUID
+    public let acceptedURLString: String?
+    public let sourceKindRaw: String
+    public let capturedAt: Date
+
+    public init(
+        id: UUID = UUID(),
+        itemID: UUID,
+        importEnvelopeID: UUID,
+        acceptedURLString: String?,
+        sourceKindRaw: String,
+        capturedAt: Date
+    ) {
+        self.id = id
+        self.itemID = itemID
+        self.importEnvelopeID = importEnvelopeID
+        self.acceptedURLString = acceptedURLString
+        self.sourceKindRaw = sourceKindRaw
+        self.capturedAt = capturedAt
+    }
+}

@@ -71,6 +71,11 @@ public actor GenerationProductRepository: ProductRepository {
         let container = try bootstrap.openContainer(for: active)
         let repository = SwiftDataProductRepository(container: container)
         _ = try await repository.snapshot()
+        let currentSchema = StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
+        if active.schemaVersion != currentSchema {
+            active = ActiveStoreGeneration(id: active.id, schemaVersion: currentSchema)
+            try bootstrap.activate(active)
+        }
         return GenerationProductRepository(
             configuration: configuration,
             generation: active,
@@ -142,7 +147,7 @@ public actor GenerationProductRepository: ProductRepository {
         let priorGeneration = currentGeneration
         let newGeneration = ActiveStoreGeneration(
             id: UUID(),
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
         )
         var journal = StoreGenerationOperationJournal(
             operationID: UUID(),

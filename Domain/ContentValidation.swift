@@ -10,6 +10,7 @@ public enum DomainLimits {
     public static let completionMemoryCount = 5_000
     public static let drawSessionCount = 10_000
     public static let drawAttemptCount = 50_000
+    public static let sourceReferenceCount = 5_000
 }
 
 public enum StoreCapacityResource: String, Equatable, Sendable {
@@ -17,6 +18,7 @@ public enum StoreCapacityResource: String, Equatable, Sendable {
     case completionMemories
     case drawSessions
     case drawAttempts
+    case sourceReferences
 
     public var countLimit: Int {
         switch self {
@@ -24,6 +26,7 @@ public enum StoreCapacityResource: String, Equatable, Sendable {
         case .completionMemories: DomainLimits.completionMemoryCount
         case .drawSessions: DomainLimits.drawSessionCount
         case .drawAttempts: DomainLimits.drawAttemptCount
+        case .sourceReferences: DomainLimits.sourceReferenceCount
         }
     }
 }

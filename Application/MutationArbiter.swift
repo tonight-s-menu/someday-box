@@ -31,6 +31,10 @@ public struct MutationArbiter: Sendable {
         }
     }
 
+    public func snapshotForIdempotencyCheck() async throws -> PersistedProductState {
+        try await repository.snapshot()
+    }
+
     private func validate(_ state: PersistedProductState) throws {
         do {
             try validator.validate(state)

@@ -44,11 +44,12 @@ public actor SwiftDataProductRepository: ProductRepository {
     }
 
     private func loadValidatedState() throws -> PersistedProductState {
-        let itemRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.ItemRecord>())
-        let currentPickRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.CurrentPickRecord>())
-        let sessionRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.SessionRecord>())
-        let attemptRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.AttemptRecord>())
-        let memoryRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.MemoryRecord>())
+        let itemRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.ItemRecord>())
+        let currentPickRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.CurrentPickRecord>())
+        let sessionRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.SessionRecord>())
+        let attemptRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.AttemptRecord>())
+        let memoryRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.MemoryRecord>())
+        let sourceRecords = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.SourceRecord>())
 
         guard currentPickRecords.count <= 1 else {
             throw SwiftDataRepositoryError.multipleCurrentPickRecords
@@ -58,7 +59,8 @@ public actor SwiftDataProductRepository: ProductRepository {
             currentPick: currentPickRecords.first?.domainValue(),
             sessions: try sessionRecords.map { try $0.domainValue() },
             attempts: try attemptRecords.map { try $0.domainValue() },
-            memories: memoryRecords.map { $0.domainValue() }
+            memories: memoryRecords.map { $0.domainValue() },
+            sources: sourceRecords.map { $0.domainValue() }
         )
         try validator.validate(state)
         return state
@@ -70,10 +72,11 @@ public actor SwiftDataProductRepository: ProductRepository {
         try synchronizeSessions(state.sessions)
         try synchronizeAttempts(state.attempts)
         try synchronizeMemories(state.memories)
+        try synchronizeSources(state.sources)
     }
 
     private func synchronizeItems(_ items: [BoxItem]) throws {
-        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.ItemRecord>())
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.ItemRecord>())
         var recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
         for item in items {
             if let record = recordsByID.removeValue(forKey: item.id) {
@@ -86,14 +89,14 @@ public actor SwiftDataProductRepository: ProductRepository {
                 record.completedAt = item.completedAt
                 record.lastShownAt = item.lastShownAt
             } else {
-                context.insert(SomedayBoxSchemaV1.ItemRecord(domain: item))
+                context.insert(SomedayBoxSchemaV2.ItemRecord(domain: item))
             }
         }
         recordsByID.values.forEach(context.delete)
     }
 
     private func synchronizeCurrentPick(_ currentPick: CurrentPick?) throws {
-        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.CurrentPickRecord>())
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.CurrentPickRecord>())
         guard let currentPick else {
             records.forEach(context.delete)
             return
@@ -103,12 +106,12 @@ public actor SwiftDataProductRepository: ProductRepository {
             record.acceptedAt = currentPick.acceptedAt
             records.dropFirst().forEach(context.delete)
         } else {
-            context.insert(SomedayBoxSchemaV1.CurrentPickRecord(domain: currentPick))
+            context.insert(SomedayBoxSchemaV2.CurrentPickRecord(domain: currentPick))
         }
     }
 
     private func synchronizeSessions(_ sessions: [DrawSession]) throws {
-        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.SessionRecord>())
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.SessionRecord>())
         var recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
         for session in sessions {
             if let record = recordsByID.removeValue(forKey: session.id) {
@@ -117,14 +120,14 @@ public actor SwiftDataProductRepository: ProductRepository {
                 record.availableTimeRaw = session.availableTimeRaw
                 record.policyVersion = session.policyVersion
             } else {
-                context.insert(SomedayBoxSchemaV1.SessionRecord(domain: session))
+                context.insert(SomedayBoxSchemaV2.SessionRecord(domain: session))
             }
         }
         recordsByID.values.forEach(context.delete)
     }
 
     private func synchronizeAttempts(_ attempts: [DrawAttempt]) throws {
-        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.AttemptRecord>())
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.AttemptRecord>())
         var recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
         for attempt in attempts {
             if let record = recordsByID.removeValue(forKey: attempt.id) {
@@ -137,14 +140,14 @@ public actor SwiftDataProductRepository: ProductRepository {
                 record.outcomeRaw = attempt.outcomeRaw
                 record.resolvedAt = attempt.resolvedAt
             } else {
-                context.insert(SomedayBoxSchemaV1.AttemptRecord(domain: attempt))
+                context.insert(SomedayBoxSchemaV2.AttemptRecord(domain: attempt))
             }
         }
         recordsByID.values.forEach(context.delete)
     }
 
     private func synchronizeMemories(_ memories: [CompletionMemory]) throws {
-        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV1.MemoryRecord>())
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.MemoryRecord>())
         var recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
         for memory in memories {
             if let record = recordsByID.removeValue(forKey: memory.id) {
@@ -154,7 +157,24 @@ public actor SwiftDataProductRepository: ProductRepository {
                 record.durationSnapshotRaw = memory.durationSnapshotRaw
                 record.completedAt = memory.completedAt
             } else {
-                context.insert(SomedayBoxSchemaV1.MemoryRecord(domain: memory))
+                context.insert(SomedayBoxSchemaV2.MemoryRecord(domain: memory))
+            }
+        }
+        recordsByID.values.forEach(context.delete)
+    }
+
+    private func synchronizeSources(_ sources: [SourceReference]) throws {
+        let records = try context.fetch(FetchDescriptor<SomedayBoxSchemaV2.SourceRecord>())
+        var recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+        for source in sources {
+            if let record = recordsByID.removeValue(forKey: source.id) {
+                record.itemID = source.itemID
+                record.importEnvelopeID = source.importEnvelopeID
+                record.acceptedURLString = source.acceptedURLString
+                record.sourceKindRaw = source.sourceKindRaw
+                record.capturedAt = source.capturedAt
+            } else {
+                context.insert(SomedayBoxSchemaV2.SourceRecord(domain: source))
             }
         }
         recordsByID.values.forEach(context.delete)

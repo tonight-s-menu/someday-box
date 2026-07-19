@@ -54,7 +54,7 @@ public struct StoreGenerationBootstrap: Sendable {
             withIntermediateDirectories: true
         )
         return try ModelContainer(
-            for: Schema(versionedSchema: SomedayBoxSchemaV1.self),
+            for: Schema(versionedSchema: SomedayBoxSchemaV2.self),
             migrationPlan: SomedayBoxSchemaMigrationPlan.self,
             configurations: [configuration.modelConfiguration(generationID: generation.id)]
         )
@@ -63,7 +63,7 @@ public struct StoreGenerationBootstrap: Sendable {
     public func createGeneration(id: UUID = UUID()) throws -> ActiveStoreGeneration {
         let generation = ActiveStoreGeneration(
             id: id,
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
         )
         try FileManager.default.createDirectory(
             at: configuration.generationURL(id: id),
@@ -99,7 +99,7 @@ public struct StoreGenerationBootstrap: Sendable {
 
         let generation = ActiveStoreGeneration(
             id: UUID(),
-            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier)
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
         )
         try fileManager.createDirectory(
             at: configuration.generationURL(id: generation.id),
@@ -111,7 +111,7 @@ public struct StoreGenerationBootstrap: Sendable {
 
     public static func makeInMemoryContainer() throws -> ModelContainer {
         try ModelContainer(
-            for: Schema(versionedSchema: SomedayBoxSchemaV1.self),
+            for: Schema(versionedSchema: SomedayBoxSchemaV2.self),
             migrationPlan: SomedayBoxSchemaMigrationPlan.self,
             configurations: [StoreGenerationConfiguration.inMemoryModelConfiguration()]
         )
@@ -127,9 +127,11 @@ public struct StoreGenerationBootstrap: Sendable {
             throw StoreGenerationBootstrapError.invalidManifestChecksum
         }
         let version = envelope.payload.schemaVersion
-        guard version.major == SomedayBoxSchemaV1.versionIdentifier.major,
-              version.minor == SomedayBoxSchemaV1.versionIdentifier.minor,
-              version.patch == SomedayBoxSchemaV1.versionIdentifier.patch else {
+        let supported = [
+            StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier),
+            StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier),
+        ]
+        guard supported.contains(version) else {
             throw StoreGenerationBootstrapError.unsupportedSchemaVersion(
                 major: version.major,
                 minor: version.minor,

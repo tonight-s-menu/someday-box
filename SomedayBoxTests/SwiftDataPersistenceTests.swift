@@ -21,6 +21,14 @@ final class SwiftDataPersistenceTests: XCTestCase {
             completedAt: now
         )
         XCTAssertEqual(SomedayBoxSchemaV1.MemoryRecord(domain: memory).domainValue(), memory)
+        let source = SourceReference(
+            itemID: item.id,
+            importEnvelopeID: UUID(),
+            acceptedURLString: "https://example.com/paper",
+            sourceKindRaw: "url",
+            capturedAt: now
+        )
+        XCTAssertEqual(SomedayBoxSchemaV2.SourceRecord(domain: source).domainValue(), source)
     }
 
     func testRepositoryCommitsAndRollsBackAsOneStateTransaction() async throws {
@@ -74,6 +82,26 @@ final class SwiftDataPersistenceTests: XCTestCase {
         let secondRepository = SwiftDataProductRepository(container: second.container)
         let reopenedState = try await secondRepository.snapshot()
         XCTAssertEqual(reopenedState.items, [item])
+    }
+
+    func testRepositoryPersistsSourceReferenceWithItemTransaction() async throws {
+        let repository = SwiftDataProductRepository(container: try StoreGenerationBootstrap.makeInMemoryContainer())
+        let item = makeItem()
+        let source = SourceReference(
+            itemID: item.id,
+            importEnvelopeID: UUID(),
+            acceptedURLString: "https://example.com/paper",
+            sourceKindRaw: "url",
+            capturedAt: now
+        )
+
+        _ = try await repository.withTransaction { state in
+            state.items.append(item)
+            state.sources.append(source)
+        }
+        let reopened = try await repository.snapshot()
+        XCTAssertEqual(reopened.items, [item])
+        XCTAssertEqual(reopened.sources, [source])
     }
 
     private func makeItem() -> BoxItem {

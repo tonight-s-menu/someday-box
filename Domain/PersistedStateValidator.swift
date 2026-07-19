@@ -5,6 +5,7 @@ public enum DomainRecordKind: String, Equatable, Sendable {
     case session
     case attempt
     case memory
+    case source
 }
 
 public enum PersistedStateValidationIssue: Error, Equatable, Sendable {
@@ -26,6 +27,9 @@ public enum PersistedStateValidationIssue: Error, Equatable, Sendable {
     case invalidCurrentPick
     case currentPickConflictsWithUnresolvedAttempt
     case completedItemHasNoMatchingMemory(itemID: UUID)
+    case invalidSource(id: UUID)
+    case duplicateImportEnvelopeID(UUID)
+    case multipleSourcesForItem(UUID)
 }
 
 public struct PersistedProductState: Equatable, Sendable {
@@ -34,19 +38,22 @@ public struct PersistedProductState: Equatable, Sendable {
     public var sessions: [DrawSession]
     public var attempts: [DrawAttempt]
     public var memories: [CompletionMemory]
+    public var sources: [SourceReference]
 
     public init(
         items: [BoxItem],
         currentPick: CurrentPick? = nil,
         sessions: [DrawSession] = [],
         attempts: [DrawAttempt] = [],
-        memories: [CompletionMemory] = []
+        memories: [CompletionMemory] = [],
+        sources: [SourceReference] = []
     ) {
         self.items = items
         self.currentPick = currentPick
         self.sessions = sessions
         self.attempts = attempts
         self.memories = memories
+        self.sources = sources
     }
 }
 
@@ -58,11 +65,44 @@ public struct PersistedStateValidator: Sendable {
         try validateUniqueIDs(state.sessions.map(\.id), kind: .session)
         try validateUniqueIDs(state.attempts.map(\.id), kind: .attempt)
         try validateUniqueIDs(state.memories.map(\.id), kind: .memory)
+        try validateUniqueIDs(state.sources.map(\.id), kind: .source)
 
         let itemsByID = Dictionary(uniqueKeysWithValues: state.items.map { ($0.id, $0) })
         let sessionsByID = Dictionary(uniqueKeysWithValues: state.sessions.map { ($0.id, $0) })
         let attemptsBySession = Dictionary(grouping: state.attempts, by: \.sessionID)
         let memoriesByItem = Dictionary(grouping: state.memories, by: \.sourceItemID)
+
+        guard state.sources.count <= DomainLimits.sourceReferenceCount else {
+            throw PersistedStateValidationIssue.invalidSource(id: state.sources.last?.id ?? UUID())
+        }
+        var importEnvelopeIDs = Set<UUID>()
+        var sourceItemIDs = Set<UUID>()
+        for source in state.sources {
+            guard itemsByID[source.itemID] != nil else {
+                throw PersistedStateValidationIssue.missingItem(recordID: source.id)
+            }
+            guard importEnvelopeIDs.insert(source.importEnvelopeID).inserted else {
+                throw PersistedStateValidationIssue.duplicateImportEnvelopeID(source.importEnvelopeID)
+            }
+            guard sourceItemIDs.insert(source.itemID).inserted else {
+                throw PersistedStateValidationIssue.multipleSourcesForItem(source.itemID)
+            }
+            do {
+                try OpenRawValueValidator().validate(source.sourceKindRaw, requiresPrintableASCII: true)
+                if let value = source.acceptedURLString {
+                    guard value.utf8.count <= SharePayloadExtractor.maximumURLUTF8Bytes,
+                          let url = URL(string: value),
+                          let scheme = url.scheme?.lowercased(),
+                          scheme == "http" || scheme == "https",
+                          url.host?.isEmpty == false,
+                          url.user == nil,
+                          url.password == nil
+                    else { throw PersistedStateValidationIssue.invalidSource(id: source.id) }
+                }
+            } catch {
+                throw PersistedStateValidationIssue.invalidSource(id: source.id)
+            }
+        }
 
         for item in state.items {
             do { try PaperContentValidator().validate(item) } catch {

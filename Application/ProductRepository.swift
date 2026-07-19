@@ -23,6 +23,8 @@ public enum ProductMutationKind: Equatable, Sendable {
     case archive
     case restore
     case delete
+    case importShared
+    case removeSource
 
     var mayResolveUnresolvedDraw: Bool {
         switch self {

@@ -135,12 +135,14 @@ private struct PaperRow: View {
 private struct PaperDetailView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     let itemID: UUID
     @State private var isEditing = false
     @State private var title = ""
     @State private var note = ""
     @State private var duration = DurationBucket.upTo30Minutes
     @State private var confirmsDeletion = false
+    @State private var confirmsSourceRemoval = false
 
     var body: some View {
         Group {
@@ -165,6 +167,28 @@ private struct PaperDetailView: View {
                                 Text(note).fixedSize(horizontal: false, vertical: true)
                             }
                             LabeledContent("Duration", value: item.durationLabel)
+                        }
+                    }
+
+                    if let source = appModel.source(itemID: item.id) {
+                        Section("Source") {
+                            if let value = source.acceptedURLString,
+                               let url = URL(string: value),
+                               let host = url.host {
+                                LabeledContent("Shared link", value: host)
+                                Button {
+                                    openURL(url)
+                                } label: {
+                                    Label("Open Original", systemImage: "arrow.up.right.square")
+                                }
+                                ShareLink(item: value) {
+                                    Label("Copy or share link", systemImage: "square.and.arrow.up")
+                                }
+                            } else {
+                                LabeledContent("Shared content", value: "Text only")
+                            }
+                            LabeledContent("Captured", value: source.capturedAt.formatted(date: .abbreviated, time: .shortened))
+                            Button("Remove Source", role: .destructive) { confirmsSourceRemoval = true }
                         }
                     }
 
@@ -224,6 +248,18 @@ private struct PaperDetailView: View {
                     Button("Cancel", role: .cancel) {}
                 } message: {
                     Text("This cannot be undone. Other papers and memories stay unchanged.")
+                }
+                .confirmationDialog(
+                    "Remove this source?",
+                    isPresented: $confirmsSourceRemoval,
+                    titleVisibility: .visible
+                ) {
+                    Button("Remove Source", role: .destructive) {
+                        Task { _ = await appModel.removeSource(itemID: item.id) }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("The paper stays in your Box. The saved link and share provenance will be removed.")
                 }
             } else {
                 ContentUnavailableView("Paper unavailable", systemImage: "doc.questionmark")

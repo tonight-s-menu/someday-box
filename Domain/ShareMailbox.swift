@@ -34,6 +34,17 @@ private struct MailboxManifestV1: Codable {
         return Self(formatVersion: payload.formatVersion, activeGenerationID: payload.activeGenerationID, epoch: payload.epoch, state: payload.state, checksumSHA256: checksum)
     }
 
+    func validatedGenerationID() throws -> UUID {
+        let payload = Payload(formatVersion: formatVersion, activeGenerationID: activeGenerationID, epoch: epoch, state: state)
+        let checksum = SHA256.hash(data: try ShareCaptureEnvelopeV1.encoder.encode(payload))
+            .map { String(format: "%02x", $0) }.joined()
+        guard formatVersion == 1, checksum == checksumSHA256 else {
+            throw ShareCaptureError.invalidChecksum
+        }
+        guard state == "idle" else { throw ShareCaptureError.mailboxBusy }
+        return activeGenerationID
+    }
+
     private struct Payload: Codable { let formatVersion: Int; let activeGenerationID: UUID; let epoch: Int64; let state: String }
 }
 
@@ -210,8 +221,8 @@ public struct ShareMailboxWriter {
         let manifest = root.appendingPathComponent("manifest-v1.json")
         if FileManager.default.fileExists(atPath: manifest.path) {
             let value = try JSONDecoder().decode(MailboxManifestV1.self, from: Data(contentsOf: manifest))
-            guard value.formatVersion == 1, value.state == "idle" else { throw ShareCaptureError.mailboxBusy }
-            return generations.appendingPathComponent(value.activeGenerationID.uuidString.lowercased(), isDirectory: true)
+            let generationID = try value.validatedGenerationID()
+            return generations.appendingPathComponent(generationID.uuidString.lowercased(), isDirectory: true)
         }
         let generationID = UUID()
         let generation = generations.appendingPathComponent(generationID.uuidString.lowercased(), isDirectory: true)
@@ -226,5 +237,76 @@ public struct ShareMailboxWriter {
             let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
             return total + size
         }
+    }
+}
+
+public struct ShareMailboxEntry: Equatable, Sendable {
+    public let envelope: ShareCaptureEnvelopeV1
+    public let fileURL: URL
+
+    public init(envelope: ShareCaptureEnvelopeV1, fileURL: URL) {
+        self.envelope = envelope
+        self.fileURL = fileURL
+    }
+}
+
+public struct ShareMailboxReader {
+    public init() {}
+
+    public func entries(at groupContainerURL: URL) throws -> [ShareMailboxEntry] {
+        let root = groupContainerURL.appendingPathComponent("ShareMailbox", isDirectory: true)
+        guard FileManager.default.fileExists(atPath: root.path) else { return [] }
+        var result: Result<[ShareMailboxEntry], Error> = .failure(ShareCaptureError.publicationFailed)
+        var coordinationError: NSError?
+        NSFileCoordinator().coordinate(readingItemAt: root, options: [], error: &coordinationError) { coordinatedRoot in
+            result = Result { try readCoordinated(root: coordinatedRoot) }
+        }
+        if coordinationError != nil { throw ShareCaptureError.mailboxBusy }
+        return try result.get()
+    }
+
+    public func remove(_ entry: ShareMailboxEntry, at groupContainerURL: URL) throws {
+        let root = groupContainerURL.appendingPathComponent("ShareMailbox", isDirectory: true)
+        var result: Result<Void, Error> = .failure(ShareCaptureError.publicationFailed)
+        var coordinationError: NSError?
+        NSFileCoordinator().coordinate(writingItemAt: root, options: [], error: &coordinationError) { coordinatedRoot in
+            result = Result {
+                let incoming = try activeGeneration(in: coordinatedRoot).appendingPathComponent("incoming", isDirectory: true)
+                let expected = incoming.appendingPathComponent(entry.envelope.envelopeID.uuidString.lowercased() + ".capture")
+                guard expected.standardizedFileURL == entry.fileURL.standardizedFileURL else {
+                    throw ShareCaptureError.invalidEnvelope
+                }
+                guard FileManager.default.fileExists(atPath: expected.path) else { return }
+                let stored = try ShareCaptureEnvelopeV1.decode(Data(contentsOf: expected))
+                guard stored == entry.envelope else { throw ShareCaptureError.invalidEnvelope }
+                try FileManager.default.removeItem(at: expected)
+            }
+        }
+        if coordinationError != nil { throw ShareCaptureError.mailboxBusy }
+        try result.get()
+    }
+
+    private func readCoordinated(root: URL) throws -> [ShareMailboxEntry] {
+        let incoming = try activeGeneration(in: root).appendingPathComponent("incoming", isDirectory: true)
+        guard FileManager.default.fileExists(atPath: incoming.path) else { return [] }
+        let urls = try FileManager.default.contentsOfDirectory(at: incoming, includingPropertiesForKeys: [.isRegularFileKey])
+            .filter { $0.pathExtension == "capture" }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        return try urls.map { url in
+            let envelope = try ShareCaptureEnvelopeV1.decode(Data(contentsOf: url, options: [.mappedIfSafe]))
+            guard url.deletingPathExtension().lastPathComponent == envelope.envelopeID.uuidString.lowercased() else {
+                throw ShareCaptureError.invalidEnvelope
+            }
+            return ShareMailboxEntry(envelope: envelope, fileURL: url)
+        }
+    }
+
+    private func activeGeneration(in root: URL) throws -> URL {
+        let manifestURL = root.appendingPathComponent("manifest-v1.json")
+        guard FileManager.default.fileExists(atPath: manifestURL.path) else { return root }
+        let manifest = try JSONDecoder().decode(MailboxManifestV1.self, from: Data(contentsOf: manifestURL))
+        let generationID = try manifest.validatedGenerationID()
+        return root.appendingPathComponent("generations", isDirectory: true)
+            .appendingPathComponent(generationID.uuidString.lowercased(), isDirectory: true)
     }
 }
