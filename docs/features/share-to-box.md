@@ -6,6 +6,8 @@
 | --- | --- |
 | Document status | Selected post-MVP feature; S1–S5 implemented with release evidence open, S6 blocked on signed packaged acceptance |
 | Parent product contract | [Product requirements and technical foundation](../product-requirements-and-technical-foundation.md) |
+| vNext presentation contract | [Core Box Living Experience Upgrade](../core-box-living-experience-upgrade.md) |
+| vNext integration status | Transaction-derived fresh/imported outcome and post-commit refetch reconciliation are open Core Box C6 prerequisites; not part of the current S1–S5 implementation claim |
 | Product | someday-box / 改天盲盒 |
 | System-facing name | Add to someday-box / 放进改天盲盒 |
 | Feature-facing name | Share to Box |
@@ -17,7 +19,7 @@
 
 This document translates the cross-platform sharing idea into an implementation-oriented feature contract. It resolves the gap between a compelling product story and what an iOS Share Extension can truthfully receive, persist, and prove. It contains no implementation code and does not claim that the complete feature has passed release acceptance. S1–S5 are implemented in source and pass the locally executable automated gates. Real-host, signed-entitlement, physical-device, manual assistive-technology, performance, interruption, privacy-report, and immediate-predecessor evidence remains open. S6 therefore remains blocked even though an unsigned Release archive passes the structural package audit.
 
-The parent product contract remains authoritative for Paper lifecycle, duration, drawing, Current Pick, Memories, backup safety, accessibility, and low-pressure language. This document owns only the Share to Box feature. If the two documents appear to conflict, the stricter privacy, data-integrity, and user-visible-truth rule applies until the conflict is explicitly resolved.
+The parent product contract remains authoritative for Paper lifecycle, duration, drawing, Current Pick, Memories, backup safety, accessibility, and low-pressure language. The vNext Core Box contract owns only the main-app presentation that may occur after a shared capture has become committed product truth. This document owns Share Extension payload, publication, mailbox, main-app materialization, Source Reference, and recovery behavior. The explicitly labeled vNext/C6 additions below are future requirements and do not retroactively claim that the current S1–S5 source already returns those outcomes. If the documents appear to conflict, the stricter privacy, data-integrity, transport-truth, and user-visible-truth rule applies until the conflict is explicitly resolved.
 
 ---
 
@@ -494,7 +496,7 @@ The persisted unresolved reveal is the only ordinary product surface allowed ahe
 
 Home, Box, and a new Draw use product truth after every valid capture at or before the watermark has either been ingested or routed to Shared Capture Recovery. A new envelope published after the watermark belongs to the next foreground or explicit mailbox-change refresh and does not retroactively make the completed snapshot claim false. A failure to ingest one envelope does not corrupt or duplicate other valid captures.
 
-If the containing app has never launched, its normal first-run store bootstrap and introduction remain authoritative. After the introduction, the first Home/Box snapshot already includes every successfully ingested share; no sample or placeholder Paper substitutes for it.
+If the containing app has never launched, its normal first-run store bootstrap and introduction remain authoritative. Successful envelopes may be materialized during bootstrap, but no Home/Box snapshot appears before the introduction. User-visible priority is load failure/full Store Recovery when implemented, persisted unresolved reveal, Shared Capture Recovery for a blocked envelope, first-launch introduction, then root tabs. After the introduction, the first Home/Box snapshot already includes every successfully ingested share; no sample or placeholder Paper substitutes for it.
 
 ### 8.2 Materialization rules
 
@@ -506,6 +508,8 @@ A valid envelope becomes:
 Source metadata does not change lifecycle, duration, draw weight, Current Pick, or Memory behavior.
 
 Source Reference capturedAt preserves the extension’s wall-clock value for approximate display only. A later device-clock correction, backward time change, or apparently future capture time does not reject an otherwise valid capture or alter draw behavior.
+
+The vNext Core Box scene may play an individual or aggregate Paper-deposit response only when ingestion returns a freshly imported result after the containing app commits and refetches this Box Item plus Source Reference. Fresh-versus-existing is the result of the same serialized transaction that creates or observes the Source Reference; a snapshot check made before that transaction is not authoritative under concurrent ingestion. The idempotent `alreadyImported` result—such as replay after product commit succeeded but envelope cleanup was interrupted—performs reconciliation without replaying deposit motion. The visual event is optional, short-lived presentation state: losing or interrupting it never retries materialization, and extension publication alone never qualifies. Four or more freshly committed imports use bounded aggregate feedback rather than a blocking sequence of full animations. Queue size, expiry, background-drop, and post-commit-refetch-failure behavior are owned by the linked Core Box contract.
 
 ### 8.3 Source detail
 
@@ -789,6 +793,10 @@ Crash outcomes:
 
 Exactly-once materialization is guaranteed across the normal active-envelope retry window by persistent identity and transaction ordering, not by assuming the extension completion callback runs once. The corresponding Paper is not exposed until the final envelope has been removed, so Remove Source cannot erase the idempotency record during that window. P0 makes no permanent replay-deduplication claim after both normal envelope cleanup and a later explicit Source removal.
 
+The application outcome is also transactional. If two tasks race to ingest the same envelope, exactly one transaction may return `freshlyImported` with the committed IDs; the other returns `alreadyImported` with the existing committed identity. A preflight snapshot followed by an unconditional “imported” return is invalid because another task can commit in between. Refetch verifies the outcome but does not infer freshness. If commit succeeds and refetch fails, ingestion enters reconcile/load handling, removes no envelope until verification, emits no deposit event, and never offers a second materialization mutation.
+
+This paragraph is a vNext Core Box C6 prerequisite and is not current implementation evidence. The existing S3 implementation claim remains limited to the previously accepted atomic materialization/idempotent replay contract; it must be hardened before any Core Box deposit animation or structured-outcome release claim is enabled.
+
 ### 10.7 Target and module boundaries
 
 The second executable target creates real reuse, so a small app-extension-safe local module is justified. It contains only the envelope DTO, canonical codec, bounded validation, deterministic URL/text extraction primitives, clock/UUID abstractions, and content-free error codes. It imports Foundation, CryptoKit, and Uniform Type Identifiers as needed; it imports neither SwiftUI nor SwiftData.
@@ -926,6 +934,8 @@ Allowed diagnostics are bounded counts, contract versions, stable content-free e
 | ING-03 | Ingest before Draw truth | Home/Box counts and a new Draw cover every valid capture at or before the recorded mailbox watermark, after any unresolved reveal |
 | ING-04 | Preserve recoverable failures | Capacity, future version, corruption, and operation-gate failures retain or quarantine the envelope and open Shared Capture Recovery |
 | ING-05 | Remove only after commit | A product persistence failure leaves the final envelope available for retry |
+| ING-06 (vNext C6, open) | Return transactional idempotency truth | Concurrent ingestion of one envelope produces one Item/Source and exactly one `freshlyImported` result; every losing/replay path returns `alreadyImported` |
+| ING-07 (vNext C6, open) | Separate commit and refetch failure | A committed transaction with failed projection refresh enters reconcile, emits no success animation, and cannot be resubmitted as a new import |
 
 ### 12.4 Source behavior
 
@@ -1013,6 +1023,7 @@ Cover:
 - atomic envelope temporary-write/final-publication/readback;
 - termination before publication, after publication, before product commit, after product commit, and before envelope deletion;
 - simultaneous extension saves with unique IDs;
+- simultaneous ingestion attempts for the same final envelope, proving one fresh transaction result and one `alreadyImported` result;
 - ingestion while an unresolved reveal or data operation gate exists;
 - coordination cancellation/watchdog behavior, late NSItemProvider callbacks, and stale temporary cleanup;
 - current/previous mailbox generation reconciliation;
@@ -1021,6 +1032,7 @@ Cover:
 - erase racing a new share before, during, and after finalization;
 - capacity and canonical-byte headroom;
 - no duplicate Item after retry;
+- product commit followed by injected refetch failure, proving no false “not changed,” no second mutation, and no deposit event;
 - matching and mismatched envelope/Source identity collisions plus backup/restore normalization;
 - Shared Capture Recovery retry, restricted management, raw export, explicit discard, close/relaunch, and multiple-capture sequencing.
 

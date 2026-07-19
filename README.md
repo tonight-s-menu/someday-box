@@ -5,11 +5,13 @@ Native, local-only iPhone app for capturing an idea now and drawing a suitable o
 ## Product documents
 
 - [MVP product and technical baseline](docs/product-requirements-and-technical-foundation.md)
+- [Core Box Living Experience Upgrade](docs/core-box-living-experience-upgrade.md) — vNext requirements, state machines, RealityKit scene/asset contract, 2D parity, migration, delivery, and rollback plan; not implemented by this documentation change
+- [RealityKit core-box presentation decision](docs/adr/0004-realitykit-core-box-presentation.md) — accepted vNext boundary: virtual-camera 3D is presentation-only, bundled, and fully replaceable by the supported 2D path
 - [Share to Box feature specification](docs/features/share-to-box.md) — selected post-MVP feature; S1–S5 implemented with release evidence still open, S6 blocked on a signed physical-device candidate
 - [Share to Box readiness ledger](docs/release/share-to-box-readiness.md) — separates local source/test proof from the remaining packaged acceptance gates
 - [Share Extension local-mailbox authority decision](docs/adr/0003-share-extension-local-import-mailbox.md) — accepted implementation boundary
 
-The feature specification is a development contract, not current-runtime evidence. The implementation and verification boundaries below describe the repository as it exists today.
+The vNext and feature specifications are development contracts, not current-runtime evidence. The implementation and verification boundaries below describe the repository as it exists today.
 
 ## Development setup
 
@@ -26,7 +28,7 @@ There are no environment variables, service credentials, accounts, remote config
 ```text
 SwiftUI Features → Application Use Cases → Pure Domain Rules
                                            ↑
-                         SwiftData / File / OSLog adapters
+                                 SwiftData / File adapters
 ```
 
 - `Domain/` is Foundation-only and is independently testable through Swift Package Manager.

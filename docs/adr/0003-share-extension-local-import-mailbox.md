@@ -1,7 +1,7 @@
 # ADR 0003: Share Extension uses a local import mailbox
 
 - Status: Accepted for Share to Box implementation
-- Implementation status: In progress — S1 payload shell and S2 mailbox foundation present; milestone exit evidence remains open
+- Implementation status: S1–S5 implemented in source with milestone exit evidence still open; S6 blocked on signed packaged acceptance
 - Date: 2026-07-19
 - Feature contract: [Share to Box](../features/share-to-box.md)
 

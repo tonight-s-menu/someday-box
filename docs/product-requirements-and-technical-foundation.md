@@ -24,6 +24,7 @@ This document translates the initial concept into a bounded product specificatio
 - **Product validation and readiness:** Sections 20–23 define scenarios, risks, Definition of Done, and the final MVP acceptance statement.
 - **Platform sources:** Section 24 records the dated Apple references behind the technical baseline.
 - **Selected post-MVP feature:** [Share to Box](features/share-to-box.md) defines the first major expansion without changing the original MVP acceptance claim.
+- **Selected vNext experience:** [Core Box Living Experience Upgrade](core-box-living-experience-upgrade.md) supersedes the vNext Home/Capture/Draw/Reveal presentation direction and defines the RealityKit, 2D-equivalence, exact Custom-time, delivery, and rollback contract. This baseline remains authoritative for low-pressure product semantics, lifecycle, persistence safety, privacy, and recovery.
 
 ---
 
@@ -197,6 +198,12 @@ The next releases should be chosen from observed user friction, not from the siz
 Share to Box is the first selected major expansion. Its complete product, interaction, data, privacy, migration, rollback, and acceptance contract is maintained in [the feature specification](features/share-to-box.md), with the cross-process authority decision recorded in [ADR 0003](adr/0003-share-extension-local-import-mailbox.md).
 
 This selection does not retroactively add Share to Box to the original MVP acceptance claim. S1–S5 are now implemented in source with passing local automated evidence. Their physical-device, real-host, manual accessibility, performance, interruption, and privacy-report exit evidence remains open. S6 has an unsigned Release archive structure check only and remains blocked until a signed candidate completes the packaged device matrix. The first feature release accepts only system-provided HTTP(S) URLs and plain text, requires the same explicit title-plus-duration truth as manual capture, and adds no webpage fetching, attachment, automatic classification, inferred context, platform account access, or LLM path.
+
+### 4.5 Selected vNext experience upgrade
+
+The next selected product direction is the [Core Box Living Experience Upgrade](core-box-living-experience-upgrade.md). It turns the Box into the central interactive digital object through a bounded RealityKit scene, soft-ribbon Draw, lid-open Peek, commit-gated Paper motion, Current Pick and Memory projections, bundled sound, and three fully supported renderer tiers with independent Normal, Quick, and Reduce Motion variants.
+
+The upgrade document is authoritative for vNext Home, Capture, Draw, Reveal, scene, motion, sound, asset, renderer, and exact Custom-time development. It does not rename the product, authorize AR/camera use, real weather, social receipt, LLM classification, or an achievement system. It preserves this document's lifecycle, mutation-gate, local-only, generation-safety, backup, Recovery, and user-visible-truth contracts except for the explicitly versioned time-context v2 schema/backup/policy extension. Documentation approval is not implementation or release evidence.
 
 ---
 
@@ -530,7 +537,7 @@ Cross-device merge and conflict resolution are explicitly deferred.
 | DAT-02 | Export a portable backup | A versioned `.somedaybox` JSON document contains product records: items, Current Pick, sessions/attempts, and memories |
 | DAT-03 | Restore all-or-nothing | Corrupt, truncated, future-version, or domain-invalid files never replace the active store generation; every Section 9.8 invariant is validated before activation |
 | DAT-04 | Erase local data explicitly | Two-step confirmation starts a journaled empty-generation switch and idempotent cleanup of every app-owned data copy; external exports and OS-owned data remain outside app control |
-| DAT-05 | Keep content out of logs | Titles, notes, URLs, full file paths, and record UUIDs never appear in unified logs or diagnostic exports |
+| DAT-05 | Keep content out of diagnostics | Titles, notes, URLs, full file paths, and record UUIDs never appear in production logs, in-memory diagnostics, or candidate artifacts |
 | DAT-06 | Make no product network request | Static dependency/capability review and runtime network inspection both show no app-initiated connection |
 | DAT-07 | Avoid silent migration reset | A store-open or migration failure enters recovery UI and never automatically deletes the store |
 | DAT-08 | Preserve the prior store during restore | Restore builds and reopens an independent store generation before an atomic active-generation switch; interruption before the durable commit boundary returns to the prior generation, while interruption after it resumes cleanup without rolling back committed truth |
@@ -586,6 +593,8 @@ Current Pick is either absent or contains exactly one item reference. The accept
 | `availableTimeRaw` | Selected time budget or Not sure |
 | `policyVersion` | Exact draw-policy identifier |
 
+This table remains authoritative for the implemented schema through v2. A candidate that ships the selected [Core Box Living Experience Upgrade](core-box-living-experience-upgrade.md#10-time-context-v2) explicitly replaces `availableTimeRaw` in schema v3 with the documented `contextModeRaw`/`maximumMinutes`/`presentationPresetRaw` tagged union. The old field then exists only in frozen predecessor schemas and backup adapters; all migrated and new v3 Sessions validate the same canonical union.
+
 ### 9.5 Draw Attempt
 
 | Field | Meaning |
@@ -637,7 +646,8 @@ Raw values are split deliberately into open and closed sets:
 
 - `durationBucketRaw` and `durationSnapshotRaw` are open, non-empty opaque strings up to 64 UTF-8 bytes. Known values map to supported buckets. Unknown values round-trip unchanged, render as unsupported, and never enter a draw; they are not treated as an invalid enum during backup import.
 - `policyVersion` is a printable, opaque identifier up to 64 UTF-8 bytes. Historical records may preserve a policy the current build no longer executes. An open Session with such a policy may resume its already-persisted result, but only Accept and Dismiss are executable; Redraw requires a policy in the build's explicit supported-policy set.
-- `lifecycleRaw`, `availableTimeRaw`, and `outcomeRaw` are closed behavioral enums. An unknown value cannot be executed safely and makes a store generation or backup invalid.
+- `lifecycleRaw`, `outcomeRaw`, and schema-v1/v2 `availableTimeRaw` are closed behavioral enums. An unknown value cannot be executed safely and makes a store generation or backup invalid.
+- Schema-v3 Draw context uses the closed tagged-union invariants in the selected Core Box contract. It does not fall back to, sentinel-encode, or dual-write `availableTimeRaw`.
 - A released raw value is never reassigned to a different meaning. A format adapter may translate a documented older value, but generic decoding may not guess.
 
 Every normal write, migration, staged restore, and fresh-container reopen validates the following persisted-state invariant set:
@@ -858,7 +868,7 @@ Release acceptance requires:
 - Set the app's default data protection to Complete because the MVP has no background data requirement.
 - Do not implement custom encryption or claim end-to-end encryption.
 - Do not log titles, notes, pasted text, URLs, record IDs, or full file paths.
-- Use `OSLog.Logger` categories with stable error codes, counts, versions, and durations only.
+- The current production-source audit prohibits `Logger`, `os_log`, `print`, and equivalent logging calls. Use external Instruments/test evidence and, only when separately contracted, bounded content-free in-memory diagnostics. Any future production logging path requires an explicit privacy review and audit-policy change.
 - Add a privacy manifest from v1. Declare no tracking and no collected data when the shipped binary truthfully meets those conditions.
 - Declare required-reason APIs used by the app, including app-owned UserDefaults access where applicable.
 - Publish a plain-language privacy policy even if the App Store privacy label is “Data Not Collected.”
@@ -939,7 +949,7 @@ The product and repository name remain `someday-box`; Swift target and module id
 | Haptics | SwiftUI sensory feedback | Native semantic feedback and simple fallback | Custom Core Haptics waveform |
 | Backup | Foundation JSON, custom UTType, system file exporter/importer | Portable, versioned, user-controlled, no server | Copying an internal SQLite store, proprietary binary archive |
 | Backup integrity | CryptoKit SHA-256 | Detects accidental corruption with a native implementation | Custom cryptography or a false encryption claim |
-| Logging | `OSLog.Logger` | Native categories, levels, signposts, privacy controls | Third-party logging or crash SDK |
+| Diagnostics | No production logging calls; external Instruments/tests and separately reviewed bounded in-memory state | Matches the enforced source audit and local-only privacy boundary | Third-party logging or crash SDK |
 | Unit/integration tests | Swift Testing | Parameterized domain and persistence tests, concurrency-aware | New XCTest-only unit suite |
 | UI/performance tests | XCTest and XCUIAutomation | Native UI automation, launch/performance metrics, accessibility audit | Third-party UI automation |
 | Localization | String Catalog | Native pluralization and translation workflow | Hardcoded strings |
@@ -990,7 +1000,7 @@ Pure Domain Rules
        ↑
 Repository Protocols
        ↑
-SwiftData / File / OSLog Adapters
+SwiftData / File Adapters
 ```
 
 ### 14.1 App composition
@@ -1076,7 +1086,7 @@ Each feature owns short-lived `@Observable` state such as draft input, selected 
 - Random generator.
 - Haptic preference and sensory feedback.
 - File importer/exporter.
-- Logger.
+- Separately reviewed content-free diagnostics, if approved.
 - App version/build metadata.
 
 JSON encoding may run away from the main actor, but only `Sendable` DTOs cross actor boundaries. SwiftData model instances remain in their owning context.
@@ -1246,9 +1256,9 @@ It cannot remove backup files the user exported to Files, iCloud Drive, Finder, 
 
 No backend does not mean the app should be undiagnosable. It means diagnostics remain private, bounded, and user-controlled.
 
-### 16.1 Unified logs
+### 16.1 Enforced production-diagnostic boundary
 
-Suggested categories:
+The current audit rejects production calls to `Logger`, `os_log`, `print`, and equivalent surfaces. Release diagnostics therefore use external Instruments/runtime inspection, deterministic test artifacts, and candidate records. If a bounded in-memory health snapshot is later approved, suggested metric keys are:
 
 - `capture`
 - `draw`
@@ -1257,7 +1267,7 @@ Suggested categories:
 - `backup`
 - `uiLifecycle`
 
-Allowed dynamic content:
+Allowed metric dimensions:
 
 - Stable error code.
 - Count.
@@ -1265,12 +1275,14 @@ Allowed dynamic content:
 - Schema, format, policy, app, and build version.
 - Boolean success/failure state.
 
-Forbidden dynamic content:
+Forbidden content:
 
 - Paper title or note.
 - Pasted URL or arbitrary user input.
-- Full UUID.
+- Any product/envelope UUID, stable record identifier, or truncated/hashed/otherwise derived form of one.
 - Full file path or file contents.
+
+The in-memory snapshot, if implemented, is discarded on process exit, contains no record identifiers, is excluded from backup, and is removed by Erase All. Persistent diagnostic storage or production unified logging requires a separate retention/export/erase contract and an explicit update to the source audit; this document does not authorize it implicitly.
 
 ### 16.2 Product history versus diagnostics
 
@@ -1662,8 +1674,6 @@ The following primary sources support the technical choices. Availability and su
 - [Performing accessibility audits](https://developer.apple.com/documentation/accessibility/performing-accessibility-audits-for-your-app)
 - [Swift Testing](https://developer.apple.com/documentation/testing)
 - [Xcode testing strategy](https://developer.apple.com/documentation/xcode/testing)
-- [Unified logging](https://developer.apple.com/documentation/os/logging)
-- [OSLog privacy](https://developer.apple.com/documentation/os/oslogprivacy)
 - [App privacy details and the definition of collection](https://developer.apple.com/app-store/app-privacy-details/)
 - [Using the file system effectively](https://developer.apple.com/documentation/foundation/using-the-file-system-effectively)
 - [Defining custom file and data types](https://developer.apple.com/documentation/uniformtypeidentifiers/defining-file-and-data-types-for-your-app)

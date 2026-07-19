@@ -54,12 +54,24 @@ Values below describe the current source contract and must be checked against th
 | App Group identifier | `not shipped`, or `group.com.somedaybox.app.share` — verify signed entitlements |
 | Activation-rule contract and supported UTTypes | `not shipped`, or `dictionary v2; strict; URL max 1; plain text` — verify archive |
 | Oldest readable Share Capture Envelope | `not shipped`, or `1` — verify |
+| Core Box living experience | `not shipped`, or `shipped` with the fields below completed |
+| Core Box renderer / interaction versions | `not shipped`, or `REQUIRED / REQUIRED` |
+| Core Box asset version / digest | `not shipped`, or `REQUIRED / REQUIRED` |
+| Core Box asset source format / authoring host / production build host | `not shipped`, or `REQUIRED / REQUIRED / REQUIRED` |
+| Core Box animation timing / fallback-policy versions | `not shipped`, or `REQUIRED / REQUIRED` |
+| Core Box default / renderer tiers / motion modes | `not shipped`, or `REQUIRED / D0,D1,D2 / M0,M1,M2` |
+| Core Box committed-outcome / preference-namespace versions | `not shipped`, or `REQUIRED / core-box-presentation-v1` |
+| Core Box fixture versions | `not shipped`, or `5,000-Paper REQUIRED / 50-cycle REQUIRED` |
+| Core Box Draw-context contract | `not shipped: legacy permitted`; `shipped P0: time-context-v2` with exact production identifier — verify |
+| Core Box selection-policy version | `not shipped: mvp-v1 permitted`; `shipped P0: time-context-v2` — verify independently from context/schema version |
+| Core Box schema/backup/digest contract | `not shipped`, or `schema v3 / backup v3 canonicalization 1 / digest v3` — verify |
+| Core Box Store Recovery prerequisite | `not shipped`, or `closed with packaged evidence` |
 
 ## Evidence ledger
 
 Use only `pass`, `fail`, `blocked`, or `not run`. A lower evidence level never substitutes for a higher one.
 
-When Share to Box is not shipped, use `not run` for its conditional evidence row, `not shipped` as the procedure, and an archive-inspection artifact proving there is no embedded Share Extension or App Group entitlement. This is the standard not-applicable representation; do not add an undeclared fifth status.
+When Share to Box is not shipped, its artifact proves the candidate has no embedded extension or App Group entitlement. When the Core Box living experience is not shipped, its artifact proves the candidate archive contains no reachable or bundled production scene/path; an internal source prototype may exist only when build/source inspection records how it is excluded from that candidate. Use `not run` for the applicable conditional evidence row and `not shipped` as its procedure. This is the standard not-applicable representation; do not add an undeclared fifth status.
 
 | Evidence level | Status | Command or procedure | Immutable artifact |
 | --- | --- | --- | --- |
@@ -73,6 +85,7 @@ When Share to Box is not shipped, use `not run` for its conditional evidence row
 | Network/privacy runtime | `not run` | Instruments and App Privacy Report | `REQUIRED` |
 | Packaged | `not run` | Signed Release/TestFlight journey | `REQUIRED` |
 | Share to Box (conditional) | `not run` | Real-host app/extension/mailbox/ingestion journey, or `not shipped` | `REQUIRED` |
+| Core Box living experience (conditional) | `not run` | D0/D1/D2 plus motion variants, structured outcomes, asset, migration, Recovery, accessibility, performance, and packaged journey, or `not shipped` | `REQUIRED` |
 
 ## Known limitations and exceptions
 

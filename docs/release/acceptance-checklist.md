@@ -86,3 +86,30 @@ Complete this section only when the candidate manifest declares Share to Box as 
 - [ ] The installed signed candidate survives immediate-predecessor upgrade, host dismissal, app suspension, device locking, and later containing-app launch without losing or duplicating the active capture.
 
 This conditional gate is closed only by the installed packaged app and extension. Main-app unit tests, a synthetic host, Debug signing, or an extension screenshot do not prove real-host payloads, entitlements, lifecycle, or packaged ingestion.
+
+## 10. Conditional Core Box living-experience evidence
+
+Complete this section only when the candidate manifest declares the [Core Box living experience](../core-box-living-experience-upgrade.md) as shipped. A scene hidden in the archive or reachable production path cannot be treated as “not shipped.”
+
+- [ ] The candidate records the renderer, interaction, asset, animation-timing, fallback-policy, Draw-context, selection-policy, schema, and backup-format versions plus the compiled asset digest.
+- [ ] Every 3D model, texture, environment resource, audio file, and 2D fallback is bundled; source/provenance records are retained; archive and runtime inspection find no remote asset or product-network dependency.
+- [ ] The RealityView uses the reviewed virtual-camera, non-AR path and requests no camera, location, microphone, Photos, Contacts, Calendar, or notification permission for the core experience.
+- [ ] Runtime validates the bundled manifest digest and required entity/pivot/anchor contract; build/archive audit separately proves triangle/entity/Paper/light/material/texture/audio/package/provenance ceilings and full/Lite variants.
+- [ ] A missing/corrupt asset and every injected required-anchor failure select a functional 2D path without changing product data or blocking Capture, Draw, unresolved-result recovery, Shared Capture Recovery, or store Recovery.
+- [ ] D0 Full 3D, D1 Lite 3D, and D2 SwiftUI 2D under required Normal/Quick/Reduced Motion variants complete the same Capture → Draw → Accept/Redraw/Dismiss → Current Pick → Complete/Put back → Memories journey and major error states.
+- [ ] Capture deposit, Paper reveal, Current Pick attachment, completion stamp/seam, and Share deposit occur only after structured transaction outcomes plus verified refetch; injected post-commit refetch failure enters reconcile and never duplicates a Paper, Attempt, Current Pick, Memory, Source Reference, or Share success animation.
+- [ ] Ribbon release below threshold writes no Session/Attempt, release at threshold submits exactly once, and the visible native Draw control provides an equivalent path for assistive technologies and renderer failure.
+- [ ] Peek exposes no readable Paper title/note, has a visible Organize action, and restores a stable camera/presentation state across background and foreground.
+- [ ] Startup unresolved results bypass new selection, unsupported old policy disables Redraw only, and exhausted Redraw closes the old Session, refreshes deferred Share/Recovery work, then creates a distinct same-context Session only after explicit Reshuffle.
+- [ ] `inBoxCount` includes unsupported-duration Active Papers while `drawableCount` excludes them; scene density, Peek, Draw availability, and VoiceOver report the appropriate values.
+- [ ] P0 time-context v2 proves the full fit table, exact Custom boundaries, custom independent-generation schema v2 → v3 migration with no active legacy field/sentinel/dual write, canonical backup v1/v2 → v3 adapters, generation-digest coverage, old unresolved-result recovery, and non-reinterpretation of historical policy versions.
+- [ ] Concurrent ingestion of one Share envelope returns exactly one fresh transaction outcome; `alreadyImported`, post-commit refetch failure, background, and expired presentation batches emit no deposit replay.
+- [ ] Automated audits plus manual VoiceOver, Voice Control, Switch Control, largest Dynamic Type, Increase Contrast, Differentiate Without Color, Reduce Transparency, and Reduce Motion pass on physical devices.
+- [ ] Oldest/current physical iPhones pass p95 native Home/3D readiness, D0/D1 percentile+hitch, main-thread stall, peak-memory, 50-cycle thermal, Low Power Mode, memory-pressure fallback, audio interruption, and background-stop budgets in Release without the debugger.
+- [ ] The checked-in deterministic 5,000-Paper fixture remains inside the fixed visible entity/Paper ceilings, and renderer switching at a stable boundary performs zero product-store writes.
+- [ ] Product restore preserves the versioned presentation preferences; Erase All resets renderer/Quick/ambience/sound/haptics/last-context/first-animation values plus introduction state.
+- [ ] Full independent Store Recovery is usable without constructing the scene; a Retry-only load-failure surface does not close this gate.
+- [ ] Airplane-mode and runtime network/privacy inspection cover time-of-day ambience, sound, Share materialization feedback, renderer fallback, backup/restore, and relaunch.
+- [ ] The installed signed candidate—not only a preview, simulator, Debug build, or unsigned archive—completes the full renderer/accessibility/device matrix and has approved containment and forward-fix decisions.
+
+This conditional gate is closed only when the packaged scene and every supported fallback preserve the same product truth. A polished model, a smooth simulator recording, or green domain tests cannot substitute for asset, accessibility, performance, interruption, and physical-device evidence.
