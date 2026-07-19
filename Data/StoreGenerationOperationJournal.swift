@@ -116,3 +116,80 @@ private struct JournalEnvelope: Codable {
     let payload: StoreGenerationOperationJournal
     let sha256: String
 }
+
+public struct SharedProductDataOperationJournal: Codable, Equatable, Sendable {
+    public let formatVersion: Int
+    public let operationID: UUID
+    public let kind: StoreGenerationOperationKind
+    public let targetProductGenerationID: UUID
+    public let mailboxReplacement: ShareMailboxMaintenance.StagedReplacement
+
+    public init(
+        operationID: UUID,
+        kind: StoreGenerationOperationKind,
+        targetProductGenerationID: UUID,
+        mailboxReplacement: ShareMailboxMaintenance.StagedReplacement
+    ) {
+        formatVersion = 1
+        self.operationID = operationID
+        self.kind = kind
+        self.targetProductGenerationID = targetProductGenerationID
+        self.mailboxReplacement = mailboxReplacement
+    }
+}
+
+public struct SharedProductDataJournalStore: Sendable {
+    private let url: URL
+
+    public init(applicationSupportURL: URL) {
+        url = applicationSupportURL.appendingPathComponent("shared-product-operation.json")
+    }
+
+    public func load() throws -> SharedProductDataOperationJournal? {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let envelope = try JSONDecoder().decode(SharedJournalEnvelope.self, from: Data(contentsOf: url))
+        guard envelope.payload.formatVersion == 1 else {
+            throw StoreGenerationJournalError.unsupportedFormatVersion(envelope.payload.formatVersion)
+        }
+        guard Self.sha256Hex(try Self.encode(envelope.payload)) == envelope.sha256 else {
+            throw StoreGenerationJournalError.invalidChecksum
+        }
+        return envelope.payload
+    }
+
+    public func write(_ journal: SharedProductDataOperationJournal) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let envelope = SharedJournalEnvelope(
+            payload: journal,
+            sha256: Self.sha256Hex(try Self.encode(journal))
+        )
+        try Self.durableAtomicWrite(Self.encode(envelope), to: url)
+    }
+
+    public func remove() throws {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        try FileManager.default.removeItem(at: url)
+    }
+
+    private static func durableAtomicWrite(_ data: Data, to url: URL) throws {
+        try data.write(to: url, options: [.atomic])
+        let handle = try FileHandle(forWritingTo: url)
+        try handle.synchronize()
+        try handle.close()
+    }
+
+    private static func encode<Value: Encodable>(_ value: Value) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(value)
+    }
+
+    private static func sha256Hex(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private struct SharedJournalEnvelope: Codable {
+    let payload: SharedProductDataOperationJournal
+    let sha256: String
+}

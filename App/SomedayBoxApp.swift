@@ -1,6 +1,18 @@
 import Observation
 import SwiftUI
 
+enum ShareCaptureRecoveryItem: Equatable, Identifiable {
+    case pending(ShareMailboxEntry, message: String)
+    case invalid(ShareMailboxProblem)
+
+    var id: UUID {
+        switch self {
+        case let .pending(entry, _): entry.envelope.envelopeID
+        case let .invalid(problem): problem.id
+        }
+    }
+}
+
 @main
 struct SomedayBoxApp: App {
     @State private var appModel: AppModel?
@@ -58,7 +70,27 @@ enum AppComposition {
         let groupContainerURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: "group.com.somedaybox.app.share"
         )
-        return AppModel(repository: repository, shareGroupContainerURL: groupContainerURL)
+        let sharedJournalStore = SharedProductDataJournalStore(applicationSupportURL: supportRoot)
+        if let groupContainerURL {
+            let maintenance = ShareMailboxMaintenance()
+            if let journal = try sharedJournalStore.load() {
+                if await repository.activeGeneration().id == journal.targetProductGenerationID {
+                    try maintenance.commit(journal.mailboxReplacement, at: groupContainerURL)
+                } else {
+                    try maintenance.discard(journal.mailboxReplacement, at: groupContainerURL)
+                }
+                try sharedJournalStore.remove()
+            } else {
+                try maintenance.recoverAbandonedMaintenance(at: groupContainerURL)
+            }
+        } else if try sharedJournalStore.load() != nil {
+            throw ShareCaptureError.publicationFailed
+        }
+        return AppModel(
+            repository: repository,
+            shareGroupContainerURL: groupContainerURL,
+            sharedJournalStore: sharedJournalStore
+        )
     }
 }
 
@@ -81,12 +113,15 @@ final class AppModel {
     private let removeSourceUseCase: RemoveSourceUseCase
     private let shareGroupContainerURL: URL?
     private let shareMailboxReader = ShareMailboxReader()
+    private let shareMailboxMaintenance = ShareMailboxMaintenance()
+    private let sharedJournalStore: SharedProductDataJournalStore
 
     var state = PersistedProductState(items: [])
     var isLoading = true
     var loadFailed = false
     var isMutating = false
     var errorMessage: String?
+    var shareRecoveryItems: [ShareCaptureRecoveryItem] = []
     var hapticsEnabled: Bool {
         didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled") }
     }
@@ -94,9 +129,17 @@ final class AppModel {
         didSet { UserDefaults.standard.set(hasSeenIntroduction, forKey: "hasSeenIntroduction") }
     }
 
-    init(repository: GenerationProductRepository, shareGroupContainerURL: URL? = nil) {
+    init(
+        repository: GenerationProductRepository,
+        shareGroupContainerURL: URL? = nil,
+        sharedJournalStore: SharedProductDataJournalStore? = nil
+    ) {
         self.repository = repository
         self.shareGroupContainerURL = shareGroupContainerURL
+        self.sharedJournalStore = sharedJournalStore ?? SharedProductDataJournalStore(
+            applicationSupportURL: FileManager.default.temporaryDirectory
+                .appendingPathComponent("SomedayBox-\(UUID().uuidString)", isDirectory: true)
+        )
         hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
         let arbiter = MutationArbiter(repository: repository)
@@ -144,12 +187,14 @@ final class AppModel {
         state.sources.first { $0.itemID == itemID }
     }
 
+    var currentShareRecovery: ShareCaptureRecoveryItem? { shareRecoveryItems.first }
+
     func load() async {
         isLoading = true
         do {
             state = try await repository.snapshot()
             if unresolvedAttempt == nil {
-                try await ingestSharedCaptures()
+                await ingestSharedCaptures()
                 state = try await repository.snapshot()
             }
             errorMessage = nil
@@ -227,18 +272,24 @@ final class AppModel {
         isMutating = true
         defer { isMutating = false }
         do {
-            let snapshot = try await repository.exportSnapshot()
             let info = Bundle.main.infoDictionary ?? [:]
             let metadata = BackupDocumentMetadataV1(
                 exportedAt: Date(),
                 appMarketingVersion: info["CFBundleShortVersionString"] as? String ?? "0",
                 appBuild: info["CFBundleVersion"] as? String ?? "0",
-                schemaVersion: BackupSchemaVersionV1(major: 1, minor: 0, patch: 0),
+                schemaVersion: BackupSchemaVersionV1(major: 2, minor: 0, patch: 0),
                 selectionPolicyVersion: DrawSelectionPolicy.version
             )
-            let data = try await Task.detached {
-                try BackupDocumentCodecV1().encode(state: snapshot, metadata: metadata)
-            }.value
+            let groupURL = shareGroupContainerURL
+            let reader = shareMailboxReader
+            let data = try await repository.exportSnapshotWithParticipant { snapshot in
+                let envelopes = try groupURL.map { try reader.entries(at: $0).map(\.envelope) } ?? []
+                return try BackupDocumentCodecV2().encode(
+                    state: snapshot,
+                    pendingEnvelopes: envelopes,
+                    metadata: metadata
+                )
+            }
             errorMessage = nil
             return data
         } catch {
@@ -247,25 +298,37 @@ final class AppModel {
         }
     }
 
-    func prepareRestore(data: Data) async -> PersistedProductState? {
+    func prepareRestore(data: Data) async -> BackupRestorePayload? {
         do {
-            let restoredState = try await Task.detached {
-                try BackupDocumentCodecV1().decode(data)
+            let restoredPayload = try await Task.detached {
+                try BackupDocumentCodecV2().decode(data)
             }.value
             errorMessage = nil
-            return restoredState
+            return restoredPayload
         } catch {
             errorMessage = message(for: error)
             return nil
         }
     }
 
-    func restoreBackup(_ restoredState: PersistedProductState) async -> Bool {
-        await replaceProductData { try await self.repository.restore(validatedState: restoredState) }
+    func restoreBackup(_ payload: BackupRestorePayload) async -> Bool {
+        await replaceProductData {
+            try await self.replaceAllAuthorities(
+                productState: payload.state,
+                envelopes: payload.pendingEnvelopes,
+                kind: .restore
+            )
+        }
     }
 
     func eraseAllData() async -> Bool {
-        let erased = await replaceProductData { try await self.repository.eraseAll() }
+        let erased = await replaceProductData {
+            try await self.replaceAllAuthorities(
+                productState: PersistedProductState(items: []),
+                envelopes: [],
+                kind: .erase
+            )
+        }
         if erased {
             hapticsEnabled = true
             hasSeenIntroduction = false
@@ -287,11 +350,64 @@ final class AppModel {
         errorMessage = message(for: error)
     }
 
-    private func ingestSharedCaptures() async throws {
+    func retryCurrentShareRecovery() async -> Bool {
+        guard let current = currentShareRecovery, let groupURL = shareGroupContainerURL else { return false }
+        switch current {
+        case let .pending(entry, _):
+            do {
+                _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                try shareMailboxReader.remove(entry, at: groupURL)
+                shareRecoveryItems.removeFirst()
+                state = try await repository.snapshot()
+                errorMessage = nil
+                return true
+            } catch {
+                errorMessage = message(for: error)
+                return false
+            }
+        case .invalid:
+            errorMessage = String(localized: "This capture cannot be read safely. Export or discard it, or update someday-box if it came from a newer version.")
+            return false
+        }
+    }
+
+    func discardCurrentShareRecovery() async -> Bool {
+        guard let current = currentShareRecovery, let groupURL = shareGroupContainerURL else { return false }
+        do {
+            switch current {
+            case let .pending(entry, _): try shareMailboxReader.remove(entry, at: groupURL)
+            case let .invalid(problem): try shareMailboxReader.discard(problem, at: groupURL)
+            }
+            shareRecoveryItems.removeFirst()
+            errorMessage = nil
+            return true
+        } catch {
+            errorMessage = message(for: error)
+            return false
+        }
+    }
+
+    func currentRawRecoveryData() -> Data? {
+        guard case let .invalid(problem) = currentShareRecovery else { return nil }
+        do { return try shareMailboxReader.rawRecoveryData(problem) }
+        catch { errorMessage = message(for: error); return nil }
+    }
+
+    private func ingestSharedCaptures() async {
         guard let shareGroupContainerURL else { return }
-        for entry in try shareMailboxReader.entries(at: shareGroupContainerURL) {
-            _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
-            try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
+        do {
+            let inspection = try shareMailboxReader.inspect(at: shareGroupContainerURL)
+            shareRecoveryItems = inspection.problems.map { .invalid($0) }
+            for entry in inspection.entries {
+                do {
+                    _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                    try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
+                } catch {
+                    shareRecoveryItems.append(.pending(entry, message: message(for: error)))
+                }
+            }
+        } catch {
+            errorMessage = message(for: error)
         }
     }
 
@@ -326,6 +442,59 @@ final class AppModel {
         }
     }
 
+    private func replaceAllAuthorities(
+        productState: PersistedProductState,
+        envelopes: [ShareCaptureEnvelopeV1],
+        kind: StoreGenerationOperationKind
+    ) async throws -> PersistedProductState {
+        guard let groupURL = shareGroupContainerURL else {
+            guard envelopes.isEmpty else { throw ShareCaptureError.publicationFailed }
+            switch kind {
+            case .restore: return try await repository.restore(validatedState: productState)
+            case .erase: return try await repository.eraseAll()
+            }
+        }
+
+        let operationID = UUID()
+        let targetProductGenerationID = UUID()
+        let mailboxReplacement = try shareMailboxMaintenance.stageReplacement(
+            with: envelopes,
+            operationID: operationID,
+            at: groupURL
+        )
+        let journal = SharedProductDataOperationJournal(
+            operationID: operationID,
+            kind: kind,
+            targetProductGenerationID: targetProductGenerationID,
+            mailboxReplacement: mailboxReplacement
+        )
+        do {
+            try sharedJournalStore.write(journal)
+            let result: PersistedProductState
+            switch kind {
+            case .restore:
+                result = try await repository.restore(
+                    validatedState: productState,
+                    targetGenerationID: targetProductGenerationID
+                )
+            case .erase:
+                result = try await repository.eraseAll(targetGenerationID: targetProductGenerationID)
+            }
+            try shareMailboxMaintenance.commit(mailboxReplacement, at: groupURL)
+            try sharedJournalStore.remove()
+            return result
+        } catch {
+            if await repository.activeGeneration().id == targetProductGenerationID {
+                // Product truth crossed its durable commit boundary. Startup recovery must
+                // finish the mailbox switch; rolling either authority back is unsafe now.
+                throw GenerationRepositoryError.committedCleanupIncomplete
+            }
+            try? shareMailboxMaintenance.discard(mailboxReplacement, at: groupURL)
+            try? sharedJournalStore.remove()
+            throw error
+        }
+    }
+
     private func message(for error: Error) -> String {
         switch error {
         case ApplicationError.drawResolutionRequired:
@@ -354,6 +523,10 @@ final class AppModel {
             String(localized: "This file is not a valid someday-box backup.")
         case GenerationRepositoryError.operationInProgress:
             String(localized: "A local data operation is already in progress.")
+        case ShareCaptureError.mailboxFull:
+            String(localized: "Shared captures are using the available local mailbox space. Export or remove content, then try again.")
+        case is ShareCaptureError:
+            String(localized: "A shared capture needs attention. Its local bytes were kept.")
         default:
             String(localized: "Something went wrong locally. Your previous state was kept.")
         }

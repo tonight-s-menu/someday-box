@@ -8,7 +8,7 @@ public struct BackupFileReader: Sendable {
     public init() {}
 
     public func read(from url: URL) throws -> Data {
-        let limit = BackupFormatV1Limits.encodedByteCount
+        let limit = BackupFormatV2Limits.encodedByteCount
         if let fileSize = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize,
            fileSize > limit {
             throw BackupFileReaderError.encodedByteLimitExceeded(limit: limit, actual: fileSize)

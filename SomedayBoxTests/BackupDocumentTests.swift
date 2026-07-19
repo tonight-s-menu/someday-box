@@ -123,6 +123,40 @@ final class BackupDocumentTests: XCTestCase {
         }
     }
 
+    func testV2RoundTripPreservesSourcesAndPendingEnvelopesAndReadsV1() throws {
+        var state = completeState()
+        let source = SourceReference(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000006")!,
+            itemID: state.items[0].id,
+            importEnvelopeID: UUID(uuidString: "00000000-0000-0000-0000-000000000007")!,
+            acceptedURLString: "https://example.com/source",
+            sourceKindRaw: "url",
+            capturedAt: instant
+        )
+        state.sources = [source]
+        let pending = try ShareCaptureEnvelopeV1(
+            envelopeID: UUID(uuidString: "00000000-0000-0000-0000-000000000008")!,
+            createdAt: instant,
+            appBuild: "1",
+            title: "Pending paper",
+            note: nil,
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+            acceptedURLString: nil,
+            sourceKindRaw: "shared_text"
+        )
+        let codecV2 = BackupDocumentCodecV2()
+
+        let data = try codecV2.encode(state: state, pendingEnvelopes: [pending], metadata: metadata())
+        let decoded = try codecV2.decode(data)
+        XCTAssertEqual(decoded, BackupRestorePayload(state: state, pendingEnvelopes: [pending]))
+
+        let v1Data = try codec.encode(state: completeState(), metadata: metadata())
+        XCTAssertEqual(
+            try codecV2.decode(v1Data),
+            BackupRestorePayload(state: completeState(), pendingEnvelopes: [])
+        )
+    }
+
     private func completeState() -> PersistedProductState {
         let itemID = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
         let sessionID = UUID(uuidString: "00000000-0000-0000-0000-000000000003")!

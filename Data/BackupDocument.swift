@@ -16,6 +16,220 @@ public enum BackupRecordKind: String, Equatable, Sendable {
     case session
     case attempt
     case memory
+    case source
+    case envelope
+}
+
+public enum BackupFormatV2Limits {
+    public static let encodedByteCount = 159_383_552
+    public static let sourceCount = 5_000
+    public static let envelopeCount = 256
+}
+
+public struct BackupSourceV2: Codable, Equatable, Sendable {
+    public let id: UUID
+    public let itemID: UUID
+    public let importEnvelopeID: UUID
+    public let acceptedURLString: String?
+    public let sourceKindRaw: String
+    public let capturedAtMilliseconds: Int64
+}
+
+public struct BackupRestorePayload: Equatable, Sendable {
+    public let state: PersistedProductState
+    public let pendingEnvelopes: [ShareCaptureEnvelopeV1]
+
+    public init(state: PersistedProductState, pendingEnvelopes: [ShareCaptureEnvelopeV1]) {
+        self.state = state
+        self.pendingEnvelopes = pendingEnvelopes
+    }
+}
+
+public struct BackupDocumentV2: Codable, Equatable, Sendable {
+    public static let formatVersion = 2
+    public static let canonicalizationVersion = 1
+
+    public let formatVersion: Int
+    public let canonicalizationVersion: Int
+    public let productV1CanonicalData: Data
+    public let sources: [BackupSourceV2]
+    public let pendingEnvelopes: [ShareCaptureEnvelopeV1]
+    public let checksumSHA256: String
+
+    fileprivate var checksumPayload: BackupChecksumPayloadV2 {
+        BackupChecksumPayloadV2(
+            formatVersion: formatVersion,
+            canonicalizationVersion: canonicalizationVersion,
+            productV1CanonicalData: productV1CanonicalData,
+            sources: sources,
+            pendingEnvelopes: pendingEnvelopes
+        )
+    }
+}
+
+public struct BackupDocumentCodecV2: Sendable {
+    public init() {}
+
+    public func encode(
+        state: PersistedProductState,
+        pendingEnvelopes: [ShareCaptureEnvelopeV1],
+        metadata: BackupDocumentMetadataV1
+    ) throws -> Data {
+        try PersistedStateValidator().validate(state)
+        try validateEnvelopeSet(pendingEnvelopes, state: state)
+        let productV1Data = try BackupDocumentCodecV1().encode(
+            state: PersistedProductState(
+                items: state.items,
+                currentPick: state.currentPick,
+                sessions: state.sessions,
+                attempts: state.attempts,
+                memories: state.memories
+            ),
+            metadata: metadata
+        )
+        let sources = try state.sources.map {
+            BackupSourceV2(
+                id: $0.id,
+                itemID: $0.itemID,
+                importEnvelopeID: $0.importEnvelopeID,
+                acceptedURLString: $0.acceptedURLString,
+                sourceKindRaw: $0.sourceKindRaw,
+                capturedAtMilliseconds: try milliseconds($0.capturedAt)
+            )
+        }.sorted { uuidLess($0.id, $1.id) }
+        let envelopes = pendingEnvelopes.sorted { uuidLess($0.envelopeID, $1.envelopeID) }
+        let payload = BackupChecksumPayloadV2(
+            formatVersion: BackupDocumentV2.formatVersion,
+            canonicalizationVersion: BackupDocumentV2.canonicalizationVersion,
+            productV1CanonicalData: productV1Data,
+            sources: sources,
+            pendingEnvelopes: envelopes
+        )
+        let document = BackupDocumentV2(
+            formatVersion: payload.formatVersion,
+            canonicalizationVersion: payload.canonicalizationVersion,
+            productV1CanonicalData: payload.productV1CanonicalData,
+            sources: payload.sources,
+            pendingEnvelopes: payload.pendingEnvelopes,
+            checksumSHA256: sha256Hex(try canonicalEncode(payload))
+        )
+        let data = try canonicalEncode(document)
+        guard data.count <= BackupFormatV2Limits.encodedByteCount else {
+            throw BackupDocumentError.encodedByteLimitExceeded(limit: BackupFormatV2Limits.encodedByteCount, actual: data.count)
+        }
+        _ = try decode(data)
+        return data
+    }
+
+    public func decode(_ data: Data) throws -> BackupRestorePayload {
+        guard !data.isEmpty else { throw BackupDocumentError.emptyDocument }
+        guard data.count <= BackupFormatV2Limits.encodedByteCount else {
+            throw BackupDocumentError.encodedByteLimitExceeded(limit: BackupFormatV2Limits.encodedByteCount, actual: data.count)
+        }
+        let probe: BackupFormatProbe
+        do { probe = try JSONDecoder().decode(BackupFormatProbe.self, from: data) }
+        catch { throw BackupDocumentError.malformedDocument }
+        if probe.formatVersion == BackupDocumentV1.formatVersion {
+            return BackupRestorePayload(state: try BackupDocumentCodecV1().decode(data), pendingEnvelopes: [])
+        }
+        guard probe.formatVersion == BackupDocumentV2.formatVersion else {
+            throw BackupDocumentError.unsupportedFormatVersion(probe.formatVersion)
+        }
+        let document: BackupDocumentV2
+        do { document = try JSONDecoder().decode(BackupDocumentV2.self, from: data) }
+        catch { throw BackupDocumentError.malformedDocument }
+        guard document.canonicalizationVersion == BackupDocumentV2.canonicalizationVersion else {
+            throw BackupDocumentError.unsupportedCanonicalizationVersion(document.canonicalizationVersion)
+        }
+        guard try canonicalEncode(document) == data else { throw BackupDocumentError.nonCanonicalEncoding }
+        guard document.checksumSHA256 == sha256Hex(try canonicalEncode(document.checksumPayload)) else {
+            throw BackupDocumentError.invalidChecksum
+        }
+        guard document.sources.count <= BackupFormatV2Limits.sourceCount else {
+            throw BackupDocumentError.countLimitExceeded(kind: .source, limit: BackupFormatV2Limits.sourceCount, actual: document.sources.count)
+        }
+        guard document.pendingEnvelopes.count <= BackupFormatV2Limits.envelopeCount else {
+            throw BackupDocumentError.countLimitExceeded(kind: .envelope, limit: BackupFormatV2Limits.envelopeCount, actual: document.pendingEnvelopes.count)
+        }
+        try validateOrdering(document.sources.map(\.id), kind: .source)
+        try validateOrdering(document.pendingEnvelopes.map(\.envelopeID), kind: .envelope)
+        var state = try BackupDocumentCodecV1().decode(document.productV1CanonicalData)
+        state.sources = document.sources.map {
+            SourceReference(
+                id: $0.id,
+                itemID: $0.itemID,
+                importEnvelopeID: $0.importEnvelopeID,
+                acceptedURLString: $0.acceptedURLString,
+                sourceKindRaw: $0.sourceKindRaw,
+                capturedAt: Date(timeIntervalSince1970: Double($0.capturedAtMilliseconds) / 1_000)
+            )
+        }
+        do { try PersistedStateValidator().validate(state) }
+        catch let issue as PersistedStateValidationIssue { throw BackupDocumentError.invalidPersistedState(issue) }
+        try validateEnvelopeSet(document.pendingEnvelopes, state: state)
+        return BackupRestorePayload(state: state, pendingEnvelopes: document.pendingEnvelopes)
+    }
+
+    private func validateEnvelopeSet(_ envelopes: [ShareCaptureEnvelopeV1], state: PersistedProductState) throws {
+        guard envelopes.count <= BackupFormatV2Limits.envelopeCount else {
+            throw BackupDocumentError.countLimitExceeded(kind: .envelope, limit: BackupFormatV2Limits.envelopeCount, actual: envelopes.count)
+        }
+        var ids = Set<UUID>()
+        let sourcesByEnvelope = Dictionary(uniqueKeysWithValues: state.sources.map { ($0.importEnvelopeID, $0) })
+        for envelope in envelopes {
+            guard ids.insert(envelope.envelopeID).inserted else {
+                throw BackupDocumentError.recordsNotInCanonicalOrder(kind: .envelope)
+            }
+            _ = try envelope.canonicalData()
+            if let source = sourcesByEnvelope[envelope.envelopeID] {
+                guard let item = state.items.first(where: { $0.id == source.itemID }),
+                      item.title == envelope.title,
+                      item.note == envelope.note,
+                      item.durationBucketRaw == envelope.durationBucketRaw,
+                      source.acceptedURLString == envelope.acceptedURLString,
+                      source.sourceKindRaw == envelope.sourceKindRaw
+                else { throw BackupDocumentError.invalidPersistedState(.invalidSource(id: source.id)) }
+            }
+        }
+    }
+
+    private func validateOrdering(_ ids: [UUID], kind: BackupRecordKind) throws {
+        guard zip(ids, ids.dropFirst()).allSatisfy({ uuidLess($0, $1) }) else {
+            throw BackupDocumentError.recordsNotInCanonicalOrder(kind: kind)
+        }
+    }
+
+    private func milliseconds(_ date: Date) throws -> Int64 {
+        let value = date.timeIntervalSince1970 * 1_000
+        guard value.isFinite, value >= Double(Int64.min), value < Double(Int64.max) else {
+            throw BackupDocumentError.invalidTimestamp
+        }
+        return Int64(value.rounded(.toNearestOrAwayFromZero))
+    }
+
+    private func canonicalEncode<Value: Encodable>(_ value: Value) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(value)
+    }
+
+    private func sha256Hex(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func uuidLess(_ lhs: UUID, _ rhs: UUID) -> Bool {
+        withUnsafeBytes(of: lhs.uuid) { lhsBytes in
+            withUnsafeBytes(of: rhs.uuid) { rhsBytes in lhsBytes.lexicographicallyPrecedes(rhsBytes) }
+        }
+    }
+}
+
+private struct BackupChecksumPayloadV2: Codable, Equatable {
+    let formatVersion: Int
+    let canonicalizationVersion: Int
+    let productV1CanonicalData: Data
+    let sources: [BackupSourceV2]
+    let pendingEnvelopes: [ShareCaptureEnvelopeV1]
 }
 
 public enum BackupDocumentError: Error, Equatable, Sendable {

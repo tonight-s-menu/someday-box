@@ -98,6 +98,19 @@ public actor GenerationProductRepository: ProductRepository {
         return state
     }
 
+    public func exportSnapshotWithParticipant<Output: Sendable>(
+        _ participant: @escaping @Sendable (PersistedProductState) async throws -> Output
+    ) async throws -> Output {
+        guard gateState == .idle else { throw GenerationRepositoryError.operationInProgress }
+        gateState = .exporting
+        defer { gateState = .idle }
+        let state = try await currentRepository.snapshot()
+        guard !state.attempts.contains(where: { $0.outcome == .unresolved }) else {
+            throw ApplicationError.drawResolutionRequired
+        }
+        return try await participant(state)
+    }
+
     public func withTransaction(
         _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
     ) async throws -> PersistedProductState {
@@ -107,12 +120,19 @@ public actor GenerationProductRepository: ProductRepository {
         return try await currentRepository.withTransaction(mutation)
     }
 
-    public func restore(validatedState: PersistedProductState) async throws -> PersistedProductState {
-        try await replaceAll(with: validatedState, kind: .restore)
+    public func restore(
+        validatedState: PersistedProductState,
+        targetGenerationID: UUID = UUID()
+    ) async throws -> PersistedProductState {
+        try await replaceAll(with: validatedState, kind: .restore, targetGenerationID: targetGenerationID)
     }
 
-    public func eraseAll() async throws -> PersistedProductState {
-        try await replaceAll(with: PersistedProductState(items: []), kind: .erase)
+    public func eraseAll(targetGenerationID: UUID = UUID()) async throws -> PersistedProductState {
+        try await replaceAll(
+            with: PersistedProductState(items: []),
+            kind: .erase,
+            targetGenerationID: targetGenerationID
+        )
     }
 
     public func activeGeneration() -> ActiveStoreGeneration {
@@ -121,7 +141,8 @@ public actor GenerationProductRepository: ProductRepository {
 
     private func replaceAll(
         with targetState: PersistedProductState,
-        kind: StoreGenerationOperationKind
+        kind: StoreGenerationOperationKind,
+        targetGenerationID: UUID
     ) async throws -> PersistedProductState {
         guard gateState == .idle else { throw GenerationRepositoryError.operationInProgress }
         gateState = .generationOperation
@@ -146,7 +167,7 @@ public actor GenerationProductRepository: ProductRepository {
 
         let priorGeneration = currentGeneration
         let newGeneration = ActiveStoreGeneration(
-            id: UUID(),
+            id: targetGenerationID,
             schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV2.versionIdentifier)
         )
         var journal = StoreGenerationOperationJournal(
@@ -236,13 +257,14 @@ public actor GenerationProductRepository: ProductRepository {
     }
 
     private static func productDigest(_ state: PersistedProductState) throws -> String {
-        let data = try BackupDocumentCodecV1().encode(
+        let data = try BackupDocumentCodecV2().encode(
             state: state,
+            pendingEnvelopes: [],
             metadata: BackupDocumentMetadataV1(
                 exportedAt: Date(timeIntervalSince1970: 0),
-                appMarketingVersion: "generation-digest-v1",
+                appMarketingVersion: "generation-digest-v2",
                 appBuild: "1",
-                schemaVersion: BackupSchemaVersionV1(major: 1, minor: 0, patch: 0),
+                schemaVersion: BackupSchemaVersionV1(major: 2, minor: 0, patch: 0),
                 selectionPolicyVersion: DrawSelectionPolicy.version
             )
         )

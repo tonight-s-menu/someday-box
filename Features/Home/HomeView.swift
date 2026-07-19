@@ -228,7 +228,7 @@ private struct SettingsView: View {
     @State private var exportedDocument: SomedayBoxBackupFile?
     @State private var presentsExporter = false
     @State private var presentsImporter = false
-    @State private var pendingRestore: PersistedProductState?
+    @State private var pendingRestore: BackupRestorePayload?
     @State private var confirmsRestore = false
     @State private var confirmsErase = false
     @State private var confirmsEraseAgain = false
@@ -265,8 +265,8 @@ private struct SettingsView: View {
                 Section {
                     settingsSectionTitle("About")
                     SettingsValueRow(label: "Storage", value: "On this device")
-                    SettingsValueRow(label: "Schema", value: "1.0.0")
-                    SettingsValueRow(label: "Backup format", value: "1")
+                    SettingsValueRow(label: "Schema", value: "2.0.0")
+                    SettingsValueRow(label: "Backup format", value: "2")
                     SettingsValueRow(label: "Draw policy", value: DrawSelectionPolicy.version)
                     SettingsValueRow(label: "Active papers", value: appModel.state.items.filter { $0.lifecycle == .active }.count.formatted())
                     SettingsValueRow(label: "Drawable papers", value: appModel.drawableCount.formatted())
@@ -325,7 +325,7 @@ private struct SettingsView: View {
                 Button("Cancel", role: .cancel) { pendingRestore = nil }
             } message: {
                 if let pendingRestore {
-                    Text("This backup contains \(pendingRestore.items.count) papers and \(pendingRestore.memories.count) memories. Your current Box will be replaced only after the restored data is verified.")
+                    Text("This backup contains \(pendingRestore.state.items.count) papers, \(pendingRestore.state.memories.count) memories, and \(pendingRestore.pendingEnvelopes.count) pending captures. Your current Box will be replaced only after the restored data is verified.")
                 }
             }
             .confirmationDialog(

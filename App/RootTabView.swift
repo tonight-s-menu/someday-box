@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct RootTabView: View {
     @Environment(AppModel.self) private var appModel
@@ -21,6 +22,8 @@ struct RootTabView: View {
                 }
             } else if appModel.unresolvedAttempt != nil {
                 DrawRevealGate()
+            } else if appModel.currentShareRecovery != nil {
+                SharedCaptureRecoveryView()
             } else if !appModel.hasSeenIntroduction {
                 IntroductionView()
             } else {
@@ -57,6 +60,164 @@ struct RootTabView: View {
             Text(appModel.errorMessage ?? "")
         }
     }
+}
+
+private struct SharedCaptureRecoveryView: View {
+    @Environment(AppModel.self) private var appModel
+    @State private var showsManagement = false
+    @State private var confirmsDiscard = false
+    @State private var rawDocument: RecoveryFileDocument?
+    @State private var exportsRaw = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Image(systemName: "shippingbox.and.arrow.backward")
+                        .font(.system(size: 48))
+                        .foregroundStyle(SomedayBoxBrand.tint)
+                        .accessibilityHidden(true)
+                    Text("Shared capture needs attention")
+                        .font(.largeTitle.bold())
+                        .accessibilityAddTraits(.isHeader)
+                    Text(recoveryDescription)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if appModel.shareRecoveryItems.count > 1 {
+                        Text("\(appModel.shareRecoveryItems.count) local captures are waiting. Handle this one first.")
+                            .font(.callout)
+                    }
+                    Button {
+                        Task { _ = await appModel.retryCurrentShareRecovery() }
+                    } label: {
+                        Label("Retry", systemImage: "arrow.clockwise")
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button {
+                        showsManagement = true
+                    } label: {
+                        Label("Manage Box", systemImage: "square.stack")
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                    }
+                    .buttonStyle(.bordered)
+
+                    if case .invalid = appModel.currentShareRecovery {
+                        Button {
+                            guard let data = appModel.currentRawRecoveryData() else { return }
+                            rawDocument = RecoveryFileDocument(data: data)
+                            exportsRaw = true
+                        } label: {
+                            Label("Export Raw Recovery File", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                        }
+                        .buttonStyle(.bordered)
+                        Text("If this capture came from a newer version, update someday-box before discarding it.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Button("Discard This Capture", role: .destructive) { confirmsDiscard = true }
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .padding(24)
+                .frame(maxWidth: 560)
+            }
+            .background(SomedayBoxBrand.canvas)
+            .navigationTitle("Shared Capture Recovery")
+            .sheet(isPresented: $showsManagement) { RecoveryBoxManagementView() }
+            .confirmationDialog("Discard this local capture?", isPresented: $confirmsDiscard, titleVisibility: .visible) {
+                Button("Discard This Capture", role: .destructive) {
+                    Task { _ = await appModel.discardCurrentShareRecovery() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This removes only this local capture. Papers and memories already in your Box stay unchanged.")
+            }
+            .fileExporter(
+                isPresented: $exportsRaw,
+                document: rawDocument,
+                contentType: .data,
+                defaultFilename: "someday-box-share-recovery"
+            ) { result in
+                if case let .failure(error) = result { appModel.report(error) }
+                rawDocument = nil
+            }
+        }
+    }
+
+    private var recoveryDescription: String {
+        switch appModel.currentShareRecovery {
+        case let .pending(entry, message):
+            "“\(entry.envelope.title)” is still stored locally, but it could not be added to the Box yet. \(message)"
+        case let .invalid(problem):
+            problem.kind == .unsupportedEnvelopeVersion
+                ? "This local capture was written by a newer format. It has not been added to the Box."
+                : "This local capture could not be validated. It has not been added to the Box."
+        case nil:
+            "The local capture is no longer waiting."
+        }
+    }
+}
+
+private struct RecoveryBoxManagementView: View {
+    @Environment(AppModel.self) private var appModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var backupDocument: RecoveryFileDocument?
+    @State private var exportsBackup = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Export a full backup or permanently remove papers to create safe local capacity. Drawing and capture stay unavailable here.")
+                        .foregroundStyle(.secondary)
+                    Button("Export backup", systemImage: "square.and.arrow.up") {
+                        Task {
+                            guard let data = await appModel.exportBackupData() else { return }
+                            backupDocument = RecoveryFileDocument(data: data)
+                            exportsBackup = true
+                        }
+                    }
+                }
+                Section("Papers") {
+                    ForEach(appModel.state.items.sorted { $0.createdAt > $1.createdAt }) { item in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(item.title)
+                                Text(item.durationLabel).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Delete", role: .destructive) {
+                                Task { _ = await appModel.delete(itemID: item.id) }
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Manage Box")
+            .toolbar { Button("Done") { dismiss() } }
+            .fileExporter(
+                isPresented: $exportsBackup,
+                document: backupDocument,
+                contentType: .json,
+                defaultFilename: "someday-box-backup"
+            ) { result in
+                if case let .failure(error) = result { appModel.report(error) }
+                backupDocument = nil
+            }
+        }
+    }
+}
+
+private struct RecoveryFileDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.data, .json] }
+    let data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
 }
 
 private struct IntroductionView: View {
