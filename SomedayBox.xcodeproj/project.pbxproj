@@ -10,7 +10,7 @@
 		A00000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* RootTabView.swift */; };
 		A00000000000000000000003 /* BoxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* BoxItem.swift */; };
 		A00000000000000000000004 /* DrawPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* DrawPolicy.swift */; };
-		A00000000000000000000005 /* CapturePaperUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000005 /* CapturePaperUseCase.swift */; };
+		A00000000000000000000005 /* ProductRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000005 /* ProductRepository.swift */; };
 		A00000000000000000000006 /* StoreGenerationConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* StoreGenerationConfiguration.swift */; };
 		A00000000000000000000007 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* HomeView.swift */; };
 		A00000000000000000000008 /* BoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008 /* BoxView.swift */; };
@@ -26,6 +26,16 @@
 		C00000000000000000000004 /* PersistedStateValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* PersistedStateValidator.swift */; };
 		C00000000000000000000005 /* DomainValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* DomainValidationTests.swift */; };
 		C00000000000000000000006 /* PersistedStateValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* PersistedStateValidatorTests.swift */; };
+		D00000000000000000000001 /* MutationArbiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000001 /* MutationArbiter.swift */; };
+		D00000000000000000000002 /* PaperUseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000002 /* PaperUseCases.swift */; };
+		D00000000000000000000003 /* DrawUseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000003 /* DrawUseCases.swift */; };
+		D00000000000000000000004 /* LifecycleUseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000004 /* LifecycleUseCases.swift */; };
+		D00000000000000000000005 /* SomedayBoxSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000005 /* SomedayBoxSchemaV1.swift */; };
+		D00000000000000000000006 /* StoreGenerationBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000006 /* StoreGenerationBootstrap.swift */; };
+		D00000000000000000000007 /* SwiftDataDomainMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000007 /* SwiftDataDomainMapping.swift */; };
+		D00000000000000000000008 /* SwiftDataProductRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000008 /* SwiftDataProductRepository.swift */; };
+		D00000000000000000000009 /* ApplicationUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000009 /* ApplicationUseCaseTests.swift */; };
+		D0000000000000000000000A /* SwiftDataPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1000000000000000000000A /* SwiftDataPersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +43,7 @@
 		A10000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		A10000000000000000000003 /* BoxItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxItem.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* DrawPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawPolicy.swift; sourceTree = "<group>"; };
-		A10000000000000000000005 /* CapturePaperUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePaperUseCase.swift; sourceTree = "<group>"; };
+		A10000000000000000000005 /* ProductRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductRepository.swift; sourceTree = "<group>"; };
 		A10000000000000000000006 /* StoreGenerationConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreGenerationConfiguration.swift; sourceTree = "<group>"; };
 		A10000000000000000000007 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A10000000000000000000008 /* BoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxView.swift; sourceTree = "<group>"; };
@@ -53,6 +63,16 @@
 		C10000000000000000000004 /* PersistedStateValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedStateValidator.swift; sourceTree = "<group>"; };
 		C10000000000000000000005 /* DomainValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainValidationTests.swift; sourceTree = "<group>"; };
 		C10000000000000000000006 /* PersistedStateValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedStateValidatorTests.swift; sourceTree = "<group>"; };
+		D10000000000000000000001 /* MutationArbiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutationArbiter.swift; sourceTree = "<group>"; };
+		D10000000000000000000002 /* PaperUseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperUseCases.swift; sourceTree = "<group>"; };
+		D10000000000000000000003 /* DrawUseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawUseCases.swift; sourceTree = "<group>"; };
+		D10000000000000000000004 /* LifecycleUseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifecycleUseCases.swift; sourceTree = "<group>"; };
+		D10000000000000000000005 /* SomedayBoxSchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SomedayBoxSchemaV1.swift; sourceTree = "<group>"; };
+		D10000000000000000000006 /* StoreGenerationBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreGenerationBootstrap.swift; sourceTree = "<group>"; };
+		D10000000000000000000007 /* SwiftDataDomainMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataDomainMapping.swift; sourceTree = "<group>"; };
+		D10000000000000000000008 /* SwiftDataProductRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataProductRepository.swift; sourceTree = "<group>"; };
+		D10000000000000000000009 /* ApplicationUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationUseCaseTests.swift; sourceTree = "<group>"; };
+		D1000000000000000000000A /* SwiftDataPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataPersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,12 +87,12 @@
 		); sourceTree = "<group>"; };
 		A30000000000000000000002 /* App */ = {isa = PBXGroup; children = (A10000000000000000000001, A10000000000000000000002); path = App; sourceTree = "<group>"; };
 		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004, C10000000000000000000001, C10000000000000000000002, C10000000000000000000003, C10000000000000000000004); path = Domain; sourceTree = "<group>"; };
-		A30000000000000000000004 /* Application */ = {isa = PBXGroup; children = (A10000000000000000000005); path = Application; sourceTree = "<group>"; };
-		A30000000000000000000005 /* Data */ = {isa = PBXGroup; children = (A10000000000000000000006); path = Data; sourceTree = "<group>"; };
+		A30000000000000000000004 /* Application */ = {isa = PBXGroup; children = (A10000000000000000000005, D10000000000000000000001, D10000000000000000000002, D10000000000000000000003, D10000000000000000000004); path = Application; sourceTree = "<group>"; };
+		A30000000000000000000005 /* Data */ = {isa = PBXGroup; children = (A10000000000000000000006, D10000000000000000000005, D10000000000000000000006, D10000000000000000000007, D10000000000000000000008); path = Data; sourceTree = "<group>"; };
 		A30000000000000000000006 /* Features */ = {isa = PBXGroup; children = (A3000000000000000000000C, A3000000000000000000000D, A3000000000000000000000E); path = Features; sourceTree = "<group>"; };
 		A30000000000000000000007 /* DesignSystem */ = {isa = PBXGroup; children = (A1000000000000000000000A); path = DesignSystem; sourceTree = "<group>"; };
 		A30000000000000000000008 /* Resources */ = {isa = PBXGroup; children = (A1000000000000000000000B, A1000000000000000000000C); path = Resources; sourceTree = "<group>"; };
-		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E, C10000000000000000000005, C10000000000000000000006); path = SomedayBoxTests; sourceTree = "<group>"; };
+		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E, C10000000000000000000005, C10000000000000000000006, D10000000000000000000009, D1000000000000000000000A); path = SomedayBoxTests; sourceTree = "<group>"; };
 		A3000000000000000000000A /* SomedayBoxUITests */ = {isa = PBXGroup; children = (A1000000000000000000000F); path = SomedayBoxUITests; sourceTree = "<group>"; };
 		A3000000000000000000000B /* Products */ = {isa = PBXGroup; children = (A10000000000000000000010, A10000000000000000000011, A10000000000000000000012); name = Products; sourceTree = "<group>"; };
 		A3000000000000000000000C /* Home */ = {isa = PBXGroup; children = (A10000000000000000000007); path = Home; sourceTree = "<group>"; };
@@ -95,8 +115,8 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, C00000000000000000000001, C00000000000000000000002, C00000000000000000000003, C00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
-		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D, C00000000000000000000005, C00000000000000000000006); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, C00000000000000000000001, C00000000000000000000002, C00000000000000000000003, C00000000000000000000004, A00000000000000000000005, D00000000000000000000001, D00000000000000000000002, D00000000000000000000003, D00000000000000000000004, A00000000000000000000006, D00000000000000000000005, D00000000000000000000006, D00000000000000000000007, D00000000000000000000008, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D, C00000000000000000000005, C00000000000000000000006, D00000000000000000000009, D0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
 		A60000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000E); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
