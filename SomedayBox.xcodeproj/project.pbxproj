@@ -42,6 +42,13 @@
 		F00000000000000000000002 /* StoreGenerationOperationJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000002 /* StoreGenerationOperationJournal.swift */; };
 		F00000000000000000000003 /* GenerationProductRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000003 /* GenerationProductRepositoryTests.swift */; };
 		G00000000000000000000001 /* BackupFileReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = G10000000000000000000001 /* BackupFileReader.swift */; };
+		H00000000000000000000001 /* SharePayloadExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000001 /* SharePayloadExtraction.swift */; };
+		H00000000000000000000002 /* SharePayloadExtractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000002 /* SharePayloadExtractionTests.swift */; };
+		H00000000000000000000003 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000003 /* ShareViewController.swift */; };
+		H00000000000000000000004 /* BoxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* BoxItem.swift */; };
+		H00000000000000000000005 /* ContentValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* ContentValidation.swift */; };
+		H00000000000000000000006 /* SharePayloadExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000001 /* SharePayloadExtraction.swift */; };
+		H00000000000000000000007 /* ShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = H10000000000000000000006 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,41 +93,54 @@
 		F10000000000000000000003 /* GenerationProductRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationProductRepositoryTests.swift; sourceTree = "<group>"; };
 		G10000000000000000000001 /* BackupFileReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileReader.swift; sourceTree = "<group>"; };
 		G10000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		H10000000000000000000001 /* SharePayloadExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePayloadExtraction.swift; sourceTree = "<group>"; };
+		H10000000000000000000002 /* SharePayloadExtractionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePayloadExtractionTests.swift; sourceTree = "<group>"; };
+		H10000000000000000000003 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		H10000000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		H10000000000000000000005 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		H10000000000000000000006 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A20000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		A20000000000000000000002 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		A20000000000000000000003 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		H20000000000000000000002 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		H20000000000000000000001 /* Embed App Extensions */ = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = ""; dstSubfolderSpec = 13; files = (H00000000000000000000007 /* ShareExtension.appex in Embed App Extensions */, ); name = "Embed App Extensions"; runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
 		A30000000000000000000001 = {isa = PBXGroup; children = (
-			A30000000000000000000002 /* App */, A30000000000000000000003 /* Domain */, A30000000000000000000004 /* Application */, A30000000000000000000005 /* Data */, A30000000000000000000006 /* Features */, A30000000000000000000007 /* DesignSystem */, A30000000000000000000008 /* Resources */, A30000000000000000000009 /* SomedayBoxTests */, A3000000000000000000000A /* SomedayBoxUITests */, A1000000000000000000000D /* SomedayBox.entitlements */, A3000000000000000000000B /* Products */
+			A30000000000000000000002 /* App */, A30000000000000000000003 /* Domain */, A30000000000000000000004 /* Application */, A30000000000000000000005 /* Data */, A30000000000000000000006 /* Features */, A30000000000000000000007 /* DesignSystem */, A30000000000000000000008 /* Resources */, A30000000000000000000009 /* SomedayBoxTests */, A3000000000000000000000A /* SomedayBoxUITests */, H30000000000000000000001 /* ShareExtension */, A1000000000000000000000D /* SomedayBox.entitlements */, A3000000000000000000000B /* Products */
 		); sourceTree = "<group>"; };
 		A30000000000000000000002 /* App */ = {isa = PBXGroup; children = (A10000000000000000000001, A10000000000000000000002); path = App; sourceTree = "<group>"; };
-		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004, C10000000000000000000001, C10000000000000000000002, C10000000000000000000003, C10000000000000000000004); path = Domain; sourceTree = "<group>"; };
+		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004, C10000000000000000000001, C10000000000000000000002, C10000000000000000000003, C10000000000000000000004, H10000000000000000000001); path = Domain; sourceTree = "<group>"; };
 		A30000000000000000000004 /* Application */ = {isa = PBXGroup; children = (A10000000000000000000005, D10000000000000000000001, D10000000000000000000002, D10000000000000000000003, D10000000000000000000004); path = Application; sourceTree = "<group>"; };
 		A30000000000000000000005 /* Data */ = {isa = PBXGroup; children = (A10000000000000000000006, D10000000000000000000005, D10000000000000000000006, D10000000000000000000007, D10000000000000000000008, E10000000000000000000001, G10000000000000000000001, F10000000000000000000001, F10000000000000000000002); path = Data; sourceTree = "<group>"; };
 		A30000000000000000000006 /* Features */ = {isa = PBXGroup; children = (A3000000000000000000000C, A3000000000000000000000D, A3000000000000000000000E); path = Features; sourceTree = "<group>"; };
 		A30000000000000000000007 /* DesignSystem */ = {isa = PBXGroup; children = (A1000000000000000000000A); path = DesignSystem; sourceTree = "<group>"; };
 		A30000000000000000000008 /* Resources */ = {isa = PBXGroup; children = (G10000000000000000000002, A1000000000000000000000B, A1000000000000000000000C); path = Resources; sourceTree = "<group>"; };
-		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E, C10000000000000000000005, C10000000000000000000006, D10000000000000000000009, D1000000000000000000000A, E10000000000000000000002, F10000000000000000000003); path = SomedayBoxTests; sourceTree = "<group>"; };
+		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E, C10000000000000000000005, C10000000000000000000006, D10000000000000000000009, D1000000000000000000000A, E10000000000000000000002, F10000000000000000000003, H10000000000000000000002); path = SomedayBoxTests; sourceTree = "<group>"; };
 		A3000000000000000000000A /* SomedayBoxUITests */ = {isa = PBXGroup; children = (A1000000000000000000000F); path = SomedayBoxUITests; sourceTree = "<group>"; };
-		A3000000000000000000000B /* Products */ = {isa = PBXGroup; children = (A10000000000000000000010, A10000000000000000000011, A10000000000000000000012); name = Products; sourceTree = "<group>"; };
+		A3000000000000000000000B /* Products */ = {isa = PBXGroup; children = (A10000000000000000000010, A10000000000000000000011, A10000000000000000000012, H10000000000000000000006); name = Products; sourceTree = "<group>"; };
+		H30000000000000000000001 /* ShareExtension */ = {isa = PBXGroup; children = (H10000000000000000000003, H10000000000000000000004, H10000000000000000000005); path = ShareExtension; sourceTree = "<group>"; };
 		A3000000000000000000000C /* Home */ = {isa = PBXGroup; children = (A10000000000000000000007); path = Home; sourceTree = "<group>"; };
 		A3000000000000000000000D /* Box */ = {isa = PBXGroup; children = (A10000000000000000000008); path = Box; sourceTree = "<group>"; };
 		A3000000000000000000000E /* Memories */ = {isa = PBXGroup; children = (A10000000000000000000009); path = Memories; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A40000000000000000000001 /* SomedayBox */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000002 /* Build configuration list for PBXNativeTarget "SomedayBox" */; buildPhases = (A60000000000000000000001 /* Sources */, A20000000000000000000001 /* Frameworks */, A70000000000000000000001 /* Resources */); buildRules = (); dependencies = (); name = SomedayBox; productName = SomedayBox; productReference = A10000000000000000000010 /* SomedayBox.app */; productType = "com.apple.product-type.application"; };
+		A40000000000000000000001 /* SomedayBox */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000002 /* Build configuration list for PBXNativeTarget "SomedayBox" */; buildPhases = (A60000000000000000000001 /* Sources */, A20000000000000000000001 /* Frameworks */, A70000000000000000000001 /* Resources */, H20000000000000000000001 /* Embed App Extensions */); buildRules = (); dependencies = (H80000000000000000000001 /* PBXTargetDependency */, ); name = SomedayBox; productName = SomedayBox; productReference = A10000000000000000000010 /* SomedayBox.app */; productType = "com.apple.product-type.application"; };
 		A40000000000000000000002 /* SomedayBoxTests */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000003 /* Build configuration list for PBXNativeTarget "SomedayBoxTests" */; buildPhases = (A60000000000000000000002 /* Sources */, A20000000000000000000002 /* Frameworks */); buildRules = (); dependencies = (A80000000000000000000001 /* PBXTargetDependency */); name = SomedayBoxTests; productName = SomedayBoxTests; productReference = A10000000000000000000011 /* SomedayBoxTests.xctest */; productType = "com.apple.product-type.bundle.unit-test"; };
 		A40000000000000000000003 /* SomedayBoxUITests */ = {isa = PBXNativeTarget; buildConfigurationList = A50000000000000000000004 /* Build configuration list for PBXNativeTarget "SomedayBoxUITests" */; buildPhases = (A60000000000000000000003 /* Sources */, A20000000000000000000003 /* Frameworks */); buildRules = (); dependencies = (A80000000000000000000002 /* PBXTargetDependency */); name = SomedayBoxUITests; productName = SomedayBoxUITests; productReference = A10000000000000000000012 /* SomedayBoxUITests.xctest */; productType = "com.apple.product-type.bundle.ui-testing"; };
+		H40000000000000000000001 /* ShareExtension */ = {isa = PBXNativeTarget; buildConfigurationList = H50000000000000000000001 /* Build configuration list for PBXNativeTarget "ShareExtension" */; buildPhases = (H60000000000000000000001 /* Sources */, H20000000000000000000002 /* Frameworks */); buildRules = (); dependencies = (); name = ShareExtension; productName = ShareExtension; productReference = H10000000000000000000006 /* ShareExtension.appex */; productType = "com.apple.product-type.app-extension"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A90000000000000000000001 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = { A40000000000000000000001 = { CreatedOnToolsVersion = 26.0; }; A40000000000000000000002 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; A40000000000000000000003 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; }; }; buildConfigurationList = A50000000000000000000001 /* Build configuration list for PBXProject "SomedayBox" */; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, "zh-Hans"); mainGroup = A30000000000000000000001; productRefGroup = A3000000000000000000000B /* Products */; projectDirPath = ""; projectRoot = ""; targets = (A40000000000000000000001, A40000000000000000000002, A40000000000000000000003); };
+		A90000000000000000000001 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = { A40000000000000000000001 = { CreatedOnToolsVersion = 26.0; }; A40000000000000000000002 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; A40000000000000000000003 = { CreatedOnToolsVersion = 26.0; TestTargetID = A40000000000000000000001; }; H40000000000000000000001 = { CreatedOnToolsVersion = 26.0; }; }; }; buildConfigurationList = A50000000000000000000001 /* Build configuration list for PBXProject "SomedayBox" */; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, "zh-Hans"); mainGroup = A30000000000000000000001; productRefGroup = A3000000000000000000000B /* Products */; projectDirPath = ""; projectRoot = ""; targets = (A40000000000000000000001, A40000000000000000000002, A40000000000000000000003, H40000000000000000000001); };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -128,19 +148,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, C00000000000000000000001, C00000000000000000000002, C00000000000000000000003, C00000000000000000000004, A00000000000000000000005, D00000000000000000000001, D00000000000000000000002, D00000000000000000000003, D00000000000000000000004, A00000000000000000000006, D00000000000000000000005, D00000000000000000000006, D00000000000000000000007, D00000000000000000000008, E00000000000000000000001, G00000000000000000000001, F00000000000000000000001, F00000000000000000000002, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
-		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D, C00000000000000000000005, C00000000000000000000006, D00000000000000000000009, D0000000000000000000000A, E00000000000000000000002, F00000000000000000000003); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, H00000000000000000000001, C00000000000000000000001, C00000000000000000000002, C00000000000000000000003, C00000000000000000000004, A00000000000000000000005, D00000000000000000000001, D00000000000000000000002, D00000000000000000000003, D00000000000000000000004, A00000000000000000000006, D00000000000000000000005, D00000000000000000000006, D00000000000000000000007, D00000000000000000000008, E00000000000000000000001, G00000000000000000000001, F00000000000000000000001, F00000000000000000000002, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D, C00000000000000000000005, C00000000000000000000006, D00000000000000000000009, D0000000000000000000000A, E00000000000000000000002, F00000000000000000000003, H00000000000000000000002); runOnlyForDeploymentPostprocessing = 0; };
 		A60000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000E); runOnlyForDeploymentPostprocessing = 0; };
+		H60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (H00000000000000000000003, H00000000000000000000004, H00000000000000000000005, H00000000000000000000006); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		A80000000000000000000001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = A40000000000000000000001 /* SomedayBox */; targetProxy = A80000000000000000000003 /* PBXContainerItemProxy */; };
 		A80000000000000000000002 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = A40000000000000000000001 /* SomedayBox */; targetProxy = A80000000000000000000004 /* PBXContainerItemProxy */; };
+		H80000000000000000000001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = H40000000000000000000001 /* ShareExtension */; targetProxy = H80000000000000000000002 /* PBXContainerItemProxy */; };
 /* End PBXTargetDependency section */
 
 /* Begin PBXContainerItemProxy section */
 		A80000000000000000000003 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A90000000000000000000001 /* Project object */; proxyType = 1; remoteGlobalIDString = A40000000000000000000001; remoteInfo = SomedayBox; };
 		A80000000000000000000004 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A90000000000000000000001 /* Project object */; proxyType = 1; remoteGlobalIDString = A40000000000000000000001; remoteInfo = SomedayBox; };
+		H80000000000000000000002 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A90000000000000000000001 /* Project object */; proxyType = 1; remoteGlobalIDString = H40000000000000000000001; remoteInfo = ShareExtension; };
 /* End PBXContainerItemProxy section */
 
 /* Begin XCBuildConfiguration section */
@@ -152,6 +175,8 @@
 		B00000000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SomedayBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SomedayBox"; }; name = Release; };
 		B00000000000000000000007 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = SomedayBox; }; name = Debug; };
 		B00000000000000000000008 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = SomedayBox; }; name = Release; };
+		H90000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = ShareExtension/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.share; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		H90000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = ShareExtension/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.share; PRODUCT_NAME = "$(TARGET_NAME)"; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -159,6 +184,7 @@
 		A50000000000000000000002 /* Build configuration list for PBXNativeTarget "SomedayBox" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000003, B00000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		A50000000000000000000003 /* Build configuration list for PBXNativeTarget "SomedayBoxTests" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000005, B00000000000000000000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		A50000000000000000000004 /* Build configuration list for PBXNativeTarget "SomedayBoxUITests" */ = {isa = XCConfigurationList; buildConfigurations = (B00000000000000000000007, B00000000000000000000008); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		H50000000000000000000001 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {isa = XCConfigurationList; buildConfigurations = (H90000000000000000000001, H90000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 	};
 	rootObject = A90000000000000000000001 /* Project object */;
