@@ -20,6 +20,10 @@ public struct CompletePaperUseCase: Sendable {
         let memoryID = makeID()
         _ = try await arbiter.perform(.complete) { state in
             let itemIndex = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
+            try ApplicationDomainRules.requireCapacity(
+                for: .completionMemories,
+                currentCount: state.memories.count
+            )
             try ApplicationDomainRules.transition(&state.items[itemIndex], applying: .complete)
             state.items[itemIndex].completedAt = timestamp
             state.items[itemIndex].updatedAt = timestamp

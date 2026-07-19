@@ -64,6 +64,15 @@ public struct StartDrawUseCase: Sendable {
                 throw ApplicationError.emptyPool(.noActivePapers)
             }
 
+            try ApplicationDomainRules.requireCapacity(
+                for: .drawSessions,
+                currentCount: state.sessions.count
+            )
+            try ApplicationDomainRules.requireCapacity(
+                for: .drawAttempts,
+                currentCount: state.attempts.count
+            )
+
             state.sessions.append(
                 DrawSession(id: sessionID, startedAt: timestamp, availableTime: availableTime)
             )
@@ -130,10 +139,9 @@ public struct RedrawUseCase: Sendable {
                 shownItemIDs: shownItemIDs
             )
 
-            state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
-            state.attempts[unresolvedIndex].resolvedAt = timestamp
-
             guard case let .candidates(candidates) = pool else {
+                state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
+                state.attempts[unresolvedIndex].resolvedAt = timestamp
                 state.sessions[sessionIndex].endedAt = timestamp
                 return
             }
@@ -145,9 +153,17 @@ public struct RedrawUseCase: Sendable {
                 now: timestamp,
                 using: &generator
             ) else {
+                state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
+                state.attempts[unresolvedIndex].resolvedAt = timestamp
                 state.sessions[sessionIndex].endedAt = timestamp
                 return
             }
+            try ApplicationDomainRules.requireCapacity(
+                for: .drawAttempts,
+                currentCount: state.attempts.count
+            )
+            state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
+            state.attempts[unresolvedIndex].resolvedAt = timestamp
             state.attempts.append(
                 DrawAttempt(
                     id: nextAttemptID,

@@ -6,6 +6,60 @@ public enum DomainLimits {
     public static let noteCharacterCount = 1_000
     public static let noteUTF8ByteCount = 4_096
     public static let openRawValueUTF8ByteCount = 64
+    public static let boxItemCount = 5_000
+    public static let completionMemoryCount = 5_000
+    public static let drawSessionCount = 10_000
+    public static let drawAttemptCount = 50_000
+}
+
+public enum StoreCapacityResource: String, Equatable, Sendable {
+    case boxItems
+    case completionMemories
+    case drawSessions
+    case drawAttempts
+
+    public var countLimit: Int {
+        switch self {
+        case .boxItems: DomainLimits.boxItemCount
+        case .completionMemories: DomainLimits.completionMemoryCount
+        case .drawSessions: DomainLimits.drawSessionCount
+        case .drawAttempts: DomainLimits.drawAttemptCount
+        }
+    }
+}
+
+public struct StoreCountCapacityViolation: Error, Equatable, Sendable {
+    public let resource: StoreCapacityResource
+    public let limit: Int
+    public let projectedCount: Int
+
+    public init(resource: StoreCapacityResource, limit: Int, projectedCount: Int) {
+        self.resource = resource
+        self.limit = limit
+        self.projectedCount = projectedCount
+    }
+}
+
+/// Enforces the format-v1 record-count envelope for growing mutations.
+/// Canonical backup byte headroom is a separate contract and is not implemented here.
+public struct StoreCountCapacityPolicy: Sendable {
+    public init() {}
+
+    public func requireCapacity(
+        for resource: StoreCapacityResource,
+        currentCount: Int,
+        adding additionalCount: Int = 1
+    ) throws {
+        precondition(currentCount >= 0 && additionalCount >= 0)
+        let (projectedCount, overflowed) = currentCount.addingReportingOverflow(additionalCount)
+        guard !overflowed, projectedCount <= resource.countLimit else {
+            throw StoreCountCapacityViolation(
+                resource: resource,
+                limit: resource.countLimit,
+                projectedCount: overflowed ? .max : projectedCount
+            )
+        }
+    }
 }
 
 public enum TextValidationFailure: Error, Equatable, Sendable {

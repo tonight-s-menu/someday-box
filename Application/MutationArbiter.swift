@@ -41,6 +41,25 @@ public struct MutationArbiter: Sendable {
 }
 
 enum ApplicationDomainRules {
+    static func requireCapacity(
+        for resource: StoreCapacityResource,
+        currentCount: Int,
+        adding additionalCount: Int = 1
+    ) throws {
+        do {
+            try StoreCountCapacityPolicy().requireCapacity(
+                for: resource,
+                currentCount: currentCount,
+                adding: additionalCount
+            )
+        } catch let violation as StoreCountCapacityViolation {
+            throw ApplicationError.capacityExceeded(
+                resource: violation.resource,
+                limit: violation.limit
+            )
+        }
+    }
+
     static func validatedContent(title: String, note: String?) throws -> ValidatedPaperContent {
         do {
             return try PaperContentValidator().validate(title: title, note: note)

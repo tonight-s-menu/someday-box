@@ -21,6 +21,41 @@ final class ApplicationUseCaseTests: XCTestCase {
         XCTAssertEqual(state.items.first?.title, "Read outside")
     }
 
+    func testCaptureAllowsExactItemLimitThenRejectsGrowthWithoutMutation() async throws {
+        let items = (0..<(DomainLimits.boxItemCount - 1)).map { index in
+            item(title: "Paper \(index)")
+        }
+        let repository = InMemoryProductRepository(state: PersistedProductState(items: items))
+        let useCase = CapturePaperUseCase(
+            arbiter: MutationArbiter(repository: repository),
+            clock: FixedClock(value: now)
+        )
+
+        _ = try await useCase.execute(
+            title: "Last paper",
+            note: nil,
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue
+        )
+        let atLimit = try await repository.snapshot()
+        XCTAssertEqual(atLimit.items.count, DomainLimits.boxItemCount)
+
+        do {
+            _ = try await useCase.execute(
+                title: "One too many",
+                note: nil,
+                durationBucketRaw: DurationBucket.upTo30Minutes.rawValue
+            )
+            XCTFail("Capture should reject item growth above format-v1.")
+        } catch {
+            XCTAssertEqual(
+                error as? ApplicationError,
+                .capacityExceeded(resource: .boxItems, limit: DomainLimits.boxItemCount)
+            )
+        }
+        let afterRejectedCapture = try await repository.snapshot()
+        XCTAssertEqual(afterRejectedCapture, atLimit)
+    }
+
     func testUnresolvedGateTakesPriorityOverCaptureAndEditValidation() async throws {
         let fixture = unresolvedFixture(items: [item()])
         let repository = InMemoryProductRepository(state: fixture)
@@ -129,6 +164,74 @@ final class ApplicationUseCaseTests: XCTestCase {
         XCTAssertEqual(state.memories.first?.titleSnapshot, source.title)
         XCTAssertEqual(state.memories.first?.completedAt, now.addingTimeInterval(-1))
         XCTAssertEqual(state.items.first?.completedAt, state.memories.first?.completedAt)
+    }
+
+    func testCompletionAtMemoryLimitLeavesLifecycleAndMemoriesUnchanged() async throws {
+        let source = item()
+        let memories = (0..<DomainLimits.completionMemoryCount).map { _ in
+            CompletionMemory(
+                sourceItemID: source.id,
+                titleSnapshot: source.title,
+                durationSnapshotRaw: source.durationBucketRaw,
+                completedAt: now
+            )
+        }
+        let original = PersistedProductState(items: [source], memories: memories)
+        let repository = InMemoryProductRepository(state: original)
+
+        do {
+            try await CompletePaperUseCase(
+                arbiter: MutationArbiter(repository: repository),
+                clock: FixedClock(value: now)
+            ).execute(itemID: source.id)
+            XCTFail("Completion should reject Memory growth above format-v1.")
+        } catch {
+            XCTAssertEqual(
+                error as? ApplicationError,
+                .capacityExceeded(resource: .completionMemories, limit: DomainLimits.completionMemoryCount)
+            )
+        }
+        let afterRejectedCompletion = try await repository.snapshot()
+        XCTAssertEqual(afterRejectedCompletion, original)
+    }
+
+    func testStartDrawCompactsEndedJournalBeforeProjectedCountChecks() async throws {
+        let source = item()
+        var sessions: [DrawSession] = []
+        var attempts: [DrawAttempt] = []
+        for offset in 0...DrawJournalCompactionPolicy.maximumEndedSessionCount {
+            let endedAt = now.addingTimeInterval(TimeInterval(offset))
+            let session = DrawSession(startedAt: endedAt, endedAt: endedAt, availableTime: .upTo30Minutes)
+            sessions.append(session)
+            attempts.append(
+                DrawAttempt(
+                    sessionID: session.id,
+                    sequence: 1,
+                    itemID: source.id,
+                    eligibleCount: 1,
+                    shownAt: endedAt,
+                    outcome: .dismissed,
+                    resolvedAt: endedAt
+                )
+            )
+        }
+        let repository = InMemoryProductRepository(
+            state: PersistedProductState(items: [source], sessions: sessions, attempts: attempts)
+        )
+
+        _ = try await StartDrawUseCase(
+            arbiter: MutationArbiter(repository: repository),
+            clock: FixedClock(value: now.addingTimeInterval(10_000)),
+            randomUnitInterval: { 0 }
+        ).execute(availableTime: .upTo30Minutes)
+
+        let state = try await repository.snapshot()
+        XCTAssertEqual(
+            state.sessions.count,
+            DrawJournalCompactionPolicy.maximumEndedSessionCount + 1
+        )
+        XCTAssertEqual(state.attempts.count, DrawJournalCompactionPolicy.maximumEndedSessionCount + 1)
+        XCTAssertEqual(state.sessions.filter { $0.endedAt == nil }.count, 1)
     }
 
     func testDeleteRemovesEveryWholeSessionContainingThePaper() async throws {

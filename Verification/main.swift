@@ -61,7 +61,37 @@ struct DomainVerification {
         reservedItem.lastShownAt = now
         let state = PersistedProductState(items: [reservedItem], sessions: [session], attempts: [attempt])
         try! PersistedStateValidator().validate(state)
+
+        verifyStoreCountCapacityBoundaries()
         print("Domain verification passed.")
+    }
+
+    private static func verifyStoreCountCapacityBoundaries() {
+        let policy = StoreCountCapacityPolicy()
+        let expectedLimits: [(StoreCapacityResource, Int)] = [
+            (.boxItems, 5_000),
+            (.completionMemories, 5_000),
+            (.drawSessions, 10_000),
+            (.drawAttempts, 50_000),
+        ]
+        for (resource, expectedLimit) in expectedLimits {
+            precondition(resource.countLimit == expectedLimit, "A format-v1 count limit drifted.")
+            try! policy.requireCapacity(
+                for: resource,
+                currentCount: expectedLimit - 1,
+                adding: 1
+            )
+            do {
+                try policy.requireCapacity(for: resource, currentCount: expectedLimit, adding: 1)
+                preconditionFailure("A growing mutation exceeded a format-v1 count limit.")
+            } catch let violation as StoreCountCapacityViolation {
+                precondition(violation.resource == resource)
+                precondition(violation.limit == expectedLimit)
+                precondition(violation.projectedCount == expectedLimit + 1)
+            } catch {
+                preconditionFailure("Count capacity returned an unexpected error.")
+            }
+        }
     }
 
     private static func item(duration: DurationBucket, now: Date) -> BoxItem {

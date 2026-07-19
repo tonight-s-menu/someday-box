@@ -44,4 +44,5 @@ public enum ApplicationError: Error, Equatable, Sendable {
     case invalidLifecycle(LifecycleTransitionFailure)
     case emptyPool(EmptyPoolReason)
     case invalidPersistedState(PersistedStateValidationIssue)
+    case capacityExceeded(resource: StoreCapacityResource, limit: Int)
 }

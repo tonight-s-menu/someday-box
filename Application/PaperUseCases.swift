@@ -22,6 +22,10 @@ public struct CapturePaperUseCase: Sendable {
         _ = try await arbiter.perform(.capture) { state in
             let content = try ApplicationDomainRules.validatedContent(title: title, note: note)
             try ApplicationDomainRules.requireSupportedDuration(durationBucketRaw)
+            try ApplicationDomainRules.requireCapacity(
+                for: .boxItems,
+                currentCount: state.items.count
+            )
             state.items.append(
                 BoxItem(
                     id: id,
