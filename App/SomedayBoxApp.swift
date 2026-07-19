@@ -4,49 +4,57 @@ import SwiftUI
 @main
 struct SomedayBoxApp: App {
     @State private var appModel: AppModel?
-    private let startupError: String?
-
-    init() {
-        do {
-            _appModel = State(initialValue: try AppComposition.make())
-            startupError = nil
-        } catch {
-            _appModel = State(initialValue: nil)
-            startupError = String(localized: "We couldn't open your Box. Your data was not changed.")
-        }
-    }
+    @State private var startupError: String?
 
     var body: some Scene {
         WindowGroup {
-            if let appModel {
-                RootTabView()
-                    .environment(appModel)
-                    .tint(SomedayBoxBrand.tint)
-            } else {
-                ContentUnavailableView(
-                    "Your Box needs attention",
-                    systemImage: "externaldrive.badge.exclamationmark",
-                    description: Text(startupError ?? String(localized: "Your data was not changed."))
-                )
+            Group {
+                if let appModel {
+                    RootTabView()
+                        .environment(appModel)
+                        .tint(SomedayBoxBrand.tint)
+                } else if let startupError {
+                    ContentUnavailableView {
+                        Label("Your Box needs attention", systemImage: "externaldrive.badge.exclamationmark")
+                    } description: {
+                        Text(startupError)
+                    } actions: {
+                        Button("Try again") { Task { await start() } }
+                            .buttonStyle(.borderedProminent)
+                    }
+                } else {
+                    ProgressView("Opening your Box…")
+                        .accessibilityLabel("Opening your Box")
+                }
             }
+            .task { await start() }
+        }
+    }
+
+    @MainActor
+    private func start() async {
+        guard appModel == nil else { return }
+        startupError = nil
+        do {
+            appModel = try await AppComposition.make()
+        } catch {
+            startupError = String(localized: "We couldn't open your Box. Your data was not changed.")
         }
     }
 }
 
 @MainActor
 enum AppComposition {
-    static func make() throws -> AppModel {
+    static func make() async throws -> AppModel {
         let supportRoot = try FileManager.default.url(
             for: .applicationSupportDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
         ).appendingPathComponent("SomedayBox", isDirectory: true)
-        let bootstrap = StoreGenerationBootstrap(
+        let repository = try await GenerationProductRepository.open(
             configuration: StoreGenerationConfiguration(applicationSupportURL: supportRoot)
         )
-        let opened = try bootstrap.openOrCreateContainer()
-        let repository = SwiftDataProductRepository(container: opened.container)
         return AppModel(repository: repository)
     }
 }
@@ -54,7 +62,7 @@ enum AppComposition {
 @MainActor
 @Observable
 final class AppModel {
-    private let repository: any ProductRepository
+    private let repository: GenerationProductRepository
     private let captureUseCase: CapturePaperUseCase
     private let editUseCase: EditPaperUseCase
     private let startDrawUseCase: StartDrawUseCase
@@ -73,7 +81,7 @@ final class AppModel {
     var isMutating = false
     var errorMessage: String?
 
-    init(repository: any ProductRepository) {
+    init(repository: GenerationProductRepository) {
         self.repository = repository
         let arbiter = MutationArbiter(repository: repository)
         captureUseCase = CapturePaperUseCase(arbiter: arbiter)

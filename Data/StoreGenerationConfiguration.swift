@@ -18,6 +18,18 @@ public struct StoreGenerationConfiguration: Sendable {
             .appendingPathComponent(id.uuidString, isDirectory: true)
     }
 
+    public var generationsURL: URL {
+        applicationSupportURL.appendingPathComponent("StoreGenerations", isDirectory: true)
+    }
+
+    public var activeManifestURL: URL {
+        applicationSupportURL.appendingPathComponent(StoreGenerationBootstrap.manifestFileName)
+    }
+
+    public var operationJournalURL: URL {
+        applicationSupportURL.appendingPathComponent("generation-operation.json")
+    }
+
     public func storeURL(generationID: UUID) -> URL {
         generationURL(id: generationID).appendingPathComponent(Self.storeFileName)
     }

@@ -2,7 +2,7 @@ import CryptoKit
 import Foundation
 import SwiftData
 
-public struct ActiveStoreGeneration: Equatable, Sendable {
+public struct ActiveStoreGeneration: Codable, Equatable, Sendable {
     public let id: UUID
     public let schemaVersion: StoreSchemaVersion
 
@@ -34,7 +34,7 @@ public enum StoreGenerationBootstrapError: Error, Equatable, Sendable {
     case unsupportedSchemaVersion(major: Int, minor: Int, patch: Int)
 }
 
-public struct StoreGenerationBootstrap {
+public struct StoreGenerationBootstrap: Sendable {
     public static let manifestFileName = "active-generation.json"
 
     private let configuration: StoreGenerationConfiguration
@@ -44,18 +44,46 @@ public struct StoreGenerationBootstrap {
     }
 
     public func openOrCreateContainer() throws -> (generation: ActiveStoreGeneration, container: ModelContainer) {
-        let fileManager = FileManager.default
         let generation = try loadOrCreateActiveGeneration()
-        try fileManager.createDirectory(
+        return (generation, try openContainer(for: generation))
+    }
+
+    public func openContainer(for generation: ActiveStoreGeneration) throws -> ModelContainer {
+        try FileManager.default.createDirectory(
             at: configuration.generationURL(id: generation.id),
             withIntermediateDirectories: true
         )
-        let container = try ModelContainer(
+        return try ModelContainer(
             for: Schema(versionedSchema: SomedayBoxSchemaV1.self),
             migrationPlan: SomedayBoxSchemaMigrationPlan.self,
             configurations: [configuration.modelConfiguration(generationID: generation.id)]
         )
-        return (generation, container)
+    }
+
+    public func createGeneration(id: UUID = UUID()) throws -> ActiveStoreGeneration {
+        let generation = ActiveStoreGeneration(
+            id: id,
+            schemaVersion: StoreSchemaVersion(SomedayBoxSchemaV1.versionIdentifier)
+        )
+        try FileManager.default.createDirectory(
+            at: configuration.generationURL(id: id),
+            withIntermediateDirectories: false
+        )
+        return generation
+    }
+
+    public func activate(_ generation: ActiveStoreGeneration) throws {
+        try FileManager.default.createDirectory(
+            at: configuration.applicationSupportURL,
+            withIntermediateDirectories: true
+        )
+        try writeManifest(for: generation, to: configuration.activeManifestURL)
+    }
+
+    public func removeGeneration(id: UUID) throws {
+        let url = configuration.generationURL(id: id)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        try FileManager.default.removeItem(at: url)
     }
 
     public func loadOrCreateActiveGeneration() throws -> ActiveStoreGeneration {
@@ -64,7 +92,7 @@ public struct StoreGenerationBootstrap {
             at: configuration.applicationSupportURL,
             withIntermediateDirectories: true
         )
-        let manifestURL = configuration.applicationSupportURL.appendingPathComponent(Self.manifestFileName)
+        let manifestURL = configuration.activeManifestURL
         if fileManager.fileExists(atPath: manifestURL.path) {
             return try readManifest(at: manifestURL)
         }
@@ -122,7 +150,11 @@ public struct StoreGenerationBootstrap {
         )
         let payloadData = try Self.encode(payload)
         let envelope = ManifestEnvelope(payload: payload, sha256: Self.sha256Hex(payloadData))
-        try Self.encode(envelope).write(to: url, options: [.atomic])
+        let data = try Self.encode(envelope)
+        try data.write(to: url, options: [.atomic])
+        let handle = try FileHandle(forWritingTo: url)
+        try handle.synchronize()
+        try handle.close()
     }
 
     private static func encode<Value: Encodable>(_ value: Value) throws -> Data {
