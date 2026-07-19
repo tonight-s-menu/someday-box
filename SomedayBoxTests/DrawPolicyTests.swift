@@ -84,6 +84,14 @@ struct DrawPolicyTests {
         )
         #expect(selected?.id == secondItem.id)
     }
+
+    @Test func customFortyFiveMinutesDoesNotAdmitAnHourPaper() {
+        let ten = item(duration: .upTo10Minutes)
+        let thirty = item(duration: .upTo30Minutes)
+        let sixty = item(duration: .upTo60Minutes)
+        let result = CandidatePoolBuilder().build(items: [ten, thirty, sixty], context: DrawContext(customMinutes: 45), currentPick: nil, reservedItemID: nil, shownItemIDs: [])
+        #expect(result == .candidates([ten, thirty]))
+    }
 }
 #else
 import XCTest
@@ -156,6 +164,13 @@ final class DrawPolicyTests: XCTestCase {
             using: &generator
         )
         XCTAssertEqual(selected?.id, secondItem.id)
+    }
+
+    func testCustomFortyFiveMinutesDoesNotAdmitAnHourPaper() {
+        let ten = item(duration: .upTo10Minutes)
+        let thirty = item(duration: .upTo30Minutes)
+        let sixty = item(duration: .upTo60Minutes)
+        XCTAssertEqual(CandidatePoolBuilder().build(items: [ten, thirty, sixty], context: DrawContext(customMinutes: 45), currentPick: nil, reservedItemID: nil, shownItemIDs: []), .candidates([ten, thirty]))
     }
 }
 #endif
