@@ -171,24 +171,24 @@ private struct PaperDetailView: View {
                     }
 
                     if let source = appModel.source(itemID: item.id) {
-                        Section("Source") {
+                        Section(shareFeatureText("Source")) {
                             if let value = source.acceptedURLString,
                                let url = URL(string: value),
                                let host = url.host {
-                                LabeledContent("Shared link", value: host)
+                                LabeledContent(shareFeatureText("Shared link"), value: host)
                                 Button {
                                     openURL(url)
                                 } label: {
-                                    Label("Open Original", systemImage: "arrow.up.right.square")
+                                    Label(shareFeatureText("Open Original"), systemImage: "arrow.up.right.square")
                                 }
                                 ShareLink(item: value) {
-                                    Label("Copy or share link", systemImage: "square.and.arrow.up")
+                                    Label(shareFeatureText("Copy or share link"), systemImage: "square.and.arrow.up")
                                 }
                             } else {
-                                LabeledContent("Shared content", value: "Text only")
+                                LabeledContent(shareFeatureText("Shared content"), value: shareFeatureText("Text only"))
                             }
-                            LabeledContent("Captured", value: source.capturedAt.formatted(date: .abbreviated, time: .shortened))
-                            Button("Remove Source", role: .destructive) { confirmsSourceRemoval = true }
+                            LabeledContent(shareFeatureText("Captured"), value: source.capturedAt.formatted(date: .abbreviated, time: .shortened))
+                            Button(shareFeatureText("Remove Source"), role: .destructive) { confirmsSourceRemoval = true }
                         }
                     }
 
@@ -250,16 +250,16 @@ private struct PaperDetailView: View {
                     Text("This cannot be undone. Other papers and memories stay unchanged.")
                 }
                 .confirmationDialog(
-                    "Remove this source?",
+                    shareFeatureText("Remove this source?"),
                     isPresented: $confirmsSourceRemoval,
                     titleVisibility: .visible
                 ) {
-                    Button("Remove Source", role: .destructive) {
+                    Button(shareFeatureText("Remove Source"), role: .destructive) {
                         Task { _ = await appModel.removeSource(itemID: item.id) }
                     }
-                    Button("Cancel", role: .cancel) {}
+                    Button(shareFeatureText("Cancel"), role: .cancel) {}
                 } message: {
-                    Text("The paper stays in your Box. The saved link and share provenance will be removed.")
+                    Text(shareFeatureText("The paper stays in your Box. The saved link and share provenance will be removed."))
                 }
             } else {
                 ContentUnavailableView("Paper unavailable", systemImage: "doc.questionmark")

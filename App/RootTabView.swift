@@ -77,20 +77,20 @@ private struct SharedCaptureRecoveryView: View {
                         .font(.system(size: 48))
                         .foregroundStyle(SomedayBoxBrand.tint)
                         .accessibilityHidden(true)
-                    Text("Shared capture needs attention")
+                    Text(shareFeatureText("Shared capture needs attention"))
                         .font(.largeTitle.bold())
                         .accessibilityAddTraits(.isHeader)
                     Text(recoveryDescription)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     if appModel.shareRecoveryItems.count > 1 {
-                        Text("\(appModel.shareRecoveryItems.count) local captures are waiting. Handle this one first.")
+                        Text(shareFeatureText("%lld local captures are waiting. Handle this one first.", appModel.shareRecoveryItems.count))
                             .font(.callout)
                     }
                     Button {
                         Task { _ = await appModel.retryCurrentShareRecovery() }
                     } label: {
-                        Label("Retry", systemImage: "arrow.clockwise")
+                        Label(shareFeatureText("Retry"), systemImage: "arrow.clockwise")
                             .frame(maxWidth: .infinity, minHeight: 50)
                     }
                     .buttonStyle(.borderedProminent)
@@ -98,7 +98,7 @@ private struct SharedCaptureRecoveryView: View {
                     Button {
                         showsManagement = true
                     } label: {
-                        Label("Manage Box", systemImage: "square.stack")
+                        Label(shareFeatureText("Manage Box"), systemImage: "square.stack")
                             .frame(maxWidth: .infinity, minHeight: 48)
                     }
                     .buttonStyle(.bordered)
@@ -109,31 +109,31 @@ private struct SharedCaptureRecoveryView: View {
                             rawDocument = RecoveryFileDocument(data: data)
                             exportsRaw = true
                         } label: {
-                            Label("Export Raw Recovery File", systemImage: "square.and.arrow.up")
+                            Label(shareFeatureText("Export Raw Recovery File"), systemImage: "square.and.arrow.up")
                                 .frame(maxWidth: .infinity, minHeight: 48)
                         }
                         .buttonStyle(.bordered)
-                        Text("If this capture came from a newer version, update someday-box before discarding it.")
+                        Text(shareFeatureText("If this capture came from a newer version, update someday-box before discarding it."))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
 
-                    Button("Discard This Capture", role: .destructive) { confirmsDiscard = true }
+                    Button(shareFeatureText("Discard This Capture"), role: .destructive) { confirmsDiscard = true }
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .padding(24)
                 .frame(maxWidth: 560)
             }
             .background(SomedayBoxBrand.canvas)
-            .navigationTitle("Shared Capture Recovery")
+            .navigationTitle(shareFeatureText("Shared Capture Recovery"))
             .sheet(isPresented: $showsManagement) { RecoveryBoxManagementView() }
-            .confirmationDialog("Discard this local capture?", isPresented: $confirmsDiscard, titleVisibility: .visible) {
-                Button("Discard This Capture", role: .destructive) {
+            .confirmationDialog(shareFeatureText("Discard this local capture?"), isPresented: $confirmsDiscard, titleVisibility: .visible) {
+                Button(shareFeatureText("Discard This Capture"), role: .destructive) {
                     Task { _ = await appModel.discardCurrentShareRecovery() }
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(shareFeatureText("Cancel"), role: .cancel) {}
             } message: {
-                Text("This removes only this local capture. Papers and memories already in your Box stay unchanged.")
+                Text(shareFeatureText("This removes only this local capture. Papers and memories already in your Box stay unchanged."))
             }
             .fileExporter(
                 isPresented: $exportsRaw,
@@ -150,13 +150,13 @@ private struct SharedCaptureRecoveryView: View {
     private var recoveryDescription: String {
         switch appModel.currentShareRecovery {
         case let .pending(entry, message):
-            "“\(entry.envelope.title)” is still stored locally, but it could not be added to the Box yet. \(message)"
+            shareFeatureText("“%@” is still stored locally, but it could not be added to the Box yet. %@", entry.envelope.title, message)
         case let .invalid(problem):
             problem.kind == .unsupportedEnvelopeVersion
-                ? "This local capture was written by a newer format. It has not been added to the Box."
-                : "This local capture could not be validated. It has not been added to the Box."
+                ? shareFeatureText("This local capture was written by a newer format. It has not been added to the Box.")
+                : shareFeatureText("This local capture could not be validated. It has not been added to the Box.")
         case nil:
-            "The local capture is no longer waiting."
+            shareFeatureText("The local capture is no longer waiting.")
         }
     }
 }
@@ -171,7 +171,7 @@ private struct RecoveryBoxManagementView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Export a full backup or permanently remove papers to create safe local capacity. Drawing and capture stay unavailable here.")
+                    Text(shareFeatureText("Export a full backup or permanently remove papers to create safe local capacity. Drawing and capture stay unavailable here."))
                         .foregroundStyle(.secondary)
                     Button("Export backup", systemImage: "square.and.arrow.up") {
                         Task {
@@ -181,7 +181,7 @@ private struct RecoveryBoxManagementView: View {
                         }
                     }
                 }
-                Section("Papers") {
+                Section(shareFeatureText("Papers")) {
                     ForEach(appModel.state.items.sorted { $0.createdAt > $1.createdAt }) { item in
                         HStack {
                             VStack(alignment: .leading) {
@@ -189,7 +189,7 @@ private struct RecoveryBoxManagementView: View {
                                 Text(item.durationLabel).font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Button("Delete", role: .destructive) {
+                            Button(shareFeatureText("Delete"), role: .destructive) {
                                 Task { _ = await appModel.delete(itemID: item.id) }
                             }
                             .buttonStyle(.borderless)
@@ -197,8 +197,8 @@ private struct RecoveryBoxManagementView: View {
                     }
                 }
             }
-            .navigationTitle("Manage Box")
-            .toolbar { Button("Done") { dismiss() } }
+            .navigationTitle(shareFeatureText("Manage Box"))
+            .toolbar { Button(shareFeatureText("Done")) { dismiss() } }
             .fileExporter(
                 isPresented: $exportsBackup,
                 document: backupDocument,

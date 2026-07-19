@@ -35,11 +35,21 @@ report_matches() {
 
 cd "${REPOSITORY_ROOT}"
 
-readonly -a PRODUCTION_SOURCE_ROOTS=(App Application Data Domain Features DesignSystem)
+readonly -a PRODUCTION_SOURCE_ROOTS=(App Application Data Domain Features DesignSystem ShareExtension)
 report_matches \
     "production Swift contains no networking, web-view, authentication-session, or CloudKit API" \
     'https?://|(^|[^[:alnum:]_])(URLSession|URLSessionConfiguration|WebView|WKWebView|WKNavigationDelegate|SFSafariViewController|ASWebAuthenticationSession|CKContainer|CKDatabase|CKRecord|NWConnection|NWBrowser)([^[:alnum:]_]|$)|^[[:space:]]*import[[:space:]]+(WebKit|CloudKit|Network)([[:space:]]|$)' \
     "${PRODUCTION_SOURCE_ROOTS[@]}"
+
+report_matches \
+    "production Swift contains no user-content logging surface" \
+    '(^|[^[:alnum:]_])(print|debugPrint|dump|NSLog|os_log|Logger)[[:space:]]*\(' \
+    "${PRODUCTION_SOURCE_ROOTS[@]}"
+
+report_matches \
+    "Share Extension contains no containing-app singleton access" \
+    'UIApplication[.]shared|NSWorkspace[.]shared|openURL[[:space:]]*\(' \
+    ShareExtension
 
 if rg -n 'XC(Remote|Local)SwiftPackageReference|XCSwiftPackageProductDependency|packageReferences[[:space:]]*=' "${PROJECT_FILE}"; then
     fail "Xcode project declares no Swift package dependency"

@@ -366,7 +366,7 @@ final class AppModel {
                 return false
             }
         case .invalid:
-            errorMessage = String(localized: "This capture cannot be read safely. Export or discard it, or update someday-box if it came from a newer version.")
+            errorMessage = shareFeatureText("This capture cannot be read safely. Export or discard it, or update someday-box if it came from a newer version.")
             return false
         }
     }
@@ -524,9 +524,9 @@ final class AppModel {
         case GenerationRepositoryError.operationInProgress:
             String(localized: "A local data operation is already in progress.")
         case ShareCaptureError.mailboxFull:
-            String(localized: "Shared captures are using the available local mailbox space. Export or remove content, then try again.")
+            shareFeatureText("Shared captures are using the available local mailbox space. Export or remove content, then try again.")
         case is ShareCaptureError:
-            String(localized: "A shared capture needs attention. Its local bytes were kept.")
+            shareFeatureText("A shared capture needs attention. Its local bytes were kept.")
         default:
             String(localized: "Something went wrong locally. Your previous state was kept.")
         }

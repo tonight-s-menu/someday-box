@@ -33,6 +33,8 @@ final class ShareComposeModel {
     enum State: Equatable {
         case receiving
         case ready
+        case saving
+        case saved
         case failed
     }
 
@@ -43,8 +45,12 @@ final class ShareComposeModel {
     var acceptedURLString: String?
     var errorMessage: String?
     var showsNote = false
+    private weak var extensionContext: NSExtensionContext?
 
     func load(context: NSExtensionContext?) async {
+        extensionContext = context
+        state = .receiving
+        errorMessage = nil
         guard let item = context?.inputItems.compactMap({ $0 as? NSExtensionItem }).only else {
             fail(shareText("Share one link or piece of text at a time."))
             return
@@ -67,6 +73,53 @@ final class ShareComposeModel {
         acceptedURLString = nil
     }
 
+    var canSave: Bool {
+        guard state == .ready, selectedDuration != nil else { return false }
+        return (try? PaperContentValidator().validate(title: title, note: normalizedNote)) != nil
+    }
+
+    func save() async {
+        guard canSave, let duration = selectedDuration, let extensionContext else { return }
+        state = .saving
+        do {
+            let envelope = try ShareCaptureEnvelopeV1(
+                appBuild: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0",
+                title: title,
+                note: normalizedNote,
+                durationBucketRaw: duration.rawValue,
+                acceptedURLString: acceptedURLString,
+                sourceKindRaw: acceptedURLString == nil ? "shared_text" : "url"
+            )
+            guard let groupURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.com.somedaybox.app.share"
+            ) else { throw ShareCaptureError.publicationFailed }
+            _ = try ShareMailboxWriter().publish(envelope, at: groupURL)
+            state = .saved
+            if !UIAccessibility.isReduceMotionEnabled {
+                try? await Task.sleep(for: .milliseconds(180))
+            }
+            extensionContext.completeRequest(returningItems: nil)
+        } catch ShareCaptureError.mailboxBusy {
+            fail(shareText("Your Box is finishing local maintenance. Please try again."))
+        } catch ShareCaptureError.mailboxFull {
+            fail(shareText("Shared captures are using the available local space. Open someday-box to make room."))
+        } catch {
+            fail(shareText("This capture could not be saved locally. Nothing was added."))
+        }
+    }
+
+    func cancel() {
+        extensionContext?.cancelRequest(withError: CocoaError(.userCancelled))
+    }
+
+    func retry() async {
+        await load(context: extensionContext)
+    }
+
+    private var normalizedNote: String? {
+        note.isEmpty ? nil : note
+    }
+
     private func fail(_ message: String) {
         errorMessage = message
         state = .failed
@@ -75,6 +128,7 @@ final class ShareComposeModel {
 
 private struct ShareComposeView: View {
     @Bindable var model: ShareComposeModel
+    @AccessibilityFocusState private var titleFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -85,19 +139,43 @@ private struct ShareComposeView: View {
                         ProgressView(shareText("Reading shared content…"))
                             .frame(maxWidth: .infinity, minHeight: 180)
                     case .failed:
-                        ContentUnavailableView(
-                            shareText("Can’t add this yet"),
-                            systemImage: "exclamationmark.triangle",
-                            description: Text(model.errorMessage ?? shareText("This content could not be read."))
-                        )
+                        VStack(spacing: 16) {
+                            ContentUnavailableView(
+                                shareText("Can’t add this yet"),
+                                systemImage: "exclamationmark.triangle",
+                                description: Text(model.errorMessage ?? shareText("This content could not be read."))
+                            )
+                            Button(shareText("Try again")) {
+                                Task { await model.retry() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
                     case .ready:
                         composeFields
+                    case .saving:
+                        ProgressView(shareText("Saving locally…"))
+                            .frame(maxWidth: .infinity, minHeight: 180)
+                    case .saved:
+                        ContentUnavailableView(
+                            shareText("Saved for your Box"),
+                            systemImage: "checkmark.circle.fill",
+                            description: Text(shareText("It will wait safely until you next open someday-box."))
+                        )
                     }
                 }
                 .padding(20)
             }
             .navigationTitle(shareText("Add to someday-box"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(shareText("Cancel")) { model.cancel() }
+                        .disabled(model.state == .saving || model.state == .saved)
+                }
+            }
+            .onChange(of: model.state) { _, state in
+                if state == .ready, model.title.isEmpty { titleFocused = true }
+            }
         }
     }
 
@@ -106,6 +184,7 @@ private struct ShareComposeView: View {
             TextField(shareText("Title"), text: $model.title, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
                 .accessibilityLabel(shareText("Title"))
+                .accessibilityFocused($titleFocused)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(shareText("Source")).font(.headline)
@@ -130,6 +209,7 @@ private struct ShareComposeView: View {
                             .buttonStyle(.bordered)
                             .tint(model.selectedDuration == duration ? .accentColor : .secondary)
                             .accessibilityAddTraits(model.selectedDuration == duration ? .isSelected : [])
+                            .accessibilityLabel(shareText("%@ duration", duration.shareLabel))
                     }
                 }
             }
@@ -140,15 +220,11 @@ private struct ShareComposeView: View {
                     .lineLimit(3...6)
             }
 
-            Text(shareText("Saving shares will be enabled after the local mailbox safety milestone."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            Button(shareText("Save for the Box")) {}
+            Button(shareText("Save for the Box")) { Task { await model.save() } }
                 .buttonStyle(.borderedProminent)
                 .frame(maxWidth: .infinity, minHeight: 48)
-                .disabled(true)
-                .accessibilityHint(shareText("Not available in this development build."))
+                .disabled(!model.canSave)
+                .accessibilityHint(shareText("Publishes one local capture for someday-box to import later."))
         }
     }
 }
@@ -221,9 +297,17 @@ private func shareText(_ english: String, _ argument: CVarArg? = nil) -> String 
         "How long might it take?": "大概需要多久？",
         "Add a note": "添加备注",
         "Note": "备注",
-        "Saving shares will be enabled after the local mailbox safety milestone.": "本地邮箱安全里程碑完成后，才会开放保存分享。",
         "Save for the Box": "先替我收好",
-        "Not available in this development build.": "此开发版本暂不可用。",
+        "Publishes one local capture for someday-box to import later.": "发布一份本地收件，稍后由改天盲盒正式放入盒子。",
+        "%@ duration": "时长 %@",
+        "Cancel": "取消",
+        "Try again": "重试",
+        "Saving locally…": "正在本地保存…",
+        "Saved for your Box": "已替你收好",
+        "It will wait safely until you next open someday-box.": "它会安心等到你下次打开改天盲盒。",
+        "Your Box is finishing local maintenance. Please try again.": "盲盒正在完成本地维护，请稍后重试。",
+        "Shared captures are using the available local space. Open someday-box to make room.": "分享收件已占满可用的本地空间，请打开改天盲盒腾出空间。",
+        "This capture could not be saved locally. Nothing was added.": "无法在本地保存这份收件，未添加任何内容。",
     ]
     let isChinese = Locale.current.language.languageCode?.identifier == "zh"
     let format = isChinese ? (simplifiedChinese[english] ?? english) : english

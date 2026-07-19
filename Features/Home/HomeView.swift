@@ -58,7 +58,7 @@ struct HomeView: View {
                                         Text(memory.titleSnapshot)
                                         Text(memory.completedAt, format: .dateTime.month().day())
                                             .font(.caption)
-                                            .foregroundStyle(.secondary)
+                                            .foregroundStyle(.primary)
                                     }
                                     Spacer()
                                 }
