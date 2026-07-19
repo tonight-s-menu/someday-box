@@ -1,5 +1,6 @@
 import RealityKit
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 struct HomeView: View {
@@ -17,6 +18,8 @@ struct HomeView: View {
                         inBoxCount: inBoxCount,
                         drawableCount: appModel.drawableCount,
                         memoryCount: appModel.state.memories.count,
+                        preferredRenderer: appModel.presentationPreferences.renderer,
+                        quickAnimations: appModel.presentationPreferences.quickAnimations,
                         opensPeek: { presentsPeek = true }
                     )
 
@@ -148,15 +151,26 @@ private struct CoreBoxStage: View {
     let inBoxCount: Int
     let drawableCount: Int
     let memoryCount: Int
+    let preferredRenderer: CoreBoxRendererTier
+    let quickAnimations: Bool
     let opensPeek: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var renderer = CoreBoxRendererTier.swiftUI2D
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            RealityView { content in
-                content.camera = .virtual
-                content.add(makeScene())
+            Group {
+                if renderer == .swiftUI2D {
+                    CoreBox2DStage(inBoxCount: inBoxCount, memoryCount: memoryCount)
+                } else {
+                    RealityView { content in
+                        content.camera = .virtual
+                        content.add(makeScene(tier: renderer))
+                    }
+                    .transition(.opacity)
+                }
             }
             .allowsHitTesting(false)
             .accessibilityHidden(true)
@@ -167,7 +181,7 @@ private struct CoreBoxStage: View {
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(.thinMaterial, in: Capsule())
+                    .background(.regularMaterial, in: Capsule())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Peek inside your Box")
@@ -177,6 +191,14 @@ private struct CoreBoxStage: View {
         .background(SomedayBoxBrand.canvas.opacity(0.7), in: RoundedRectangle(cornerRadius: 32))
         .contentShape(RoundedRectangle(cornerRadius: 32))
         .onTapGesture(perform: opensPeek)
+        .onAppear { selectSafeRenderer() }
+        .onChange(of: preferredRenderer) { _, _ in selectSafeRenderer() }
+        .onChange(of: scenePhase) { _, value in
+            if value == .active { selectSafeRenderer() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+            renderer = renderer.degraded
+        }
         .accessibilityElement(children: .contain)
     }
 
@@ -185,7 +207,11 @@ private struct CoreBoxStage: View {
         return "\(inBoxCount) in the Box · \(drawableCount) ready"
     }
 
-    private func makeScene() -> Entity {
+    private func selectSafeRenderer() {
+        renderer = ProcessInfo.processInfo.isLowPowerModeEnabled ? preferredRenderer.degraded : preferredRenderer
+    }
+
+    private func makeScene(tier: CoreBoxRendererTier) -> Entity {
         let root = Entity()
         root.name = "BoxRoot"
 
@@ -217,7 +243,7 @@ private struct CoreBoxStage: View {
         ribbon.position = [0, 0.055, 0.16]
         root.addChild(ribbon)
 
-        let paperCount = min(inBoxCount, 10)
+        let paperCount = min(inBoxCount, tier.maximumVisiblePapers)
         for index in 0..<paperCount {
             let paper = ModelEntity(
                 mesh: .generateBox(size: SIMD3<Float>(0.085, 0.006, 0.055), cornerRadius: 0.002),
@@ -234,7 +260,7 @@ private struct CoreBoxStage: View {
 
         let keyLight = DirectionalLight()
         keyLight.name = "Light_Key"
-        keyLight.light.intensity = 1_200
+        keyLight.light.intensity = tier == .full3D ? 1_200 : 850
         keyLight.look(at: .zero, from: [0.4, 0.5, 0.5], relativeTo: nil)
         root.addChild(keyLight)
 
@@ -244,6 +270,48 @@ private struct CoreBoxStage: View {
         camera.look(at: [0, 0.02, 0], from: camera.position, relativeTo: nil)
         root.addChild(camera)
         return root
+    }
+}
+
+private struct CoreBox2DStage: View {
+    let inBoxCount: Int
+    let memoryCount: Int
+
+    var body: some View {
+        ZStack {
+            Ellipse()
+                .fill(.black.opacity(0.12))
+                .frame(width: 230, height: 32)
+                .offset(y: 88)
+            RoundedRectangle(cornerRadius: 24)
+                .fill(SomedayBoxBrand.box)
+                .frame(width: 230, height: 132)
+                .overlay(alignment: .top) {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(SomedayBoxBrand.box.opacity(0.82))
+                        .frame(height: 34)
+                }
+            Capsule()
+                .fill(SomedayBoxBrand.paper)
+                .frame(width: 34, height: 106)
+                .rotationEffect(.degrees(-8))
+                .offset(x: 86, y: 12)
+            if inBoxCount > 0 {
+                ForEach(0..<min(inBoxCount, 6), id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(SomedayBoxBrand.paper)
+                        .frame(width: 56, height: 22)
+                        .rotationEffect(.degrees(Double(index - 2) * 4))
+                        .offset(x: CGFloat((index % 3) - 1) * 32, y: -42 + CGFloat(index / 3) * 10)
+                }
+            }
+            if memoryCount > 0 {
+                Capsule()
+                    .fill(SomedayBoxBrand.paperInk.opacity(0.55))
+                    .frame(width: 116, height: 3)
+                    .offset(y: 48)
+            }
+        }
     }
 }
 
@@ -400,9 +468,29 @@ private struct SettingsView: View {
                 }
                 Section {
                     settingsSectionTitle("Experience")
+                    Picker("Box renderer", selection: Binding(
+                        get: { appModel.presentationPreferences.renderer },
+                        set: { appModel.presentationPreferences.renderer = $0 }
+                    )) {
+                        Text("Full 3D").tag(CoreBoxRendererTier.full3D)
+                        Text("Lite 3D").tag(CoreBoxRendererTier.lite3D)
+                        Text("2D").tag(CoreBoxRendererTier.swiftUI2D)
+                    }
+                    Toggle("Quick animations", isOn: Binding(
+                        get: { appModel.presentationPreferences.quickAnimations },
+                        set: { appModel.presentationPreferences.quickAnimations = $0 }
+                    ))
+                    Toggle("Sound", isOn: Binding(
+                        get: { appModel.presentationPreferences.soundEnabled },
+                        set: { appModel.presentationPreferences.soundEnabled = $0 }
+                    ))
                     Toggle("Haptics", isOn: Binding(
                         get: { appModel.hapticsEnabled },
                         set: { appModel.hapticsEnabled = $0 }
+                    ))
+                    Toggle("Quiet ambience", isOn: Binding(
+                        get: { appModel.presentationPreferences.ambienceEnabled },
+                        set: { appModel.presentationPreferences.ambienceEnabled = $0 }
                     ))
                 }
                 Section {

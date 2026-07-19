@@ -115,6 +115,7 @@ final class AppModel {
     private let shareMailboxReader = ShareMailboxReader()
     private let shareMailboxMaintenance = ShareMailboxMaintenance()
     private let sharedJournalStore: SharedProductDataJournalStore
+    private let presentationPreferenceStore = CoreBoxPresentationPreferenceStore()
     private var isRefreshingSharedCaptures = false
 
     var state = PersistedProductState(items: [])
@@ -123,8 +124,12 @@ final class AppModel {
     var isMutating = false
     var errorMessage: String?
     var shareRecoveryItems: [ShareCaptureRecoveryItem] = []
+    var presentationPreferences: CoreBoxPresentationPreferences {
+        didSet { presentationPreferenceStore.save(presentationPreferences) }
+    }
     var hapticsEnabled: Bool {
-        didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled") }
+        get { presentationPreferences.hapticsEnabled }
+        set { presentationPreferences.hapticsEnabled = newValue }
     }
     var hasSeenIntroduction: Bool {
         didSet { UserDefaults.standard.set(hasSeenIntroduction, forKey: "hasSeenIntroduction") }
@@ -141,7 +146,7 @@ final class AppModel {
             applicationSupportURL: FileManager.default.temporaryDirectory
                 .appendingPathComponent("SomedayBox-\(UUID().uuidString)", isDirectory: true)
         )
-        hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
+        presentationPreferences = presentationPreferenceStore.load()
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
         let arbiter = MutationArbiter(repository: repository)
         captureUseCase = CapturePaperUseCase(arbiter: arbiter)
@@ -339,9 +344,9 @@ final class AppModel {
             )
         }
         if erased {
-            hapticsEnabled = true
+            presentationPreferenceStore.reset()
+            presentationPreferences = .init()
             hasSeenIntroduction = false
-            UserDefaults.standard.removeObject(forKey: "hapticsEnabled")
             UserDefaults.standard.removeObject(forKey: "hasSeenIntroduction")
         }
         return erased
