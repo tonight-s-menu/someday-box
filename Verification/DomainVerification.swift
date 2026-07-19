@@ -1,6 +1,7 @@
 import Foundation
 import SomedayBoxDomain
 
+/// Runs deterministic domain checks without depending on the iOS application target.
 @main
 struct DomainVerification {
     static func main() {

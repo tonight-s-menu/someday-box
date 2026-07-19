@@ -14,6 +14,7 @@ help:
 
 audit:
 	./scripts/audit-local-only.sh
+	./scripts/audit-build-structure.sh
 
 test:
 	swift run someday-box-domain-checks
