@@ -6,7 +6,7 @@ readonly REPOSITORY_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 readonly PROJECT_FILE="${REPOSITORY_ROOT}/SomedayBox.xcodeproj/project.pbxproj"
 readonly PRIVACY_MANIFEST="${REPOSITORY_ROOT}/Resources/PrivacyInfo.xcprivacy"
 readonly PACKAGE_MANIFEST="${REPOSITORY_ROOT}/Package.swift"
-readonly ALLOWED_ENTITLEMENT="com.apple.developer.default-data-protection"
+readonly ALLOWED_ENTITLEMENTS='com.apple.developer.default-data-protection|com.apple.security.application-groups'
 readonly ALLOWED_ENTITLEMENT_KEY_PATH='com\.apple\.developer\.default-data-protection'
 
 failures=0
@@ -77,7 +77,7 @@ else
         entitlement_keys="$(plutil -p "${entitlement_file}" | sed -n 's/^[[:space:]]*"\([^"]*\)" =>.*/\1/p')"
         while IFS= read -r entitlement_key; do
             [[ -z "${entitlement_key}" ]] && continue
-            if [[ "${entitlement_key}" != "${ALLOWED_ENTITLEMENT}" ]]; then
+            if ! [[ "${entitlement_key}" =~ ^(${ALLOWED_ENTITLEMENTS})$ ]]; then
                 fail "${entitlement_file} contains unapproved entitlement ${entitlement_key}"
             fi
         done <<< "${entitlement_keys}"
@@ -90,6 +90,15 @@ else
         fail "SomedayBox.entitlements must set complete data protection"
     fi
 fi
+
+for entitlement_file in SomedayBox.entitlements ShareExtension/ShareExtension.entitlements; do
+    group_identifier="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' "${entitlement_file}" 2>/dev/null || true)"
+    if [[ "${group_identifier}" == "group.com.somedaybox.app.share" ]]; then
+        pass "${entitlement_file} contains the reviewed Share to Box App Group"
+    else
+        fail "${entitlement_file} must contain only the reviewed Share to Box App Group"
+    fi
+done
 
 if ! plutil -lint "${PRIVACY_MANIFEST}" >/dev/null; then
     fail "privacy manifest is a valid property list"
