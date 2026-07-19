@@ -20,6 +20,7 @@ struct HomeView: View {
                         memoryCount: appModel.state.memories.count,
                         preferredRenderer: appModel.presentationPreferences.renderer,
                         quickAnimations: appModel.presentationPreferences.quickAnimations,
+                        pullsRibbon: { presentsDrawContext = true },
                         opensPeek: { presentsPeek = true }
                     )
 
@@ -41,6 +42,7 @@ struct HomeView: View {
                         } label: {
                             Label("Draw a paper", systemImage: "sparkles")
                                 .frame(maxWidth: .infinity, minHeight: 54)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(SomedayPrimaryActionButtonStyle())
                         .disabled(appModel.drawableCount == 0 || appModel.currentItem != nil)
@@ -50,42 +52,26 @@ struct HomeView: View {
                         } label: {
                             Label("Peek inside", systemImage: "eye")
                                 .frame(maxWidth: .infinity, minHeight: 48)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(.bordered)
+                        .tint(.primary)
+                        .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 14))
 
                         Button {
                             presentsCapture = true
                         } label: {
                             Label("Put in an idea", systemImage: "plus")
                                 .frame(maxWidth: .infinity, minHeight: 50)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(SomedayPrimaryActionButtonStyle())
                     }
                     .frame(maxWidth: 440)
 
-                    if !recentMemories.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent memories")
-                                .font(.headline)
-                            ForEach(recentMemories) { memory in
-                                HStack(spacing: 12) {
-                                    Image(systemName: "heart.fill")
-                                        .foregroundStyle(SomedayBoxBrand.tint)
-                                        .accessibilityHidden(true)
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(memory.titleSnapshot)
-                                        Text(memory.completedAt, format: .dateTime.month().day())
-                                            .font(.caption)
-                                            .foregroundStyle(.primary)
-                                    }
-                                    Spacer()
-                                }
-                            }
-                        }
-                        .frame(maxWidth: 520, alignment: .leading)
-                    }
                 }
                 .padding(24)
+                .safeAreaPadding(.bottom, 120)
             }
             .background(SomedayBoxBrand.canvas)
             .navigationTitle("Someday Box")
@@ -108,10 +94,6 @@ struct HomeView: View {
         } else {
             String(localized: "\(appModel.drawableCount) papers are ready for a surprise.")
         }
-    }
-
-    private var recentMemories: [CompletionMemory] {
-        Array(appModel.state.memories.sorted { $0.completedAt > $1.completedAt }.prefix(2))
     }
 
     private var inBoxCount: Int {
@@ -153,11 +135,14 @@ private struct CoreBoxStage: View {
     let memoryCount: Int
     let preferredRenderer: CoreBoxRendererTier
     let quickAnimations: Bool
+    let pullsRibbon: () -> Void
     let opensPeek: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var renderer = CoreBoxRendererTier.swiftUI2D
+    @State private var pullProgress = 0.0
+    @State private var submittedPull = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -193,8 +178,29 @@ private struct CoreBoxStage: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Peek inside your Box")
             .accessibilityValue("\(inBoxCount) papers in the Box. \(drawableCount) ready to draw. \(memoryCount) memories.")
+
+            HStack {
+                Spacer()
+                VStack(spacing: 4) {
+                    Capsule()
+                        .fill(SomedayBoxBrand.tint)
+                        .frame(width: 16, height: 54 + pullProgress * 34)
+                    Text("Pull to draw")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.primary)
+                }
+                .frame(width: 88, height: 98, alignment: .top)
+                .contentShape(Rectangle())
+                .gesture(ribbonGesture)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Pull to draw")
+                .accessibilityHint("Choose a time, then draw a paper. The Draw a paper button offers the same action.")
+                .accessibilityAction { pullsRibbon() }
+            }
+            .padding(.trailing, 14)
+            .padding(.bottom, 36)
         }
-        .frame(height: 280)
+        .frame(height: 220)
         .background(SomedayBoxBrand.canvas.opacity(0.7), in: RoundedRectangle(cornerRadius: 32))
         .contentShape(RoundedRectangle(cornerRadius: 32))
         .onTapGesture(perform: opensPeek)
@@ -212,6 +218,23 @@ private struct CoreBoxStage: View {
     private var stageSummary: String {
         if inBoxCount == 0 { return "Your Box is ready for an idea" }
         return "\(inBoxCount) in the Box · \(drawableCount) ready"
+    }
+
+    private var ribbonGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                guard !submittedPull else { return }
+                pullProgress = min(max(value.translation.height / 80, 0), 1)
+            }
+            .onEnded { _ in
+                let committed = pullProgress >= 0.72 && !submittedPull
+                submittedPull = committed
+                if committed { pullsRibbon() }
+                withAnimation(reduceMotion ? nil : .snappy(duration: quickAnimations ? 0.12 : 0.22)) {
+                    pullProgress = 0
+                }
+                submittedPull = false
+            }
     }
 
     private func selectSafeRenderer() {
