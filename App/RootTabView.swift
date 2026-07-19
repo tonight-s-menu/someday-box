@@ -109,6 +109,9 @@ struct DrawContextView: View {
                 }
             }
         }
+        .sensoryFeedback(.selection, trigger: selection) { oldValue, newValue in
+            appModel.hapticsEnabled && oldValue != newValue
+        }
     }
 }
 
@@ -208,6 +211,9 @@ struct DrawRevealGate: View {
             } else {
                 withAnimation(.spring(duration: 0.65, bounce: 0.18)) { isRevealed = true }
             }
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: isRevealed) { _, newValue in
+            appModel.hapticsEnabled && newValue
         }
     }
 }

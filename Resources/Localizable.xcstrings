@@ -1606,7 +1606,9 @@
     "This backup is damaged or was changed after export.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup is damaged or was changed after export." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份已损坏，或在导出后被修改。" } } } },
     "This backup was created by a newer, unsupported format.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup was created by a newer, unsupported format." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份使用了当前版本不支持的较新格式。" } } } },
     "This file is not a valid someday-box backup.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This file is not a valid someday-box backup." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此文件不是有效的改天盲盒备份。" } } } },
-    "Your Box has reached a local format limit. Export or remove content before adding more.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Your Box has reached a local format limit. Export or remove content before adding more." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。" } } } }
+    "Your Box has reached a local format limit. Export or remove content before adding more.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Your Box has reached a local format limit. Export or remove content before adding more." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。" } } } },
+    "Experience": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Experience" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "体验" } } } },
+    "Haptics": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Haptics" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "触感反馈" } } } }
   },
   "version": "1.0"
 }

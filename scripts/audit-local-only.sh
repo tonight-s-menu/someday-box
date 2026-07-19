@@ -103,6 +103,21 @@ else
     fi
 fi
 
+if rg -n --glob '*.swift' '(^|[^[:alnum:]_])(UserDefaults|@AppStorage)([^[:alnum:]_]|$)' "${PRODUCTION_SOURCE_ROOTS[@]}" >/dev/null; then
+    privacy_json="$(plutil -convert json -o - "${PRIVACY_MANIFEST}")"
+    if jq -e '
+        any(
+            .NSPrivacyAccessedAPITypes[]?;
+            .NSPrivacyAccessedAPIType == "NSPrivacyAccessedAPICategoryUserDefaults"
+            and (.NSPrivacyAccessedAPITypeReasons | index("CA92.1") != null)
+        )
+    ' <<< "${privacy_json}" >/dev/null; then
+        pass "app-only UserDefaults access declares approved reason CA92.1"
+    else
+        fail "UserDefaults access requires app-only reason CA92.1"
+    fi
+fi
+
 echo "[local-only audit] Evidence boundary: repository-source and project-configuration scan only."
 echo "[local-only audit] It does not prove runtime network silence, signed-package entitlements, App Privacy Report results, device behavior, or packaged acceptance."
 

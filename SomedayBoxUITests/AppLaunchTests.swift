@@ -40,4 +40,16 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(app.buttons["Restore backup"].exists)
         XCTAssertTrue(app.buttons["Erase all local data"].exists)
     }
+
+    @MainActor
+    func testHomeAndSettingsPassAutomatedAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
+
+        try app.performAccessibilityAudit()
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        try app.performAccessibilityAudit()
+    }
 }

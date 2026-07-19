@@ -77,6 +77,9 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $presentsSettings) { SettingsView() }
+            .sensoryFeedback(.success, trigger: appModel.state.memories.count) { oldValue, newValue in
+                appModel.hapticsEnabled && newValue > oldValue
+            }
         }
     }
 
@@ -245,6 +248,12 @@ private struct SettingsView: View {
                     Button("Restore backup", systemImage: "arrow.counterclockwise") {
                         presentsImporter = true
                     }
+                }
+                Section("Experience") {
+                    Toggle("Haptics", isOn: Binding(
+                        get: { appModel.hapticsEnabled },
+                        set: { appModel.hapticsEnabled = $0 }
+                    ))
                 }
                 Section("About") {
                     LabeledContent("Storage", value: "On this device")

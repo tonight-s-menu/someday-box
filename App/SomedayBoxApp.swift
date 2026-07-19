@@ -80,9 +80,13 @@ final class AppModel {
     var loadFailed = false
     var isMutating = false
     var errorMessage: String?
+    var hapticsEnabled: Bool {
+        didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled") }
+    }
 
     init(repository: GenerationProductRepository) {
         self.repository = repository
+        hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
         let arbiter = MutationArbiter(repository: repository)
         captureUseCase = CapturePaperUseCase(arbiter: arbiter)
         editUseCase = EditPaperUseCase(arbiter: arbiter)
