@@ -1,3 +1,4 @@
+import RealityKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -6,12 +7,18 @@ struct HomeView: View {
     @Binding var presentsCapture: Bool
     @Binding var presentsDrawContext: Bool
     @State private var presentsSettings = false
+    @State private var presentsPeek = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 28) {
-                    boxIllustration
+                    CoreBoxStage(
+                        inBoxCount: inBoxCount,
+                        drawableCount: appModel.drawableCount,
+                        memoryCount: appModel.state.memories.count,
+                        opensPeek: { presentsPeek = true }
+                    )
 
                     VStack(spacing: 8) {
                         Text("Put it in. Draw it out.")
@@ -34,6 +41,14 @@ struct HomeView: View {
                         }
                         .buttonStyle(SomedayPrimaryActionButtonStyle())
                         .disabled(appModel.drawableCount == 0 || appModel.currentItem != nil)
+
+                        Button {
+                            presentsPeek = true
+                        } label: {
+                            Label("Peek inside", systemImage: "eye")
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                        }
+                        .buttonStyle(.bordered)
 
                         Button {
                             presentsCapture = true
@@ -77,6 +92,7 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $presentsSettings) { SettingsView() }
+            .sheet(isPresented: $presentsPeek) { CoreBoxPeekView() }
             .sensoryFeedback(.success, trigger: appModel.state.memories.count) { oldValue, newValue in
                 appModel.hapticsEnabled && newValue > oldValue
             }
@@ -95,27 +111,9 @@ struct HomeView: View {
         Array(appModel.state.memories.sorted { $0.completedAt > $1.completedAt }.prefix(2))
     }
 
-    private var boxIllustration: some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 28)
-                .fill(SomedayBoxBrand.box)
-                .frame(width: 210, height: 145)
-                .overlay(alignment: .top) {
-                    Capsule()
-                        .fill(.black.opacity(0.14))
-                        .frame(width: 106, height: 12)
-                        .padding(.top, 24)
-                }
-            ForEach(0..<min(appModel.drawableCount, 5), id: \.self) { index in
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(SomedayBoxBrand.paper)
-                    .frame(width: 52, height: 34)
-                    .rotationEffect(.degrees(Double(index - 2) * 7))
-                    .offset(x: CGFloat(index - 2) * 17, y: -CGFloat(index % 2) * 5)
-            }
-        }
-        .padding(.top, 18)
-        .accessibilityHidden(true)
+    private var inBoxCount: Int {
+        let reserved = Set([appModel.currentItem?.id, appModel.unresolvedItem?.id].compactMap { $0 })
+        return appModel.state.items.filter { $0.lifecycle == .active && !reserved.contains($0.id) }.count
     }
 
     private func currentPaper(_ item: BoxItem) -> some View {
@@ -142,6 +140,151 @@ struct HomeView: View {
         .frame(maxWidth: 520, alignment: .leading)
         .background(SomedayBoxBrand.paper, in: RoundedRectangle(cornerRadius: 22))
         .accessibilityElement(children: .contain)
+    }
+}
+
+/// A presentation-only scene. Product mutation remains in AppModel use cases.
+private struct CoreBoxStage: View {
+    let inBoxCount: Int
+    let drawableCount: Int
+    let memoryCount: Int
+    let opensPeek: () -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            RealityView { content in
+                content.camera = .virtual
+                content.add(makeScene())
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+
+            Button(action: opensPeek) {
+                Text(stageSummary)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(.thinMaterial, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Peek inside your Box")
+            .accessibilityValue("\(inBoxCount) papers in the Box. \(drawableCount) ready to draw. \(memoryCount) memories.")
+        }
+        .frame(height: 280)
+        .background(SomedayBoxBrand.canvas.opacity(0.7), in: RoundedRectangle(cornerRadius: 32))
+        .contentShape(RoundedRectangle(cornerRadius: 32))
+        .onTapGesture(perform: opensPeek)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var stageSummary: String {
+        if inBoxCount == 0 { return "Your Box is ready for an idea" }
+        return "\(inBoxCount) in the Box · \(drawableCount) ready"
+    }
+
+    private func makeScene() -> Entity {
+        let root = Entity()
+        root.name = "BoxRoot"
+
+        let body = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.30, 0.16, 0.22), cornerRadius: 0.025),
+            materials: [SimpleMaterial(color: UIColor(red: 0.62, green: 0.38, blue: 0.23, alpha: 1), roughness: 0.82, isMetallic: false)]
+        )
+        body.name = "BoxBody"
+        body.position = [0, -0.05, 0]
+        root.addChild(body)
+
+        let lidPivot = Entity()
+        lidPivot.name = "LidPivot"
+        lidPivot.position = [0, 0.055, -0.10]
+        let lid = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.31, 0.035, 0.23), cornerRadius: 0.025),
+            materials: [SimpleMaterial(color: UIColor(red: 0.69, green: 0.44, blue: 0.27, alpha: 1), roughness: 0.8, isMetallic: false)]
+        )
+        lid.name = "LidMesh"
+        lid.position = [0, 0, 0.10]
+        lidPivot.addChild(lid)
+        root.addChild(lidPivot)
+
+        let ribbon = ModelEntity(
+            mesh: .generateBox(size: SIMD3<Float>(0.038, 0.006, 0.12), cornerRadius: 0.003),
+            materials: [SimpleMaterial(color: UIColor(red: 0.91, green: 0.72, blue: 0.58, alpha: 1), roughness: 0.9, isMetallic: false)]
+        )
+        ribbon.name = "RibbonRoot"
+        ribbon.position = [0, 0.055, 0.16]
+        root.addChild(ribbon)
+
+        let paperCount = min(inBoxCount, 10)
+        for index in 0..<paperCount {
+            let paper = ModelEntity(
+                mesh: .generateBox(size: SIMD3<Float>(0.085, 0.006, 0.055), cornerRadius: 0.002),
+                materials: [SimpleMaterial(color: UIColor(white: 0.96, alpha: 1), roughness: 1, isMetallic: false)]
+            )
+            paper.name = String(format: "PaperRest_%02d", index)
+            let x = Float(index % 4 - 1) * 0.045
+            let y = 0.04 + Float(index / 4) * 0.009
+            let z = Float(index % 3 - 1) * 0.028
+            paper.position = SIMD3<Float>(x, y, z)
+            paper.orientation = simd_quatf(angle: Float(index) * 0.17, axis: [0, 1, 0])
+            root.addChild(paper)
+        }
+
+        let keyLight = DirectionalLight()
+        keyLight.name = "Light_Key"
+        keyLight.light.intensity = 1_200
+        keyLight.look(at: .zero, from: [0.4, 0.5, 0.5], relativeTo: nil)
+        root.addChild(keyLight)
+
+        let camera = PerspectiveCamera()
+        camera.name = "Camera_Default"
+        camera.position = [0, 0.20, 0.58]
+        camera.look(at: [0, 0.02, 0], from: camera.position, relativeTo: nil)
+        root.addChild(camera)
+        return root
+    }
+}
+
+private struct CoreBoxPeekView: View {
+    @Environment(AppModel.self) private var appModel
+    @Environment(\.dismiss) private var dismiss
+
+    private var inBoxCount: Int {
+        let reserved = Set([appModel.currentItem?.id, appModel.unresolvedItem?.id].compactMap { $0 })
+        return appModel.state.items.filter { $0.lifecycle == .active && !reserved.contains($0.id) }.count
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(systemName: "shippingbox.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(SomedayBoxBrand.box)
+                    .accessibilityHidden(true)
+                Text("A quiet look inside")
+                    .font(.title.bold())
+                Text("\(inBoxCount) papers are in your Box. \(appModel.drawableCount) are ready to draw.")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                Text(appModel.state.memories.isEmpty ? "Memories will leave a small seam here when they are ready." : "Your Box carries a small memory seam.")
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                NavigationLink {
+                    BoxView()
+                } label: {
+                    Label("Organize your Box", systemImage: "square.stack")
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 8)
+            }
+            .padding(28)
+            .navigationTitle("Peek inside")
+            .toolbar { Button("Done") { dismiss() } }
+        }
     }
 }
 
