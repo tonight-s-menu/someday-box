@@ -52,6 +52,8 @@
 		H00000000000000000000007 /* ShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = H10000000000000000000006 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		I00000000000000000000001 /* ShareMailbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = I10000000000000000000001 /* ShareMailbox.swift */; };
 		I00000000000000000000002 /* ShareMailbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = I10000000000000000000001 /* ShareMailbox.swift */; };
+		J00000000000000000000001 /* CoreBoxPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000001 /* CoreBoxPresentation.swift */; };
+		J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000002 /* CoreBoxPresentationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,6 +143,8 @@
 		H10000000000000000000005 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		H10000000000000000000006 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		I10000000000000000000001 /* ShareMailbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMailbox.swift; sourceTree = "<group>"; };
+		J10000000000000000000001 /* CoreBoxPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentation.swift; sourceTree = "<group>"; };
+		J10000000000000000000002 /* CoreBoxPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -225,6 +229,7 @@
 				D10000000000000000000002 /* PaperUseCases.swift */,
 				D10000000000000000000003 /* DrawUseCases.swift */,
 				D10000000000000000000004 /* LifecycleUseCases.swift */,
+				J10000000000000000000001 /* CoreBoxPresentation.swift */,
 			);
 			path = Application;
 			sourceTree = "<group>";
@@ -284,6 +289,7 @@
 				E10000000000000000000002 /* BackupDocumentTests.swift */,
 				F10000000000000000000003 /* GenerationProductRepositoryTests.swift */,
 				H10000000000000000000002 /* SharePayloadExtractionTests.swift */,
+				J10000000000000000000002 /* CoreBoxPresentationTests.swift */,
 			);
 			path = SomedayBoxTests;
 			sourceTree = "<group>";
@@ -492,6 +498,7 @@
 				D00000000000000000000002 /* PaperUseCases.swift in Sources */,
 				D00000000000000000000003 /* DrawUseCases.swift in Sources */,
 				D00000000000000000000004 /* LifecycleUseCases.swift in Sources */,
+				J00000000000000000000001 /* CoreBoxPresentation.swift in Sources */,
 				A00000000000000000000006 /* StoreGenerationConfiguration.swift in Sources */,
 				D00000000000000000000005 /* SomedayBoxSchemaV1.swift in Sources */,
 				D00000000000000000000006 /* StoreGenerationBootstrap.swift in Sources */,
@@ -520,6 +527,7 @@
 				E00000000000000000000002 /* BackupDocumentTests.swift in Sources */,
 				F00000000000000000000003 /* GenerationProductRepositoryTests.swift in Sources */,
 				H00000000000000000000002 /* SharePayloadExtractionTests.swift in Sources */,
+				J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
