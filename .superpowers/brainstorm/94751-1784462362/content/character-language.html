@@ -1,0 +1,70 @@
+<style>
+  .direction-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin-top:24px; }
+  .direction { border:1px solid color-mix(in srgb, currentColor 16%, transparent); border-radius:24px; padding:18px; cursor:pointer; transition:.2s ease; background:color-mix(in srgb, Canvas 96%, #d77a4a 4%); }
+  .direction:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(62,35,22,.12); }
+  .direction.selected { outline:3px solid #b34e28; outline-offset:2px; }
+  .stage { height:280px; border-radius:18px; display:grid; place-items:center; overflow:hidden; position:relative; background:radial-gradient(circle at 50% 38%,#fff9e9 0,#f4dfc7 62%,#e9c7aa 100%); }
+  .floor { position:absolute; width:78%; height:28px; border-radius:50%; background:rgba(78,45,28,.14); bottom:31px; filter:blur(3px); }
+  .box { width:150px; height:120px; position:relative; border-radius:22px 22px 28px 28px; box-shadow:0 20px 24px rgba(79,43,26,.19), inset 0 3px rgba(255,255,255,.25); z-index:2; }
+  .lid { position:absolute; width:166px; height:36px; left:-8px; top:-13px; border-radius:19px 19px 11px 11px; box-shadow:inset 0 3px rgba(255,255,255,.25); }
+  .slot { position:absolute; width:64px; height:8px; border-radius:12px; top:8px; left:43px; background:rgba(64,32,19,.42); }
+  .eye { position:absolute; width:11px; height:15px; border-radius:50%; background:#432a21; top:48px; }
+  .eye.left { left:50px; } .eye.right { right:50px; }
+  .mouth { position:absolute; width:22px; height:11px; left:64px; top:72px; border-bottom:3px solid #432a21; border-radius:0 0 18px 18px; }
+  .paper { position:absolute; width:45px; height:35px; border-radius:6px; background:#fff6ce; left:54px; top:-34px; transform:rotate(-7deg); box-shadow:0 3px 7px rgba(75,40,25,.12); }
+  .soft .box,.soft .lid { background:linear-gradient(145deg,#d98b5f,#a94d31); }
+  .soft .cheek { position:absolute; width:19px; height:9px; border-radius:50%; background:#f3a08b; top:67px; opacity:.62; }
+  .soft .cheek.c1 { left:25px; } .soft .cheek.c2 { right:25px; }
+  .magic .stage { background:radial-gradient(circle at 50% 33%,#e8e1ff,#d6ccf0 54%,#b5a4d4); }
+  .magic .box,.magic .lid { background:linear-gradient(145deg,#745894,#44305d); border:2px solid #d5b569; }
+  .magic .eye { background:#ffd96a; box-shadow:0 0 10px #ffe08a; height:12px; }
+  .magic .spark { position:absolute; color:#ffe28a; font-size:22px; z-index:3; text-shadow:0 0 9px #fff2aa; }
+  .magic .s1 { left:35px; top:50px; } .magic .s2 { right:31px; top:85px; font-size:15px; }
+  .lived .stage { background:radial-gradient(circle at 50% 38%,#eef4e8,#d7e1cd 60%,#bdc8b0); }
+  .lived .box,.lived .lid { background:linear-gradient(145deg,#c98b58,#8d5738); }
+  .patch { position:absolute; width:31px; height:24px; right:18px; bottom:18px; border-radius:8px; background:#6c9471; transform:rotate(-7deg); border:2px dashed #e4d7b2; }
+  .sticker { position:absolute; left:18px; bottom:19px; color:#f3d46b; font-size:28px; transform:rotate(-14deg); }
+  .scratch { position:absolute; width:26px; border-top:2px solid rgba(80,44,25,.37); left:62px; bottom:24px; transform:rotate(-20deg); }
+  .tag { display:inline-block; font-size:12px; letter-spacing:.05em; text-transform:uppercase; opacity:.62; margin-bottom:7px; }
+  .direction h3 { margin:14px 0 7px; }
+  .direction p { margin:0; line-height:1.55; opacity:.77; }
+  .note { margin-top:20px; padding:15px 18px; border-radius:14px; background:color-mix(in srgb,#d77a4a 10%,transparent); }
+  @media(max-width:850px){ .direction-grid{grid-template-columns:1fr}.stage{height:230px} }
+</style>
+
+<h2>箱子应该像什么样的“生命”？</h2>
+<p class="subtitle">都可以旋转、触碰和做出反应；这里比较的是它被用户感知到的角色气质。</p>
+
+<div class="direction-grid">
+  <div class="direction soft" data-choice="soft_companion" onclick="toggleSelect(this)">
+    <div class="stage">
+      <div class="floor"></div>
+      <div class="box"><div class="lid"><div class="slot"></div></div><div class="paper"></div><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i><i class="cheek c1"></i><i class="cheek c2"></i></div>
+    </div>
+    <h3>A · 温柔小伙伴</h3>
+    <span class="tag">表情优先</span>
+    <p>圆润、克制的五官和小动作。亲近感最强，但需要避免幼儿化，也不能让表情变成情绪绑架。</p>
+  </div>
+
+  <div class="direction magic" data-choice="magic_box" onclick="toggleSelect(this)">
+    <div class="stage">
+      <span class="spark s1">✦</span><span class="spark s2">✧</span><div class="floor"></div>
+      <div class="box"><div class="lid"><div class="slot"></div></div><div class="paper"></div><i class="eye left"></i><i class="eye right"></i></div>
+    </div>
+    <h3>B · 神秘活盲盒</h3>
+    <span class="tag">仪式与惊喜优先</span>
+    <p>像一个有意识的魔法容器，反应更抽象。抽取仪式感强，也最符合“盲盒”，但日常陪伴感略弱。</p>
+  </div>
+
+  <div class="direction lived" data-choice="lived_object" onclick="toggleSelect(this)">
+    <div class="stage">
+      <div class="floor"></div>
+      <div class="box"><div class="lid"><div class="slot"></div></div><div class="paper"></div><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i><span class="sticker">★</span><span class="patch"></span><span class="scratch"></span></div>
+    </div>
+    <h3>C · 有生活痕迹的伙伴</h3>
+    <span class="tag">推荐基底</span>
+    <p>角色感保持含蓄，贴纸、补丁、材质和小摆件悄悄出现。最适合把长期变化做成彩蛋，而不是等级系统。</p>
+  </div>
+</div>
+
+<div class="note">可以混合，例如：以 C 的长期痕迹为基底，采用 A 的温柔动作，但不做持续可见的情绪数值。</div>

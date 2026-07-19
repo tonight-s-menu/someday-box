@@ -1,1617 +1,2039 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%lld papers are ready for a surprise.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld papers are ready for a surprise."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld papers are ready for a surprise." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld papers are ready for a surprise."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有 %lld 张纸条可以抽。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 %lld 张纸条可以抽。"
           }
         }
       }
     },
-    "1 paper is ready for a surprise.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 paper is ready for a surprise."
+    "1 paper is ready for a surprise." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paper is ready for a surprise."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有 1 张纸条可以抽。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 1 张纸条可以抽。"
           }
         }
       }
     },
-    "About": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关于"
+    "A local data operation is already in progress." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A local data operation is already in progress."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "另一项本地数据操作正在进行。"
           }
         }
       }
     },
-    "Actions": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "操作"
+    "About" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actions"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于"
           }
         }
       }
     },
-    "Add a note": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加备注"
+    "Actions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actions"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a note"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作"
           }
         }
       }
     },
-    "All durations": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "全部时长"
+    "Active papers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active papers"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All durations"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活跃纸条"
           }
         }
       }
     },
-    "Already in hand": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在进行"
+    "Add a note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a note"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Already in hand"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加备注"
           }
         }
       }
     },
-    "Already in the Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已在盲盒里"
+    "All durations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All durations"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Already in the Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部时长"
           }
         }
       }
     },
-    "Archive": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "归档"
+    "Already in hand" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already in hand"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archive"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在进行"
           }
         }
       }
     },
-    "Archived": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已归档"
+    "Already in the Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already in the Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archived"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已在盲盒里"
           }
         }
       }
     },
-    "Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "盲盒"
+    "Archive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archive"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档"
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消"
+    "Archived" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archived"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已归档"
           }
         }
       }
     },
-    "Check the title and note limits, then try again.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请检查标题和备注长度后再试。"
+    "Backup format" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup format"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check the title and note limits, then try again."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份格式"
           }
         }
       }
     },
-    "Choose an upper limit. The draw will never quietly go over it.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择时间上限，抽取结果绝不会悄悄超时。"
+    "Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose an upper limit. The draw will never quietly go over it."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "盲盒"
           }
         }
       }
     },
-    "Completed": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完成于"
+    "Cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completed"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
           }
         }
       }
     },
-    "Current paper": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "当前纸条"
+    "Check the title and note limits, then try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the title and note limits, then try again."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Current paper"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请检查标题和备注长度后再试。"
           }
         }
       }
     },
-    "Delete paper and its memories": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "删除纸条及其回忆"
+    "Choose an upper limit. The draw will never quietly go over it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose an upper limit. The draw will never quietly go over it."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete paper and its memories"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择时间上限，抽取结果绝不会悄悄超时。"
           }
         }
       }
     },
-    "Delete paper, all its memories, and related draw history": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "删除纸条、全部相关回忆和抽取记录"
+    "Completed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete paper, all its memories, and related draw history"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成于"
           }
         }
       }
     },
-    "Delete paper, its memories, and related draw history": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "删除纸条、相关回忆和抽取记录"
+    "Continue" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete paper, its memories, and related draw history"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续"
           }
         }
       }
     },
-    "Delete permanently": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "永久删除"
+    "Create a backup first if you may want these papers and memories again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a backup first if you may want these papers and memories again."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete permanently"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果以后可能需要这些纸条和回忆，请先创建备份。"
           }
         }
       }
     },
-    "Delete the source paper permanently?": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "永久删除来源纸条？"
+    "Current paper" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current paper"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete the source paper permanently?"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前纸条"
           }
         }
       }
     },
-    "Delete this paper permanently?": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "永久删除这张纸条？"
+    "Delete paper and its memories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete paper and its memories"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete this paper permanently?"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除纸条及其回忆"
           }
         }
       }
     },
-    "Dismiss": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "先不做"
+    "Delete paper, all its memories, and related draw history" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete paper, all its memories, and related draw history"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dismiss"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除纸条、全部相关回忆和抽取记录"
           }
         }
       }
     },
-    "Do this": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "就做这个"
+    "Delete paper, its memories, and related draw history" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete paper, its memories, and related draw history"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Do this"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除纸条、相关回忆和抽取记录"
           }
         }
       }
     },
-    "Done": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "做过啦"
+    "Delete permanently" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete permanently"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Done"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久删除"
           }
         }
       }
     },
-    "Draw": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "抽一张"
+    "Delete the source paper permanently?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the source paper permanently?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draw"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久删除来源纸条？"
           }
         }
       }
     },
-    "Draw a paper": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "抽一张"
+    "Delete this paper permanently?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this paper permanently?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draw a paper"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久删除这张纸条？"
           }
         }
       }
     },
-    "Draw another": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "换一张"
+    "Dismiss" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draw another"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先不做"
           }
         }
       }
     },
-    "Drawn paper: %@, %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "抽到的纸条：%1$@，%2$@"
+    "Do this" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do this"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drawn paper: %@, %@"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "就做这个"
           }
         }
       }
     },
-    "Duration": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "时长"
+    "Done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "做过啦"
           }
         }
       }
     },
-    "Duration filter": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "时长筛选"
+    "Draw" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration filter"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抽一张"
           }
         }
       }
     },
-    "Duration needs updating": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要更新时长"
+    "Draw a paper" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw a paper"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration needs updating"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抽一张"
           }
         }
       }
     },
-    "Edit": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "编辑"
+    "Draw another" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw another"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "换一张"
           }
         }
       }
     },
-    "Finish or put back your current paper before drawing another.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请先完成或放回当前纸条，再抽下一张。"
+    "Draw policy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw policy"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finish or put back your current paper before drawing another."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抽取策略"
           }
         }
       }
     },
-    "Finish the paper on screen before changing your Box.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请先处理屏幕上的纸条，再修改盲盒。"
+    "Drawable papers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drawable papers"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finish the paper on screen before changing your Box."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可抽纸条"
           }
         }
       }
     },
-    "Home": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "主页"
+    "Drawn paper: %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drawn paper: %@, %@"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Home"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抽到的纸条：%1$@，%2$@"
           }
         }
       }
     },
-    "How long might it take?": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "大概需要多久？"
+    "Duration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How long might it take?"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时长"
           }
         }
       }
     },
-    "How much time do you have?": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你现在有多少时间？"
+    "Duration filter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration filter"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How much time do you have?"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时长筛选"
           }
         }
       }
     },
-    "Ideas you put in the Box will appear here.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "放进盲盒的想法会出现在这里。"
+    "Duration needs updating" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration needs updating"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ideas you put in the Box will appear here."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要更新时长"
           }
         }
       }
     },
-    "In the Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "盲盒里"
+    "Edit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑"
           }
         }
       }
     },
-    "Local data": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本地数据"
+    "Erase all data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase all data"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Local data"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抹掉所有数据"
           }
         }
       }
     },
-    "Mark as done": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "做过啦"
+    "Erase all data permanently?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase all data permanently?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mark as done"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久抹掉所有数据？"
           }
         }
       }
     },
-    "Memories": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "回忆"
+    "Erase all local data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase all local data"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Memories"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抹掉所有本地数据"
           }
         }
       }
     },
-    "Memory": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "回忆"
+    "Erase all local data?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase all local data?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Memory"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抹掉所有本地数据？"
           }
         }
       }
     },
-    "Memory unavailable": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "回忆不可用"
+    "Experience" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experience"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Memory unavailable"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体验"
           }
         }
       }
     },
-    "No change needed": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无需更改"
+    "Export backup" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export backup"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No change needed"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出备份"
           }
         }
       }
     },
-    "No matching papers": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有匹配的纸条"
+    "Finish or put back your current paper before drawing another." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish or put back your current paper before drawing another."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No matching papers"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先完成或放回当前纸条，再抽下一张。"
           }
         }
       }
     },
-    "No memories yet": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "还没有回忆"
+    "Finish the paper on screen before changing your Box." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish the paper on screen before changing your Box."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No memories yet"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先处理屏幕上的纸条，再修改盲盒。"
           }
         }
       }
     },
-    "No papers fit the time you selected.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有纸条适合你选择的时间。"
+    "Haptics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptics"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No papers fit the time you selected."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触感反馈"
           }
         }
       }
     },
-    "No papers here": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这里还没有纸条"
+    "Home" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No papers here"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页"
           }
         }
       }
     },
-    "Not sure": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不确定"
+    "How long might it take?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How long might it take?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not sure"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大概需要多久？"
           }
         }
       }
     },
-    "OK": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "好"
+    "How much time do you have?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much time do you have?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你现在有多少时间？"
           }
         }
       }
     },
-    "On this device": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台设备上"
+    "Ideas you put in the Box will appear here." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ideas you put in the Box will appear here."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On this device"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放进盲盒的想法会出现在这里。"
           }
         }
       }
     },
-    "Opening your Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在打开盲盒"
+    "In the Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opening your Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "盲盒里"
           }
         }
       }
     },
-    "Opening your Box…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在打开盲盒…"
+    "Local data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local data"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opening your Box…"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地数据"
           }
         }
       }
     },
-    "Opens paper details": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开纸条详情"
+    "Mark as done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark as done"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opens paper details"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "做过啦"
           }
         }
       }
     },
-    "Optional note": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可选备注"
+    "Memories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memories"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional note"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回忆"
           }
         }
       }
     },
-    "Paper": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "纸条"
+    "Memory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paper"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回忆"
           }
         }
       }
     },
-    "Paper status": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "纸条状态"
+    "Memory unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory unavailable"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paper status"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回忆不可用"
           }
         }
       }
     },
-    "Paper title": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "纸条标题"
+    "No change needed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No change needed"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paper title"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无需更改"
           }
         }
       }
     },
-    "Paper unavailable": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "纸条不可用"
+    "No matching papers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching papers"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paper unavailable"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的纸条"
           }
         }
       }
     },
-    "Previous duration unavailable": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "之前的时长不可用"
+    "No memories yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No memories yet"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Previous duration unavailable"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有回忆"
           }
         }
       }
     },
-    "Put back": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "放回盲盒"
+    "No papers fit the time you selected." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No papers fit the time you selected."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Put back"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有纸条适合你选择的时间。"
           }
         }
       }
     },
-    "Put back in the Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "放回盲盒"
+    "No papers here" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No papers here"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Put back in the Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这里还没有纸条"
           }
         }
       }
     },
-    "Put in an idea": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "丢进一个想法"
+    "Not sure" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not sure"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Put in an idea"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不确定"
           }
         }
       }
     },
-    "Put it in the Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "丢进盲盒"
+    "OK" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Put it in the Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
           }
         }
       }
     },
-    "Put it in. Draw it out.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "收进去，抽出来。"
+    "On this device" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On this device"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Put it in. Draw it out."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台设备上"
           }
         }
       }
     },
-    "Recent memories": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最近的回忆"
+    "Open my Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open my Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recent memories"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开我的盲盒"
           }
         }
       }
     },
-    "Restore to the Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "恢复到盲盒"
+    "Opening your Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening your Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restore to the Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在打开盲盒"
           }
         }
       }
     },
-    "Save": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存"
+    "Opening your Box…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opening your Box…"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在打开盲盒…"
           }
         }
       }
     },
-    "Search title and note": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "搜索标题和备注"
+    "Opens paper details" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens paper details"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search title and note"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开纸条详情"
           }
         }
       }
     },
-    "Settings": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设置"
+    "Optional note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional note"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Settings"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可选备注"
           }
         }
       }
     },
-    "Some papers need a duration update before they can be drawn.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有些纸条需要更新时长后才能抽取。"
+    "Paper" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Some papers need a duration update before they can be drawn."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸条"
           }
         }
       }
     },
-    "Someday Box": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "改天盲盒"
+    "Paper status" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper status"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Someday Box"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸条状态"
           }
         }
       }
     },
-    "Something went wrong locally. Your previous state was kept.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本地操作出现问题，之前的状态已保留。"
+    "Paper title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper title"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something went wrong locally. Your previous state was kept."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸条标题"
           }
         }
       }
     },
-    "Storage": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "存储位置"
+    "Paper unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper unavailable"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storage"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸条不可用"
           }
         }
       }
     },
-    "There are no papers ready to draw yet.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "还没有可以抽取的纸条。"
+    "Previous duration unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous duration unavailable"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "There are no papers ready to draw yet."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "之前的时长不可用"
           }
         }
       }
     },
-    "This cannot be undone. Other papers and memories stay unchanged.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "此操作无法撤销，其他纸条和回忆不会改变。"
+    "Put back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put back"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This cannot be undone. Other papers and memories stay unchanged."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放回盲盒"
           }
         }
       }
     },
-    "This result came from an older draw version. You can do it or dismiss it.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这个结果来自旧版抽取。你可以接受或关闭它。"
+    "Put back in the Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put back in the Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This result came from an older draw version. You can do it or dismiss it."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放回盲盒"
           }
         }
       }
     },
-    "This result came from an older draw version. You can still do it or dismiss it.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这个结果来自旧版抽取。你仍可接受或关闭它。"
+    "Put in an idea" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put in an idea"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This result came from an older draw version. You can still do it or dismiss it."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "丢进一个想法"
           }
         }
       }
     },
-    "Try a different word or filter.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "试试其他关键词或筛选条件。"
+    "Put it in the Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it in the Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try a different word or filter."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "丢进盲盒"
           }
         }
       }
     },
-    "Try again": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重试"
+    "Put it in. Draw it out." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put it in. Draw it out."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try again"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收进去，抽出来。"
           }
         }
       }
     },
-    "Up to 1 hour": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 1 小时"
+    "Recent memories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent memories"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 1 hour"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近的回忆"
           }
         }
       }
     },
-    "Up to 10 minutes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 10 分钟"
+    "Replace everything in this Box?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace everything in this Box?"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 10 minutes"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "替换盲盒里的全部内容？"
           }
         }
       }
     },
-    "Up to 2 hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 2 小时"
+    "Replace with this backup" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace with this backup"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 2 hours"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用此备份替换"
           }
         }
       }
     },
-    "Up to 30 minutes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 30 分钟"
+    "Restore backup" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore backup"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 30 minutes"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复备份"
           }
         }
       }
     },
-    "Up to 4 hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 4 小时"
+    "Restore to the Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore to the Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 4 hours"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复到盲盒"
           }
         }
       }
     },
-    "Up to 8 hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最多 8 小时"
+    "Save" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Up to 8 hours"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
           }
         }
       }
     },
-    "We couldn't open your Box. Your data was not changed.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法打开盲盒，你的数据没有改变。"
+    "Save a possibility without scheduling it. When free time appears, draw one that fits." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save a possibility without scheduling it. When free time appears, draw one that fits."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We couldn't open your Box. Your data was not changed."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先收下一种可能，不必安排日期。有空时，再抽一张适合当下的纸条。"
           }
         }
       }
     },
-    "We couldn't read your local data. Nothing was erased or replaced.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法读取本地数据。没有任何内容被清除或替换。"
+    "Schema" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schema"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We couldn't read your local data. Nothing was erased or replaced."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "数据架构"
           }
         }
       }
     },
-    "What just came to mind?": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "刚刚想到什么？"
+    "Search title and note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search title and note"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What just came to mind?"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索标题和备注"
           }
         }
       }
     },
-    "When you do a paper, the moment will be kept here.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "做过一张纸条后，这段经历会保存在这里。"
+    "Settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When you do a paper, the moment will be kept here."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置"
           }
         }
       }
     },
-    "Write one small thing you can start in a single free period.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "写下一件能在这段空闲时间里开始的小事。"
+    "Some papers need a duration update before they can be drawn." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some papers need a duration update before they can be drawn."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Write one small thing you can start in a single free period."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有些纸条需要更新时长后才能抽取。"
           }
         }
       }
     },
-    "You've seen every fitting paper in this round.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这一轮里合适的纸条都看过了。"
+    "Someday Box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Someday Box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You've seen every fitting paper in this round."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "改天盲盒"
           }
         }
       }
     },
-    "Your Box needs attention": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "盲盒需要处理"
+    "someday-box" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "someday-box"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your Box needs attention"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "改天盲盒"
           }
         }
       }
     },
-    "Your Box was not changed": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "盲盒没有改变"
+    "Something went wrong locally. Your previous state was kept." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong locally. Your previous state was kept."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your Box was not changed"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地操作出现问题，之前的状态已保留。"
           }
         }
       }
     },
-    "Your current paper": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "当前纸条"
+    "Storage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your current paper"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储位置"
           }
         }
       }
     },
-    "Your data was not changed.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的数据没有改变。"
+    "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your data was not changed."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用会切换到已验证的空存储，再移除之前的本地数据代。已导出的文件和系统备份不受本应用控制。"
           }
         }
       }
     },
-    "Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "纸条和回忆保存在应用沙盒中。本应用没有账号、分析、广告或产品网络请求。"
+    "There are no papers ready to draw yet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are no papers ready to draw yet."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests."
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有可以抽取的纸条。"
           }
         }
       }
     },
-    "Active papers": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Active papers" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "活跃纸条" } } } },
-    "A local data operation is already in progress.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "A local data operation is already in progress." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "另一项本地数据操作正在进行。" } } } },
-    "Backup format": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Backup format" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "备份格式" } } } },
-    "Create a backup first if you may want these papers and memories again.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Create a backup first if you may want these papers and memories again." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "如果以后可能需要这些纸条和回忆，请先创建备份。" } } } },
-    "Continue": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Continue" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "继续" } } } },
-    "Draw policy": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Draw policy" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抽取策略" } } } },
-    "Drawable papers": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Drawable papers" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "可抽纸条" } } } },
-    "Erase all data": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all data" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有数据" } } } },
-    "Erase all data permanently?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all data permanently?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "永久抹掉所有数据？" } } } },
-    "Erase all local data": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all local data" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有本地数据" } } } },
-    "Erase all local data?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Erase all local data?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "抹掉所有本地数据？" } } } },
-    "Export backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Export backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "导出备份" } } } },
-    "Replace everything in this Box?": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Replace everything in this Box?" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "替换盲盒里的全部内容？" } } } },
-    "Replace with this backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Replace with this backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "使用此备份替换" } } } },
-    "Restore backup": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Restore backup" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "恢复备份" } } } },
-    "Schema": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Schema" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "数据架构" } } } },
-    "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "应用会切换到已验证的空存储，再移除之前的本地数据代。已导出的文件和系统备份不受本应用控制。" } } } },
-    "This backup contains %lld papers and %lld memories. Your current Box will be replaced only after the restored data is verified.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup contains %1$lld papers and %2$lld memories. Your current Box will be replaced only after the restored data is verified." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份包含 %1$lld 张纸条和 %2$lld 条回忆。只有在恢复数据验证通过后，当前盲盒才会被替换。" } } } },
-    "This backup is damaged or was changed after export.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup is damaged or was changed after export." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份已损坏，或在导出后被修改。" } } } },
-    "This backup was created by a newer, unsupported format.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This backup was created by a newer, unsupported format." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此备份使用了当前版本不支持的较新格式。" } } } },
-    "This file is not a valid someday-box backup.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "This file is not a valid someday-box backup." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "此文件不是有效的改天盲盒备份。" } } } },
-    "Your Box has reached a local format limit. Export or remove content before adding more.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Your Box has reached a local format limit. Export or remove content before adding more." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。" } } } },
-    "Experience": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Experience" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "体验" } } } },
-    "Haptics": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Haptics" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "触感反馈" } } } },
-    "Open my Box": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Open my Box" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开我的盲盒" } } } },
-    "Save a possibility without scheduling it. When free time appears, draw one that fits.": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "Save a possibility without scheduling it. When free time appears, draw one that fits." } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "先收下一种可能，不必安排日期。有空时，再抽一张适合当下的纸条。" } } } },
-    "someday-box": { "localizations": { "en": { "stringUnit": { "state": "translated", "value": "someday-box" } }, "zh-Hans": { "stringUnit": { "state": "translated", "value": "改天盲盒" } } } }
+    "This backup contains %lld papers and %lld memories. Your current Box will be replaced only after the restored data is verified." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup contains %1$lld papers and %2$lld memories. Your current Box will be replaced only after the restored data is verified."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此备份包含 %1$lld 张纸条和 %2$lld 条回忆。只有在恢复数据验证通过后，当前盲盒才会被替换。"
+          }
+        }
+      }
+    },
+    "This backup contains %lld papers, %lld memories, and %lld pending captures. Your current Box will be replaced only after the restored data is verified." : {
+      "comment" : "A message explaining that a backup is being restored, including the number of papers, memories, and pending captures it contains.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This backup contains %1$lld papers, %2$lld memories, and %3$lld pending captures. Your current Box will be replaced only after the restored data is verified."
+          }
+        }
+      }
+    },
+    "This backup is damaged or was changed after export." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup is damaged or was changed after export."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此备份已损坏，或在导出后被修改。"
+          }
+        }
+      }
+    },
+    "This backup was created by a newer, unsupported format." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup was created by a newer, unsupported format."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此备份使用了当前版本不支持的较新格式。"
+          }
+        }
+      }
+    },
+    "This cannot be undone. Other papers and memories stay unchanged." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This cannot be undone. Other papers and memories stay unchanged."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作无法撤销，其他纸条和回忆不会改变。"
+          }
+        }
+      }
+    },
+    "This file is not a valid someday-box backup." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file is not a valid someday-box backup."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文件不是有效的改天盲盒备份。"
+          }
+        }
+      }
+    },
+    "This result came from an older draw version. You can do it or dismiss it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This result came from an older draw version. You can do it or dismiss it."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个结果来自旧版抽取。你可以接受或关闭它。"
+          }
+        }
+      }
+    },
+    "This result came from an older draw version. You can still do it or dismiss it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This result came from an older draw version. You can still do it or dismiss it."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个结果来自旧版抽取。你仍可接受或关闭它。"
+          }
+        }
+      }
+    },
+    "Try a different word or filter." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try a different word or filter."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试试其他关键词或筛选条件。"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
+    "Up to 1 hour" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 1 hour"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 1 小时"
+          }
+        }
+      }
+    },
+    "Up to 2 hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 2 hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 2 小时"
+          }
+        }
+      }
+    },
+    "Up to 4 hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 4 hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 4 小时"
+          }
+        }
+      }
+    },
+    "Up to 8 hours" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 8 hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 8 小时"
+          }
+        }
+      }
+    },
+    "Up to 10 minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 10 minutes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 10 分钟"
+          }
+        }
+      }
+    },
+    "Up to 30 minutes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 30 minutes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 30 分钟"
+          }
+        }
+      }
+    },
+    "We couldn't open your Box. Your data was not changed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't open your Box. Your data was not changed."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法打开盲盒，你的数据没有改变。"
+          }
+        }
+      }
+    },
+    "We couldn't read your local data. Nothing was erased or replaced." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't read your local data. Nothing was erased or replaced."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取本地数据。没有任何内容被清除或替换。"
+          }
+        }
+      }
+    },
+    "What just came to mind?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What just came to mind?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刚刚想到什么？"
+          }
+        }
+      }
+    },
+    "When you do a paper, the moment will be kept here." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you do a paper, the moment will be kept here."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "做过一张纸条后，这段经历会保存在这里。"
+          }
+        }
+      }
+    },
+    "Write one small thing you can start in a single free period." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write one small thing you can start in a single free period."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写下一件能在这段空闲时间里开始的小事。"
+          }
+        }
+      }
+    },
+    "You've seen every fitting paper in this round." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've seen every fitting paper in this round."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这一轮里合适的纸条都看过了。"
+          }
+        }
+      }
+    },
+    "Your Box has reached a local format limit. Export or remove content before adding more." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Box has reached a local format limit. Export or remove content before adding more."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "盲盒已达到本地格式上限。请先导出或移除内容，再继续添加。"
+          }
+        }
+      }
+    },
+    "Your Box needs attention" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Box needs attention"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "盲盒需要处理"
+          }
+        }
+      }
+    },
+    "Your Box was not changed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Box was not changed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "盲盒没有改变"
+          }
+        }
+      }
+    },
+    "Your current paper" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your current paper"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前纸条"
+          }
+        }
+      }
+    },
+    "Your data was not changed." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data was not changed."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的数据没有改变。"
+          }
+        }
+      }
+    },
+    "Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your papers and memories stay in this app's sandbox. The app has no account, analytics, ads, or product network requests."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸条和回忆保存在应用沙盒中。本应用没有账号、分析、广告或产品网络请求。"
+          }
+        }
+      }
+    }
   },
-  "version": "1.0"
+  "version" : "1.1"
 }
