@@ -23,6 +23,7 @@ struct SharedImportPresentationBatch: Equatable {
 struct SomedayBoxApp: App {
     @State private var appModel: AppModel?
     @State private var startupError: String?
+    @State private var recoveryService: StoreRecoveryService?
 
     var body: some Scene {
         WindowGroup {
@@ -31,6 +32,12 @@ struct SomedayBoxApp: App {
                     RootTabView()
                         .environment(appModel)
                         .tint(SomedayBoxBrand.tint)
+                } else if let recoveryService {
+                    StoreRecoveryView(service: recoveryService) {
+                        self.recoveryService = nil
+                        startupError = nil
+                        Task { await start() }
+                    }
                 } else if let startupError {
                     ContentUnavailableView {
                         Label("Your Box needs attention", systemImage: "externaldrive.badge.exclamationmark")
@@ -57,19 +64,28 @@ struct SomedayBoxApp: App {
             appModel = try await AppComposition.make()
         } catch {
             startupError = String(localized: "We couldn't open your Box. Your data was not changed.")
+            if let supportRoot = try? AppComposition.supportRoot() {
+                recoveryService = StoreRecoveryService(
+                    configuration: StoreGenerationConfiguration(applicationSupportURL: supportRoot)
+                )
+            }
         }
     }
 }
 
 @MainActor
 enum AppComposition {
-    static func make() async throws -> AppModel {
-        let supportRoot = try FileManager.default.url(
+    static func supportRoot() throws -> URL {
+        try FileManager.default.url(
             for: .applicationSupportDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
         ).appendingPathComponent("SomedayBox", isDirectory: true)
+    }
+
+    static func make() async throws -> AppModel {
+        let supportRoot = try supportRoot()
         let repository = try await GenerationProductRepository.open(
             configuration: StoreGenerationConfiguration(applicationSupportURL: supportRoot)
         )

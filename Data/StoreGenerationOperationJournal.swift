@@ -41,7 +41,9 @@ public struct StoreGenerationOperationJournal: Codable, Equatable, Sendable {
         priorGeneration: ActiveStoreGeneration,
         newGeneration: ActiveStoreGeneration,
         phase: StoreGenerationOperationPhase,
-        expectedProductDigest: String
+        expectedProductDigest: String,
+        rollbackCleanupGenerationIDs: [UUID]? = nil,
+        committedCleanupGenerationIDs: [UUID]? = nil
     ) {
         formatVersion = 1
         self.operationID = operationID
@@ -50,8 +52,8 @@ public struct StoreGenerationOperationJournal: Codable, Equatable, Sendable {
         self.newGeneration = newGeneration
         self.phase = phase
         self.expectedProductDigest = expectedProductDigest
-        rollbackCleanupGenerationIDs = [newGeneration.id]
-        committedCleanupGenerationIDs = [priorGeneration.id]
+        self.rollbackCleanupGenerationIDs = rollbackCleanupGenerationIDs ?? [newGeneration.id]
+        self.committedCleanupGenerationIDs = committedCleanupGenerationIDs ?? [priorGeneration.id]
     }
 }
 
