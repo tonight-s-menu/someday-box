@@ -4,7 +4,7 @@
 
 | Field | Decision |
 | --- | --- |
-| Document status | Selected post-MVP feature baseline; implementation has not started |
+| Document status | Selected post-MVP feature baseline; S0 complete, S1–S2 implementation in progress, S3–S6 not started |
 | Parent product contract | [Product requirements and technical foundation](../product-requirements-and-technical-foundation.md) |
 | Product | someday-box / 改天盲盒 |
 | System-facing name | Add to someday-box / 放进改天盲盒 |
@@ -15,7 +15,7 @@
 | Languages | Simplified Chinese and English |
 | Last reviewed | 2026-07-19 |
 
-This document translates the cross-platform sharing idea into an implementation-oriented feature contract. It resolves the gap between a compelling product story and what an iOS Share Extension can truthfully receive, persist, and prove. It contains no implementation code and does not claim that the feature currently exists. The cross-process authority is decided; the exact coordination primitive remains an explicit S2 architecture addendum gate rather than a hidden assumption.
+This document translates the cross-platform sharing idea into an implementation-oriented feature contract. It resolves the gap between a compelling product story and what an iOS Share Extension can truthfully receive, persist, and prove. It contains no implementation code and does not claim that the complete feature currently exists. S0 contract freeze is complete. The repository contains the S1 payload shell and an S2 mailbox foundation, including the accepted coordination addendum, but neither milestone has passed its exit-evidence gate; S3–S6 remain unimplemented.
 
 The parent product contract remains authoritative for Paper lifecycle, duration, drawing, Current Pick, Memories, backup safety, accessibility, and low-pressure language. This document owns only the Share to Box feature. If the two documents appear to conflict, the stricter privacy, data-integrity, and user-visible-truth rule applies until the conflict is explicitly resolved.
 

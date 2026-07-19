@@ -196,7 +196,7 @@ The next releases should be chosen from observed user friction, not from the siz
 
 Share to Box is the first selected major expansion. Its complete product, interaction, data, privacy, migration, rollback, and acceptance contract is maintained in [the feature specification](features/share-to-box.md), with the cross-process authority decision recorded in [ADR 0003](adr/0003-share-extension-local-import-mailbox.md).
 
-This selection does not retroactively add a Share Extension to the original MVP or claim that implementation has started. The first feature release accepts only system-provided HTTP(S) URLs and plain text, requires the same explicit title-plus-duration truth as manual capture, and adds no webpage fetching, attachment, automatic classification, inferred context, platform account access, or LLM path.
+This selection does not retroactively add Share to Box to the original MVP acceptance claim. Implementation is now in progress: S0 contract freeze is complete, S1 and S2 foundations are present without milestone exit evidence, and S3–S6 have not started. The first feature release accepts only system-provided HTTP(S) URLs and plain text, requires the same explicit title-plus-duration truth as manual capture, and adds no webpage fetching, attachment, automatic classification, inferred context, platform account access, or LLM path.
 
 ---
 
