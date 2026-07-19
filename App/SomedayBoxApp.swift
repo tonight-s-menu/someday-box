@@ -13,6 +13,12 @@ enum ShareCaptureRecoveryItem: Equatable, Identifiable {
     }
 }
 
+struct SharedImportPresentationBatch: Equatable {
+    var count: Int
+    var boundedItemIDs: [UUID]
+    var expiresAt: Date
+}
+
 @main
 struct SomedayBoxApp: App {
     @State private var appModel: AppModel?
@@ -124,6 +130,7 @@ final class AppModel {
     var isMutating = false
     var errorMessage: String?
     var shareRecoveryItems: [ShareCaptureRecoveryItem] = []
+    var sharedImportPresentation: SharedImportPresentationBatch?
     var presentationPreferences: CoreBoxPresentationPreferences {
         didSet { presentationPreferenceStore.save(presentationPreferences) }
     }
@@ -369,7 +376,8 @@ final class AppModel {
         switch current {
         case let .pending(entry, _):
             do {
-                _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                let result = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                recordFreshSharedImport(result)
                 try shareMailboxReader.remove(entry, at: groupURL)
                 shareRecoveryItems.removeFirst()
                 state = try await repository.snapshot()
@@ -423,6 +431,10 @@ final class AppModel {
         }
     }
 
+    func dropSharedImportPresentation() {
+        sharedImportPresentation = nil
+    }
+
     private func ingestSharedCaptures() async {
         guard let shareGroupContainerURL else { return }
         do {
@@ -430,7 +442,8 @@ final class AppModel {
             shareRecoveryItems = inspection.problems.map { .invalid($0) }
             for entry in inspection.entries {
                 do {
-                    _ = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                    let result = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
+                    recordFreshSharedImport(result)
                     try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
                 } catch {
                     shareRecoveryItems.append(.pending(entry, message: message(for: error)))
@@ -438,6 +451,19 @@ final class AppModel {
             }
         } catch {
             errorMessage = message(for: error)
+        }
+    }
+
+    private func recordFreshSharedImport(_ result: ImportSharedPaperResult) {
+        guard case let .imported(itemID, _) = result else { return }
+        let now = Date()
+        if var batch = sharedImportPresentation, batch.expiresAt > now {
+            batch.count += 1
+            if batch.boundedItemIDs.count < 3 { batch.boundedItemIDs.append(itemID) }
+            batch.expiresAt = now.addingTimeInterval(30)
+            sharedImportPresentation = batch
+        } else {
+            sharedImportPresentation = .init(count: 1, boundedItemIDs: [itemID], expiresAt: now.addingTimeInterval(30))
         }
     }
 

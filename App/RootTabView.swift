@@ -50,8 +50,11 @@ struct RootTabView: View {
         }
         .task { await appModel.load() }
         .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active else { return }
-            Task { await appModel.refreshSharedCaptures() }
+            if newPhase == .active {
+                Task { await appModel.refreshSharedCaptures() }
+            } else {
+                appModel.dropSharedImportPresentation()
+            }
         }
         .alert(
             "Your Box was not changed",

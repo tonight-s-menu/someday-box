@@ -79,8 +79,8 @@ final class ApplicationUseCaseTests: XCTestCase {
 
         let imported = try await useCase.execute(envelope: envelope)
         let replayed = try await useCase.execute(envelope: envelope)
-        XCTAssertEqual(imported, .imported(itemID: itemID))
-        XCTAssertEqual(replayed, .alreadyImported(itemID: itemID))
+        XCTAssertEqual(imported, .imported(itemID: itemID, sourceID: sourceID))
+        XCTAssertEqual(replayed, .alreadyImported(itemID: itemID, sourceID: sourceID))
 
         let state = await repository.snapshot()
         XCTAssertEqual(state.items.count, 1)
@@ -89,6 +89,31 @@ final class ApplicationUseCaseTests: XCTestCase {
         XCTAssertEqual(state.sources.first?.importEnvelopeID, envelope.envelopeID)
         XCTAssertEqual(state.items.first?.createdAt, now)
         XCTAssertEqual(state.sources.first?.capturedAt, now.addingTimeInterval(-60))
+    }
+
+    func testConcurrentSharedImportReturnsExactlyOneFreshOutcome() async throws {
+        let repository = InMemoryProductRepository()
+        let envelope = try ShareCaptureEnvelopeV1(
+            envelopeID: UUID(),
+            createdAt: now,
+            appBuild: "1",
+            title: "One envelope",
+            note: nil,
+            durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+            acceptedURLString: nil,
+            sourceKindRaw: "text"
+        )
+        let first = ImportSharedPaperUseCase(arbiter: MutationArbiter(repository: repository), clock: FixedClock(value: now), makeItemID: { UUID(uuidString: "00000000-0000-0000-0000-000000000021")! }, makeSourceID: { UUID(uuidString: "00000000-0000-0000-0000-000000000022")! })
+        let second = ImportSharedPaperUseCase(arbiter: MutationArbiter(repository: repository), clock: FixedClock(value: now), makeItemID: { UUID(uuidString: "00000000-0000-0000-0000-000000000023")! }, makeSourceID: { UUID(uuidString: "00000000-0000-0000-0000-000000000024")! })
+
+        async let firstResult = first.execute(envelope: envelope)
+        async let secondResult = second.execute(envelope: envelope)
+        let results = try await [firstResult, secondResult]
+        XCTAssertEqual(results.filter { if case .imported = $0 { true } else { false } }.count, 1)
+        XCTAssertEqual(results.filter { if case .alreadyImported = $0 { true } else { false } }.count, 1)
+        let state = await repository.snapshot()
+        XCTAssertEqual(state.items.count, 1)
+        XCTAssertEqual(state.sources.count, 1)
     }
 
     func testSharedImportCannotBypassUnresolvedRevealGate() async throws {

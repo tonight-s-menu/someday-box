@@ -85,6 +85,20 @@ struct HomeView: View {
             .sensoryFeedback(.success, trigger: appModel.state.memories.count) { oldValue, newValue in
                 appModel.hapticsEnabled && newValue > oldValue
             }
+            .overlay(alignment: .top) {
+                if let batch = appModel.sharedImportPresentation, batch.expiresAt > Date() {
+                    Label(
+                        batch.count == 1 ? "A shared paper arrived" : "\(batch.count) shared papers arrived",
+                        systemImage: "shippingbox.and.arrow.backward.fill"
+                    )
+                    .font(.callout.weight(.semibold))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.regularMaterial, in: Capsule())
+                    .accessibilityAddTraits(.isStaticText)
+                    .onTapGesture { appModel.dropSharedImportPresentation() }
+                }
+            }
         }
     }
 

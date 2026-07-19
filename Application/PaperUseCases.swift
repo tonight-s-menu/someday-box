@@ -70,8 +70,8 @@ public struct EditPaperUseCase: Sendable {
 }
 
 public enum ImportSharedPaperResult: Equatable, Sendable {
-    case imported(itemID: UUID)
-    case alreadyImported(itemID: UUID)
+    case imported(itemID: UUID, sourceID: UUID)
+    case alreadyImported(itemID: UUID, sourceID: UUID)
 }
 
 public struct ImportSharedPaperUseCase: Sendable {
@@ -94,13 +94,13 @@ public struct ImportSharedPaperUseCase: Sendable {
 
     public func execute(envelope: ShareCaptureEnvelopeV1) async throws -> ImportSharedPaperResult {
         if let existing = try await existingSource(for: envelope) {
-            return .alreadyImported(itemID: existing.itemID)
+            return .alreadyImported(itemID: existing.itemID, sourceID: existing.id)
         }
 
         let itemID = makeItemID()
         let sourceID = makeSourceID()
         let ingestedAt = clock.now()
-        _ = try await arbiter.perform(.importShared) { state in
+        let committed = try await arbiter.perform(.importShared) { state in
             if let existing = state.sources.first(where: { $0.importEnvelopeID == envelope.envelopeID }) {
                 guard Self.matches(existing, envelope: envelope, state: state) else {
                     throw ApplicationError.invalidPersistedState(.invalidSource(id: existing.id))
@@ -132,7 +132,12 @@ public struct ImportSharedPaperUseCase: Sendable {
                 )
             )
         }
-        return .imported(itemID: itemID)
+        guard let committedSource = committed.sources.first(where: { $0.importEnvelopeID == envelope.envelopeID }) else {
+            throw ApplicationError.invalidPersistedState(.invalidSource(id: sourceID))
+        }
+        return committedSource.id == sourceID
+            ? .imported(itemID: committedSource.itemID, sourceID: committedSource.id)
+            : .alreadyImported(itemID: committedSource.itemID, sourceID: committedSource.id)
     }
 
     private func existingSource(for envelope: ShareCaptureEnvelopeV1) async throws -> SourceReference? {
