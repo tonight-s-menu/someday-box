@@ -22,12 +22,12 @@ public struct CandidatePoolBuilder: Sendable {
         reservedItemID: UUID?,
         shownItemIDs: Set<UUID>
     ) -> CandidatePoolResult {
-        let active = items.filter { $0.lifecycle == .active }
+        let active = items.filter {
+            $0.lifecycle == .active && $0.id != currentPick?.itemID && $0.id != reservedItemID
+        }
         guard !active.isEmpty else { return .empty(.noActivePapers) }
 
-        let actionable = active.filter {
-            $0.supportedDuration != nil && $0.id != currentPick?.itemID && $0.id != reservedItemID
-        }
+        let actionable = active.filter { $0.supportedDuration != nil }
         guard !actionable.isEmpty else { return .empty(.unsupportedDurations) }
 
         let timeFitting = actionable.filter { item in
@@ -43,7 +43,18 @@ public struct CandidatePoolBuilder: Sendable {
 }
 
 public protocol RandomNumberGenerating: Sendable {
+    /// Returns a value in the half-open interval `0..<1`.
     mutating func nextUnitInterval() -> Double
+}
+
+public protocol Clock: Sendable {
+    func now() -> Date
+}
+
+public struct SystemClock: Clock {
+    public init() {}
+
+    public func now() -> Date { Date() }
 }
 
 public struct PlatformRandomNumberGenerator: RandomNumberGenerating {
@@ -52,7 +63,7 @@ public struct PlatformRandomNumberGenerator: RandomNumberGenerating {
     public init() {}
 
     public mutating func nextUnitInterval() -> Double {
-        Double(generator.next()) / Double(UInt64.max)
+        Double(generator.next()) / 18_446_744_073_709_551_616
     }
 }
 
@@ -66,6 +77,7 @@ private struct SystemRandomNumberGeneratorBase {
 
 public struct DrawSelectionPolicy: Sendable {
     public static let version = "mvp-v1"
+    public static let supportedVersions: Set<String> = [version]
 
     public init() {}
 
@@ -78,7 +90,11 @@ public struct DrawSelectionPolicy: Sendable {
         guard let bucket = item.supportedDuration else { return 0 }
         let timeFit: Double
         if let available = availableTime.maximumMinutes {
-            let stepsShorter = max(0, (available - bucket.maximumMinutes) / 30)
+            guard bucket.maximumMinutes <= available,
+                  let availableBucket = DurationBucket(rawValue: availableTime.rawValue) else {
+                return 0
+            }
+            let stepsShorter = availableBucket.policyIndex - bucket.policyIndex
             switch stepsShorter {
             case 0: timeFit = 1
             case 1: timeFit = 0.85
@@ -113,10 +129,13 @@ public struct DrawSelectionPolicy: Sendable {
         let total = weights.reduce(0, +)
         guard total > 0 else { return nil }
 
-        var threshold = generator.nextUnitInterval() * total
+        let unitValue = generator.nextUnitInterval()
+        precondition(unitValue >= 0 && unitValue < 1, "Random generators must return a value in 0..<1.")
+        let threshold = unitValue * total
+        var cumulativeWeight = 0.0
         for (item, weight) in zip(candidates, weights) {
-            threshold -= weight
-            if threshold <= 0 { return item }
+            cumulativeWeight += weight
+            if threshold < cumulativeWeight { return item }
         }
         return candidates.last
     }

@@ -26,6 +26,15 @@ struct DomainVerification {
         )
         precondition(unsupportedResult == .empty(.unsupportedDurations), "Unknown duration became drawable.")
 
+        let tenMinutes = item(duration: .upTo10Minutes, now: now)
+        let timeFitWeight = DrawSelectionPolicy().weight(
+            for: tenMinutes,
+            availableTime: .upTo30Minutes,
+            eligibleCount: 1,
+            now: now
+        )
+        precondition(timeFitWeight == 1.275, "Time fit did not use discrete duration buckets.")
+
         var generator = FixedGenerator(value: 0.99)
         let second = item(duration: .upTo30Minutes, now: now)
         let selected = DrawSelectionPolicy().select(
@@ -35,6 +44,23 @@ struct DomainVerification {
             using: &generator
         )
         precondition(selected?.id == second.id, "Injected random source did not produce deterministic selection.")
+
+        let content = try! PaperContentValidator().validate(title: "  A quiet walk  ", note: "line one\nline two")
+        precondition(content.title == "A quiet walk", "Title normalization changed unexpectedly.")
+
+        let session = DrawSession(startedAt: now, availableTime: .upTo30Minutes)
+        let attempt = DrawAttempt(
+            sessionID: session.id,
+            sequence: 1,
+            itemID: short.id,
+            eligibleCount: 1,
+            shownAt: now,
+            outcome: .unresolved
+        )
+        var reservedItem = short
+        reservedItem.lastShownAt = now
+        let state = PersistedProductState(items: [reservedItem], sessions: [session], attempts: [attempt])
+        try! PersistedStateValidator().validate(state)
         print("Domain verification passed.")
     }
 

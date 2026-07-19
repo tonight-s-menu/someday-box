@@ -24,6 +24,17 @@ public enum DurationBucket: String, Codable, CaseIterable, Sendable {
         case .upTo480Minutes: 480
         }
     }
+
+    var policyIndex: Int {
+        switch self {
+        case .upTo10Minutes: 0
+        case .upTo30Minutes: 1
+        case .upTo60Minutes: 2
+        case .upTo120Minutes: 3
+        case .upTo240Minutes: 4
+        case .upTo480Minutes: 5
+        }
+    }
 }
 
 public enum AvailableTime: String, Codable, CaseIterable, Sendable {
@@ -40,7 +51,7 @@ public enum AvailableTime: String, Codable, CaseIterable, Sendable {
     }
 }
 
-public struct BoxItem: Equatable, Identifiable, Sendable {
+public struct BoxItem: Codable, Equatable, Identifiable, Sendable {
     public let id: UUID
     public var title: String
     public var note: String?
@@ -76,9 +87,13 @@ public struct BoxItem: Equatable, Identifiable, Sendable {
     public var supportedDuration: DurationBucket? {
         DurationBucket(rawValue: durationBucketRaw)
     }
+
+    public var lifecycleRaw: String {
+        lifecycle.rawValue
+    }
 }
 
-public struct CurrentPick: Equatable, Sendable {
+public struct CurrentPick: Codable, Equatable, Sendable {
     public let itemID: UUID
     public let acceptedAt: Date
 }

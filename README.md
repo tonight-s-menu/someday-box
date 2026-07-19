@@ -34,8 +34,9 @@ The initial app surface is an intentionally thin M0/M1 scaffold. Persistence, ca
 | --- | --- |
 | `make test` | Run deterministic domain-policy verification on the host toolchain. |
 | `make check` | Run host checks, then iOS tests when full Xcode is selected. |
+| `make ci-check` | Require full Xcode and run the complete test gate. |
 | `make xcode-test` | Run the Xcode scheme's unit and UI tests on an iOS simulator. |
 
 ## Current verification boundary
 
-This repository has been bootstrapped with the macOS Command Line Tools, which can run `swift test` but cannot build or launch an iOS app. Full simulator, accessibility, device, offline, archive, privacy-report, backup/restore, and packaged-release evidence remain required before an MVP completion claim.
+This repository has been bootstrapped with the macOS Command Line Tools, which can run the deterministic host verification executable but cannot build or launch an iOS app. `make check` is a local convenience command and may skip iOS tests; `make ci-check` is the strict gate. Full simulator, accessibility, device, offline, archive, privacy-report, backup/restore, and packaged-release evidence remain required before an MVP completion claim.

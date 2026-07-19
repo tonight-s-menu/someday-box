@@ -20,6 +20,12 @@
 		A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000C /* PrivacyInfo.xcprivacy */; };
 		A0000000000000000000000D /* DrawPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000E /* DrawPolicyTests.swift */; };
 		A0000000000000000000000E /* AppLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000F /* AppLaunchTests.swift */; };
+		C00000000000000000000001 /* ContentValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* ContentValidation.swift */; };
+		C00000000000000000000002 /* DrawJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* DrawJournal.swift */; };
+		C00000000000000000000003 /* LifecyclePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* LifecyclePolicy.swift */; };
+		C00000000000000000000004 /* PersistedStateValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* PersistedStateValidator.swift */; };
+		C00000000000000000000005 /* DomainValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* DomainValidationTests.swift */; };
+		C00000000000000000000006 /* PersistedStateValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* PersistedStateValidatorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +47,12 @@
 		A10000000000000000000010 /* SomedayBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SomedayBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000011 /* SomedayBoxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SomedayBoxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000012 /* SomedayBoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SomedayBoxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000000000000000000001 /* ContentValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentValidation.swift; sourceTree = "<group>"; };
+		C10000000000000000000002 /* DrawJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawJournal.swift; sourceTree = "<group>"; };
+		C10000000000000000000003 /* LifecyclePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifecyclePolicy.swift; sourceTree = "<group>"; };
+		C10000000000000000000004 /* PersistedStateValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedStateValidator.swift; sourceTree = "<group>"; };
+		C10000000000000000000005 /* DomainValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainValidationTests.swift; sourceTree = "<group>"; };
+		C10000000000000000000006 /* PersistedStateValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedStateValidatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,13 +66,13 @@
 			A30000000000000000000002 /* App */, A30000000000000000000003 /* Domain */, A30000000000000000000004 /* Application */, A30000000000000000000005 /* Data */, A30000000000000000000006 /* Features */, A30000000000000000000007 /* DesignSystem */, A30000000000000000000008 /* Resources */, A30000000000000000000009 /* SomedayBoxTests */, A3000000000000000000000A /* SomedayBoxUITests */, A1000000000000000000000D /* SomedayBox.entitlements */, A3000000000000000000000B /* Products */
 		); sourceTree = "<group>"; };
 		A30000000000000000000002 /* App */ = {isa = PBXGroup; children = (A10000000000000000000001, A10000000000000000000002); path = App; sourceTree = "<group>"; };
-		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004); path = Domain; sourceTree = "<group>"; };
+		A30000000000000000000003 /* Domain */ = {isa = PBXGroup; children = (A10000000000000000000003, A10000000000000000000004, C10000000000000000000001, C10000000000000000000002, C10000000000000000000003, C10000000000000000000004); path = Domain; sourceTree = "<group>"; };
 		A30000000000000000000004 /* Application */ = {isa = PBXGroup; children = (A10000000000000000000005); path = Application; sourceTree = "<group>"; };
 		A30000000000000000000005 /* Data */ = {isa = PBXGroup; children = (A10000000000000000000006); path = Data; sourceTree = "<group>"; };
 		A30000000000000000000006 /* Features */ = {isa = PBXGroup; children = (A3000000000000000000000C, A3000000000000000000000D, A3000000000000000000000E); path = Features; sourceTree = "<group>"; };
 		A30000000000000000000007 /* DesignSystem */ = {isa = PBXGroup; children = (A1000000000000000000000A); path = DesignSystem; sourceTree = "<group>"; };
 		A30000000000000000000008 /* Resources */ = {isa = PBXGroup; children = (A1000000000000000000000B, A1000000000000000000000C); path = Resources; sourceTree = "<group>"; };
-		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E); path = SomedayBoxTests; sourceTree = "<group>"; };
+		A30000000000000000000009 /* SomedayBoxTests */ = {isa = PBXGroup; children = (A1000000000000000000000E, C10000000000000000000005, C10000000000000000000006); path = SomedayBoxTests; sourceTree = "<group>"; };
 		A3000000000000000000000A /* SomedayBoxUITests */ = {isa = PBXGroup; children = (A1000000000000000000000F); path = SomedayBoxUITests; sourceTree = "<group>"; };
 		A3000000000000000000000B /* Products */ = {isa = PBXGroup; children = (A10000000000000000000010, A10000000000000000000011, A10000000000000000000012); name = Products; sourceTree = "<group>"; };
 		A3000000000000000000000C /* Home */ = {isa = PBXGroup; children = (A10000000000000000000007); path = Home; sourceTree = "<group>"; };
@@ -83,8 +95,8 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
-		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000004, C00000000000000000000001, C00000000000000000000002, C00000000000000000000003, C00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000007, A00000000000000000000008, A00000000000000000000009, A0000000000000000000000A); runOnlyForDeploymentPostprocessing = 0; };
+		A60000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000D, C00000000000000000000005, C00000000000000000000006); runOnlyForDeploymentPostprocessing = 0; };
 		A60000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A0000000000000000000000E); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
