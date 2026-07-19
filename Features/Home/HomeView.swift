@@ -1,3 +1,4 @@
+import CryptoKit
 import RealityKit
 import SwiftUI
 import UIKit
@@ -167,6 +168,7 @@ private struct CoreBoxStage: View {
                     RealityView { content in
                         content.camera = .virtual
                         do {
+                            guard validateBundledAssetManifest() else { throw CoreBoxAssetLoadError.invalidContract }
                             let scene = try await Entity(named: "CoreBox", in: .main)
                             guard validate(scene: scene) else { throw CoreBoxAssetLoadError.invalidContract }
                             configure(scene: scene, tier: renderer)
@@ -294,6 +296,18 @@ private struct CoreBoxStage: View {
     private func validate(scene: Entity) -> Bool {
         let required = ["BoxRoot", "BoxBody", "LidPivot", "LidMesh", "RibbonRoot", "PaperPool", "PaperReveal", "CurrentPaperAnchor", "MemorySeam", "Ground", "Camera_Default", "Camera_Overview", "Light_Key", "Light_Fill"]
         return required.allSatisfy { name in scene.name == name || scene.findEntity(named: name) != nil }
+    }
+
+    private func validateBundledAssetManifest() -> Bool {
+        guard let assetURL = Bundle.main.url(forResource: "CoreBox", withExtension: "usda"),
+              let manifestURL = Bundle.main.url(forResource: "CoreBoxAssetManifest", withExtension: "json"),
+              let assetData = try? Data(contentsOf: assetURL),
+              let manifestData = try? Data(contentsOf: manifestURL),
+              let object = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
+              let expected = object["assetSHA256"] as? String
+        else { return false }
+        let actual = SHA256.hash(data: assetData).map { String(format: "%02x", $0) }.joined()
+        return actual == expected
     }
 }
 
