@@ -31,9 +31,9 @@ Values below describe the current source contract and must be checked against th
 
 | Contract | Candidate value |
 | --- | --- |
-| SwiftData schema | `1.0.0` — verify |
-| Backup format / canonicalization | `1 / 1` — verify |
-| Backup canonical byte limit | `134,217,728` — verify |
+| SwiftData schema | `2.0.0` — verify |
+| Backup format / canonicalization | `2 / 1` — verify; format 1 remains readable |
+| Backup canonical byte limit | `159,383,552` — verify |
 | Backup item / Current Pick limits | `5,000 / 1` — verify |
 | Backup Session / Attempt / Memory limits | `10,000 / 50,000 / 5,000` — verify |
 | Selection policy | `mvp-v1` — verify |
@@ -45,15 +45,15 @@ Values below describe the current source contract and must be checked against th
 | Oldest readable data version | `REQUIRED` |
 | Migration fixture versions | `REQUIRED` |
 | Share to Box | `not shipped`, or `shipped` with the fields below completed |
-| Share Capture Envelope / canonicalization | `not shipped`, or `REQUIRED` |
-| Share mailbox manifest / operation contract | `not shipped`, or `REQUIRED` |
-| Share mailbox count / byte limits | `not shipped`, or `REQUIRED` |
-| Source Reference schema contract | `not shipped`, or `REQUIRED` |
-| Share product-graph / backup v2 byte budgets | `not shipped`, or `REQUIRED` |
-| Share Extension bundle identifier and version | `not shipped`, or `REQUIRED` |
-| App Group identifier | `not shipped`, or `REQUIRED` |
-| Activation-rule contract and supported UTTypes | `not shipped`, or `REQUIRED` |
-| Oldest readable Share Capture Envelope | `not shipped`, or `REQUIRED` |
+| Share Capture Envelope / canonicalization | `not shipped`, or `1 / 1` — verify |
+| Share mailbox manifest / operation contract | `not shipped`, or `1 / 1` — verify |
+| Share mailbox count / byte limits | `not shipped`, or `256 / 4,194,304` — verify |
+| Source Reference schema contract | `not shipped`, or `schema v2; P0 max 5,000` — verify |
+| Share product-graph / backup v2 byte budgets | `not shipped`, or `150,994,944 / 159,383,552` — verify |
+| Share Extension bundle identifier and version | `not shipped`, or `com.somedaybox.app.share / REQUIRED` |
+| App Group identifier | `not shipped`, or `group.com.somedaybox.app.share` — verify signed entitlements |
+| Activation-rule contract and supported UTTypes | `not shipped`, or `dictionary v2; strict; URL max 1; plain text` — verify archive |
+| Oldest readable Share Capture Envelope | `not shipped`, or `1` — verify |
 
 ## Evidence ledger
 

@@ -4,7 +4,7 @@
 
 | Field | Decision |
 | --- | --- |
-| Document status | Selected post-MVP feature baseline; S0 complete, S1–S2 implementation in progress, S3–S6 not started |
+| Document status | Selected post-MVP feature; S1–S5 implemented with release evidence open, S6 blocked on signed packaged acceptance |
 | Parent product contract | [Product requirements and technical foundation](../product-requirements-and-technical-foundation.md) |
 | Product | someday-box / 改天盲盒 |
 | System-facing name | Add to someday-box / 放进改天盲盒 |
@@ -15,7 +15,7 @@
 | Languages | Simplified Chinese and English |
 | Last reviewed | 2026-07-19 |
 
-This document translates the cross-platform sharing idea into an implementation-oriented feature contract. It resolves the gap between a compelling product story and what an iOS Share Extension can truthfully receive, persist, and prove. It contains no implementation code and does not claim that the complete feature currently exists. S0 contract freeze is complete. The repository contains the S1 payload shell and an S2 mailbox foundation, including the accepted coordination addendum, but neither milestone has passed its exit-evidence gate; S3–S6 remain unimplemented.
+This document translates the cross-platform sharing idea into an implementation-oriented feature contract. It resolves the gap between a compelling product story and what an iOS Share Extension can truthfully receive, persist, and prove. It contains no implementation code and does not claim that the complete feature has passed release acceptance. S1–S5 are implemented in source and pass the locally executable automated gates. Real-host, signed-entitlement, physical-device, manual assistive-technology, performance, interruption, privacy-report, and immediate-predecessor evidence remains open. S6 therefore remains blocked even though an unsigned Release archive passes the structural package audit.
 
 The parent product contract remains authoritative for Paper lifecycle, duration, drawing, Current Pick, Memories, backup safety, accessibility, and low-pressure language. This document owns only the Share to Box feature. If the two documents appear to conflict, the stricter privacy, data-integrity, and user-visible-truth rule applies until the conflict is explicitly resolved.
 
@@ -1110,6 +1110,8 @@ Exit evidence:
 
 ### S1 — Extension shell and payload truth
 
+Implementation status: **implemented; exit evidence open**. The URL/text compose flow, explicit title and duration validation, bilingual accessible states, cancellation, and local publication are present. A real-host physical-device matrix is still required.
+
 Deliver:
 
 - embedded target and exact activation rule;
@@ -1124,6 +1126,8 @@ Exit evidence:
 - static network/dependency audit.
 
 ### S2 — Atomic local mailbox
+
+Implementation status: **implemented; exit evidence open**. Versioned canonical envelopes, coordinated publication, bounded capacity, generation maintenance, readback, and checksums are present. Forced-termination, protected-data, low-storage, and signed-entitlement device evidence is still required.
 
 Deliver:
 
@@ -1141,6 +1145,8 @@ Exit evidence:
 
 ### S3 — Product ingestion and source detail
 
+Implementation status: **implemented; exit evidence open**. Schema v2, Source Reference persistence, idempotent mutation-gated ingestion, source detail/open/remove, and source-neutral draw behavior are covered locally. The immediate-predecessor fixture and visible packaged journey remain required.
+
 Deliver:
 
 - schema migration and Source Reference;
@@ -1155,6 +1161,8 @@ Exit evidence:
 - visible end-to-end journey and source-neutral draw tests.
 
 ### S4 — Backup, restore, erase, and recovery closure
+
+Implementation status: **implemented; exit evidence open**. Backup v2 reads v1, includes sources and valid pending envelopes, and coordinates store/mailbox restore or erase with a durable shared journal. Corrupt and future envelopes retain a raw export and explicit discard path. The complete process-interruption and physical-device Files matrix remains required.
 
 Deliver:
 
@@ -1172,6 +1180,8 @@ Exit evidence:
 
 ### S5 — Product hardening
 
+Implementation status: **locally implemented; device evidence open**. English/Simplified Chinese feature copy, Reduce Motion handling, Dynamic Type reachability, automated accessibility checks, extension-inclusive local-only scans, and content-log scans pass locally. VoiceOver, Voice Control, Instruments, App Privacy Report, and oldest-device measurements remain required.
+
 Deliver:
 
 - bilingual copy;
@@ -1186,6 +1196,8 @@ Exit evidence:
 - extension launch/save measurements on reference devices.
 
 ### S6 — Packaged acceptance
+
+Status: **blocked on external release evidence**. An unsigned Release archive proves that the app embeds the expected `.appex` and carries the strict URL/text-only activation configuration. It cannot prove distribution signing, installed entitlements, real-host payloads, physical-device lifecycle, runtime network silence, upgrade, or phased-release approval.
 
 Deliver:
 
