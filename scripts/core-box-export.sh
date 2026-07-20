@@ -45,4 +45,11 @@ for TIER in full lite; do
         --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/compose-core-box-static.py" -- \
         --source "${SOURCE_STAGE}" --output "${NORMALIZED_STAGE}"
     mv "${NORMALIZED_STAGE}" "${SOURCE_STAGE}"
+
+    COMPOSED_STAGE="${OUTPUT_ROOT}/stage/${TIER}/${RESOURCE}.composed.usda"
+    BLENDER_BIN="${BLENDER_BIN}" "${SOURCE_ROOT}/scripts/run-core-box-blender.sh" \
+        --background --factory-startup --disable-autoexec --offline-mode --python-use-system-env --python-exit-code 1 \
+        --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/compose-core-box-clips.py" -- \
+        --base "${SOURCE_STAGE}" --output "${COMPOSED_STAGE}" --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json"
+    mv "${COMPOSED_STAGE}" "${SOURCE_STAGE}"
 done
