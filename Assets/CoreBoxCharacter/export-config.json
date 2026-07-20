@@ -12,19 +12,19 @@
     "binarySHA256": "60ba7a9b6743f7acf101274361fa76409e382ae07cd2007ce07dea30f6b129f2"
   },
   "appleUSDTools": {
-    "macOSBuild": "25D125",
+    "macOSBuild": "25E246",
     "versionOutput": "Apple USD Tools (0.25.2)",
     "usdcat": {
       "path": "/usr/bin/usdcat",
-      "sha256": "3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4"
+      "sha256": "46ef557683664366d24132b8610a82c40e2b0bc12b47b50dc395324931a21c87"
     },
     "usdchecker": {
       "path": "/usr/bin/usdchecker",
-      "sha256": "333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371"
+      "sha256": "f5ef30ad41d45aa2425d579ece37ee99e6a7f94b128e047c63ef30c341507ca0"
     },
     "usdzip": {
       "path": "/usr/bin/usdzip",
-      "sha256": "ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1"
+      "sha256": "b1484747008da6424b2d8381553e177fe9e6c8dc791037b0f554de57d3c8e92a"
     }
   },
   "coordinateSystem": {

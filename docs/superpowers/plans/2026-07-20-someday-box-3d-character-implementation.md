@@ -27,7 +27,7 @@ Current facts verified on 2026-07-20:
 - The design spec's statement about uncommitted `HomeView.swift` and String Catalog edits is historical. The actual implementation baseline is the clean worktree plus the untouched stash.
 - Blender executable: `/Applications/Blender.app/Contents/MacOS/Blender`, version `5.2.0 LTS`, build hash `fbe6228777e7`, arm64 binary SHA-256 `60ba7a9b6743f7acf101274361fa76409e382ae07cd2007ce07dea30f6b129f2`. `/opt/homebrew/bin/blender` is a Homebrew wrapper script, not the pinned Mach-O binary, and is not an accepted export input.
 - Official installer SHA-256: `ed4d8390166dec5ea0a2813a03db6221f206ce016442be7f59f41d760972568a`.
-- Xcode: `26.6 (17F113)` on macOS build `25D125`. Apple `usdcat`, `usdzip`, and `usdchecker` each print exactly `Apple USD Tools (0.25.2)` and have SHA-256 values `3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4`, `ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1`, and `333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371` respectively.
+- Xcode: `26.6 (17F113)` on macOS build `25E246`. Apple `usdcat`, `usdzip`, and `usdchecker` each print exactly `Apple USD Tools (0.25.2)` and have SHA-256 values `46ef557683664366d24132b8610a82c40e2b0bc12b47b50dc395324931a21c87`, `b1484747008da6424b2d8381553e177fe9e6c8dc791037b0f554de57d3c8e92a`, and `f5ef30ad41d45aa2425d579ece37ee99e6a7f94b128e047c63ef30c341507ca0` respectively.
 - Apple USD Tools 0.25.2 has a verified `usdzip --arkitAsset ... --checkCompliance` crash on an asset that passes `usdchecker --arkit --strict`; a direct `subprocess.run(argv, shell=False)` observes `returncode == -signal.SIGBUS` while a shell may translate the same termination to 138. `usdzip --arkitAsset` without that flag succeeds. Task 3 records the direct-process reproduction and amends the design/ADR to the fail-closed pre-package plus post-package strict checker gate before implementation proceeds.
 - `make ci-check` currently passes 64 XCTest, 10 Swift Testing, and 5 UI tests: 79 total, zero failures, on iPhone 17 Pro Simulator.
 - `Package.swift` compiles only `Domain/`; therefore `make test` is never sufficient proof for Application, App, SwiftUI, RealityKit, or XCUITest work.
@@ -66,19 +66,19 @@ The single source of configuration truth is `Assets/CoreBoxCharacter/export-conf
     "binarySHA256": "60ba7a9b6743f7acf101274361fa76409e382ae07cd2007ce07dea30f6b129f2"
   },
   "appleUSDTools": {
-    "macOSBuild": "25D125",
+    "macOSBuild": "25E246",
     "versionOutput": "Apple USD Tools (0.25.2)",
     "usdcat": {
       "path": "/usr/bin/usdcat",
-      "sha256": "3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4"
+      "sha256": "46ef557683664366d24132b8610a82c40e2b0bc12b47b50dc395324931a21c87"
     },
     "usdchecker": {
       "path": "/usr/bin/usdchecker",
-      "sha256": "333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371"
+      "sha256": "f5ef30ad41d45aa2425d579ece37ee99e6a7f94b128e047c63ef30c341507ca0"
     },
     "usdzip": {
       "path": "/usr/bin/usdzip",
-      "sha256": "ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1"
+      "sha256": "b1484747008da6424b2d8381553e177fe9e6c8dc791037b0f554de57d3c8e92a"
     }
   },
   "coordinateSystem": {
@@ -573,19 +573,19 @@ The production authoring tree is the sorted set of `CoreBoxCharacter.blend`, all
     "tapCommit": "a61ec1d1ae76cff8cf10f792b617f5b4f7a49a84"
   },
   "appleUSDTools": {
-    "macOSBuild": "25D125",
+    "macOSBuild": "25E246",
     "versionOutput": "Apple USD Tools (0.25.2)",
     "usdcat": {
       "path": "/usr/bin/usdcat",
-      "sha256": "3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4"
+      "sha256": "46ef557683664366d24132b8610a82c40e2b0bc12b47b50dc395324931a21c87"
     },
     "usdchecker": {
       "path": "/usr/bin/usdchecker",
-      "sha256": "333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371"
+      "sha256": "f5ef30ad41d45aa2425d579ece37ee99e6a7f94b128e047c63ef30c341507ca0"
     },
     "usdzip": {
       "path": "/usr/bin/usdzip",
-      "sha256": "ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1"
+      "sha256": "b1484747008da6424b2d8381553e177fe9e6c8dc791037b0f554de57d3c8e92a"
     }
   },
   "xcode": "26.6 (17F113)"
