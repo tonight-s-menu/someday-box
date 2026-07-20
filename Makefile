@@ -4,7 +4,7 @@ DEVELOPER_DIR ?= $(shell /usr/bin/xcode-select -p)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check core-box-proof-audit
+.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check core-box-proof-audit core-box-asset-audit core-box-compatibility-test
 
 help:
 	@echo "make test       Run deterministic pure-domain checks"
@@ -18,6 +18,8 @@ help:
 	@echo "make core-box-export-stage OUTPUT_ROOT=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "make core-box-repro-check CHECKED_OUT_ASSETS=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "make core-box-proof-audit Verify test-only Core Box proof bytes and identity"
+	@echo "make core-box-asset-audit Run the read-only Core Box asset audit"
+	@echo "make core-box-compatibility-test Run the independent Core Box Host on Simulator"
 	@echo "Override the simulator with SIMULATOR_DESTINATION='platform=iOS Simulator,...'"
 
 audit:
@@ -67,3 +69,9 @@ core-box-repro-check:
 
 core-box-proof-audit:
 	./scripts/audit-core-box-proof.sh
+
+core-box-asset-audit: core-box-toolchain-audit core-box-pipeline-tests
+	./scripts/audit-core-box-assets.sh
+
+core-box-compatibility-test: core-box-toolchain-audit
+	xcodebuild test -project SomedayBox.xcodeproj -scheme CoreBoxCompatibilityHost -destination "$(SIMULATOR_DESTINATION)" -only-testing:CoreBoxCompatibilityUITests

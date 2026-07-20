@@ -111,6 +111,9 @@
 		D2000000000000000000000B /* Fixtures/CoreBoxProofFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz */; };
 		D2000000000000000000000C /* Fixtures/CoreBoxProofLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz */; };
 		D2000000000000000000000D /* Fixtures/CoreBoxProofReport.json in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000005 /* Fixtures/CoreBoxProofReport.json */; };
+		D2000000000000000000000E /* DrawPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* DrawPolicy.swift */; };
+		D2000000000000000000000F /* BoxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* BoxItem.swift */; };
+		D20000000000000000000010 /* DrawJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* DrawJournal.swift */; };
 		E30000000000000000000001 /* CoreBoxCompatibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40000000000000000000001 /* CoreBoxCompatibilityUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -875,6 +878,9 @@
 				D20000000000000000000008 /* CoreBoxSceneAdapter.swift in Sources */,
 				D20000000000000000000009 /* CoreBox2DAdapter.swift in Sources */,
 				D2000000000000000000000A /* CoreBoxProofIdentity.generated.swift in Sources */,
+				D2000000000000000000000E /* DrawPolicy.swift in Sources */,
+				D2000000000000000000000F /* BoxItem.swift in Sources */,
+				D20000000000000000000010 /* DrawJournal.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
