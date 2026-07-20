@@ -8,6 +8,12 @@ from pathlib import Path
 
 from pxr import Sdf, Usd, UsdGeom
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from core_box_usda import canonicalize_sdf_layer, canonicalize_usda
+
 
 def compose(source: Path, output: Path) -> None:
     """Move Blender's raw material scope beneath the one public root."""
@@ -44,7 +50,9 @@ def compose(source: Path, output: Path) -> None:
         raise RuntimeError("raw material scope remains")
     if "</_materials" in output_layer.ExportToString():
         raise RuntimeError("raw material reference remains")
+    canonicalize_sdf_layer(output_layer)
     output_layer.Save()
+    canonicalize_usda(output)
 
 
 def main() -> None:

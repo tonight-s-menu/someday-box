@@ -9,6 +9,12 @@ from pathlib import Path
 
 from pxr import Sdf, Usd
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from core_box_usda import canonicalize_sdf_layer, canonicalize_usda
+
 
 def compose(base: Path, output: Path, clips: list[dict[str, object]]) -> None:
     """Copy the normalized base and bind each action under its own clip set."""
@@ -36,7 +42,9 @@ def compose(base: Path, output: Path, clips: list[dict[str, object]]) -> None:
         api.SetClipTimes([(0.0, 0.0), (float(clip["durationMilliseconds"]), float(clip["authoringFrameCount"]))], token)
         names[token] = name
     root.SetCustomDataByKey("coreBoxAnimationNames", names)
+    canonicalize_sdf_layer(layer)
     layer.Save()
+    canonicalize_usda(output)
 
 
 def main() -> None:

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Export static USDA stages only; composition and USDZ sealing are the next task slice.
 set -eu
+export TZ=UTC LANG=C LC_ALL=C SOURCE_DATE_EPOCH=946684800
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -53,9 +54,18 @@ for TIER in full lite; do
         --base "${SOURCE_STAGE}" --output "${COMPOSED_STAGE}" --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json"
     mv "${COMPOSED_STAGE}" "${SOURCE_STAGE}"
 
+    # USDZ records source mtimes; normalize every packaged dependency before usdzip.
+    find "${OUTPUT_ROOT}/stage/${TIER}" -type f -exec touch -t 200001010000 {} +
+
     /usr/bin/usdcat --loadOnly "${SOURCE_STAGE}"
     /usr/bin/usdchecker --arkit --strict "${SOURCE_STAGE}"
-    /usr/bin/usdzip "${OUTPUT_ROOT}/${RESOURCE}.usdz" --arkitAsset "${SOURCE_STAGE}"
+    # usdzip serializes an absolute input path into its converted root layer;
+    # invoke it from the stage directory so that path is destination-independent.
+    (
+        cd "${OUTPUT_ROOT}/stage/${TIER}"
+        /usr/bin/usdzip "${OUTPUT_ROOT}/${RESOURCE}.usdz" --arkitAsset "${RESOURCE}.usda"
+    )
+    /usr/bin/python3 -B "${SOURCE_ROOT}/scripts/normalize-usdz-timestamps.py" --package "${OUTPUT_ROOT}/${RESOURCE}.usdz"
     /usr/bin/usdchecker --arkit --strict "${OUTPUT_ROOT}/${RESOURCE}.usdz"
     /usr/bin/python3 -B "${SOURCE_ROOT}/scripts/verify-core-box-package.py" --package "${OUTPUT_ROOT}/${RESOURCE}.usdz" --tier "${TIER}"
 done

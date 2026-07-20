@@ -4,7 +4,7 @@ DEVELOPER_DIR ?= $(shell /usr/bin/xcode-select -p)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage
+.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check
 
 help:
 	@echo "make test       Run deterministic pure-domain checks"
@@ -16,6 +16,7 @@ help:
 	@echo "make core-box-toolchain-audit Verify pinned Core Box tool provenance against the live machine"
 	@echo "make core-box-pipeline-tests  Run the Core Box asset contract unit tests"
 	@echo "make core-box-export-stage OUTPUT_ROOT=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
+	@echo "make core-box-repro-check CHECKED_OUT_ASSETS=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "Override the simulator with SIMULATOR_DESTINATION='platform=iOS Simulator,...'"
 
 audit:
@@ -57,3 +58,8 @@ core-box-export-stage:
 	./scripts/core-box-export.sh --output "$(OUTPUT_ROOT)" --profile "$(EXPORT_PROFILE)"
 	/usr/bin/usdchecker --arkit --strict "$(OUTPUT_ROOT)/stage/full/CoreBoxCharacterFull.usda"
 	/usr/bin/usdchecker --arkit --strict "$(OUTPUT_ROOT)/stage/lite/CoreBoxCharacterLite.usda"
+
+core-box-repro-check:
+	@test -n "$(CHECKED_OUT_ASSETS)" || { echo "CHECKED_OUT_ASSETS is required." >&2; exit 64; }
+	@test -n "$(EXPORT_PROFILE)" || { echo "EXPORT_PROFILE is required." >&2; exit 64; }
+	./scripts/core-box-repro-check.sh --checked-out-assets "$(CHECKED_OUT_ASSETS)" --profile "$(EXPORT_PROFILE)"

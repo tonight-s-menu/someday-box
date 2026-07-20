@@ -9,6 +9,13 @@ import sys
 from pathlib import Path
 
 import bpy
+from pxr import Sdf
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from core_box_usda import canonicalize_sdf_layer, canonicalize_usda
 
 
 EXPECTED_FLAGS = {"debug": 0, "inspect": 0, "interactive": 0, "optimize": 0, "dont_write_bytecode": 1, "no_user_site": 1, "ignore_environment": 0, "verbose": 0, "bytes_warning": 0, "quiet": 0, "hash_randomization": 0, "isolated": 0, "dev_mode": False, "utf8_mode": 1, "safe_path": False, "warn_default_encoding": 0}
@@ -42,6 +49,17 @@ def export_usda(output: Path, collection: str, *, animation: bool, materials: bo
     )
     if "FINISHED" not in result or not output.is_file():
         raise RuntimeError(f"USD export failed: {output.name}")
+    canonicalize_layer(output)
+
+
+def canonicalize_layer(path: Path) -> None:
+    """Persist a lexicographically ordered USDA layer for reproducible packaging."""
+    layer = Sdf.Layer.FindOrOpen(str(path))
+    if layer is None:
+        raise RuntimeError(f"cannot reopen exported layer: {path.name}")
+    canonicalize_sdf_layer(layer)
+    layer.Save()
+    canonicalize_usda(path)
 
 
 def activate_action(action: bpy.types.Action) -> None:
