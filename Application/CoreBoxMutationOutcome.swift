@@ -93,6 +93,11 @@ public struct ShareImportBatchAccumulator: Sendable {
 }
 
 public enum CoreBoxPresentationEventMapper {
+    public static func share(_ result: ShareImportBatchResult) -> CoreBoxPresentationEvent? {
+        guard !result.freshItemIDs.isEmpty else { return nil }
+        return .shareArrival(freshItemIDs: result.freshItemIDs)
+    }
+
     public static func capture(_ projection: AppMutationProjection<CapturePaperResult>) -> CoreBoxPresentationEvent? {
         guard case let .committed(outcome, _) = projection else { return nil }
         return .captureDeposit(itemID: outcome.itemID)

@@ -33,6 +33,8 @@ final class CoreBoxSceneAdapter: CoreBoxPresentationAdapter {
         case .captureReceive: motionName = "capture.receive"
         case .captureDeposit: motionName = "capture.deposit"
         case .drawReveal: motionName = "draw.reveal"
+        case let .shareArrival(freshItemIDs):
+            motionName = freshItemIDs.count <= 3 ? "react.notice.single" : "react.notice.aggregate"
         case .currentAttach: motionName = "current.attach"
         case .paperReturn: motionName = "paper.return"
         case .memoryStamp: motionName = "memory.stamp"

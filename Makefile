@@ -4,7 +4,7 @@ DEVELOPER_DIR ?= $(shell /usr/bin/xcode-select -p)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check core-box-proof-audit core-box-asset-audit core-box-compatibility-test
+.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check core-box-proof-audit core-box-asset-audit core-box-package-audit core-box-compatibility-test
 
 help:
 	@echo "make test       Run deterministic pure-domain checks"
@@ -19,6 +19,7 @@ help:
 	@echo "make core-box-repro-check CHECKED_OUT_ASSETS=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "make core-box-proof-audit Verify test-only Core Box proof bytes and identity"
 	@echo "make core-box-asset-audit Run the read-only Core Box asset audit"
+	@echo "make core-box-package-audit ARCHIVE_PATH=/absolute/path RELEASE_MANIFEST_PATH=/absolute/path"
 	@echo "make core-box-compatibility-test Run the independent Core Box Host on Simulator"
 	@echo "Override the simulator with SIMULATOR_DESTINATION='platform=iOS Simulator,...'"
 
@@ -72,6 +73,11 @@ core-box-proof-audit:
 
 core-box-asset-audit: core-box-toolchain-audit core-box-pipeline-tests
 	./scripts/audit-core-box-assets.sh
+
+core-box-package-audit: core-box-toolchain-audit
+	@test -n "$(ARCHIVE_PATH)" || { echo "ARCHIVE_PATH is required." >&2; exit 64; }
+	@test -n "$(RELEASE_MANIFEST_PATH)" || { echo "RELEASE_MANIFEST_PATH is required." >&2; exit 64; }
+	./scripts/audit-core-box-package.sh "$(ARCHIVE_PATH)" "$(RELEASE_MANIFEST_PATH)"
 
 core-box-compatibility-test: core-box-toolchain-audit
 	xcodebuild test -project SomedayBox.xcodeproj -scheme CoreBoxCompatibilityHost -destination "$(SIMULATOR_DESTINATION)" -only-testing:CoreBoxCompatibilityUITests

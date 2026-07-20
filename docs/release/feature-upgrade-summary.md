@@ -64,5 +64,5 @@ P1 starts only after P0 interaction and performance evidence is stable. It may a
 
 - [Core Box living-experience contract](../core-box-living-experience-upgrade.md)
 - [RealityKit architecture decision](../adr/0004-realitykit-core-box-presentation.md)
-- [Candidate release manifest](core-box-candidate-manifest.json)
+- Candidate manifests are generated outside the checkout with `scripts/generate-core-box-candidate-manifest.py`; the checked-in contract is [the candidate manifest schema](core-box-candidate-manifest.schema.json).
 - [Acceptance checklist](acceptance-checklist.md)

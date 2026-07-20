@@ -22,20 +22,26 @@ final class CoreBox2DAdapter: CoreBoxPresentationAdapter {
         events.append(event)
         guard var pose = stablePose, pose.snapshotVersion == sourceSnapshotVersion else { return }
         switch event {
-        case .captureReceive, .captureDeposit, .drawReveal, .currentAttach, .memoryStamp:
-            pose = CoreBoxStablePose(
-                snapshotVersion: pose.snapshotVersion,
-                inBoxCount: pose.inBoxCount,
-                visiblePapers: pose.visiblePapers,
-                hasCurrentPick: pose.hasCurrentPick,
-                memorySeamVisible: pose.memorySeamVisible,
-                lid: pose.lid,
-                draw: pose.draw,
-                rendererTier: pose.rendererTier,
-                motionMode: pose.motionMode
-            )
-        case .paperReturn, .touch, .failureSettle, .fallbackSettle:
+        case .captureReceive:
+            pose.lid = .open(.capture)
+        case .captureDeposit:
+            pose.lid = .closing(.deposit)
+        case .drawReveal:
+            pose.draw = .resultVisible
+        case .shareArrival:
             break
+        case .currentAttach:
+            pose.draw = .idle
+        case .paperReturn:
+            pose.lid = .closed
+            pose.draw = .armed
+        case .memoryStamp:
+            pose.memorySeamVisible = true
+        case .touch:
+            break
+        case .failureSettle, .fallbackSettle:
+            pose.lid = .closed
+            pose.draw = .idle
         }
         stablePose = pose
     }

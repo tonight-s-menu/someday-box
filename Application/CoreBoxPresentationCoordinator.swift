@@ -252,6 +252,7 @@ public final class CoreBoxPresentationCoordinator {
         switch event {
         case .captureDeposit: return [.lid, .paper]
         case .drawReveal: return [.lid, .paper, .camera]
+        case .shareArrival: return [.root, .paper]
         case .currentAttach: return [.paper, .memorySeam]
         case .paperReturn: return [.paper, .lid]
         case .memoryStamp: return [.paper, .memorySeam]

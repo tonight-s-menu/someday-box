@@ -56,8 +56,6 @@
 		J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000002 /* CoreBoxPresentationTests.swift */; };
 		J00000000000000000000003 /* LegacyV2ProductReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000003 /* LegacyV2ProductReader.swift */; };
 		J00000000000000000000004 /* BackupDocumentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000004 /* BackupDocumentV3.swift */; };
-		J00000000000000000000005 /* CoreBox.usda in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000005 /* CoreBox.usda */; };
-		J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000006 /* CoreBoxAssetManifest.json */; };
 		J00000000000000000000007 /* StoreRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000007 /* StoreRecoveryService.swift */; };
 		J00000000000000000000008 /* Recovery/StoreRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000008 /* Recovery/StoreRecoveryView.swift */; };
 		J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000009 /* StoreRecoveryTests.swift */; };
@@ -98,6 +96,7 @@
 		N00000000000000000000006 /* UITestLaunchConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000006 /* UITestLaunchConfiguration.swift */; };
 		N00000000000000000000007 /* Support/UITestLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000007 /* Support/UITestLauncher.swift */; };
 		N00000000000000000000008 /* UITestLaunchConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000008 /* UITestLaunchConfigurationTests.swift */; };
+		O00000000000000000000001 /* CoreBoxApplicationAssetSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = O10000000000000000000001 /* CoreBoxApplicationAssetSource.swift */; };
 		D20000000000000000000001 /* CoreBoxCompatibilityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000001 /* CoreBoxCompatibilityHostApp.swift */; };
 		D20000000000000000000002 /* CoreBoxCompatibilityProbeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000002 /* CoreBoxCompatibilityProbeView.swift */; };
 		D20000000000000000000003 /* CoreBoxProofAssetSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000003 /* CoreBoxProofAssetSource.swift */; };
@@ -215,8 +214,6 @@
 		J10000000000000000000002 /* CoreBoxPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationTests.swift; sourceTree = "<group>"; };
 		J10000000000000000000003 /* LegacyV2ProductReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyV2ProductReader.swift; sourceTree = "<group>"; };
 		J10000000000000000000004 /* BackupDocumentV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupDocumentV3.swift; sourceTree = "<group>"; };
-		J10000000000000000000005 /* CoreBox.usda */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBox.usda; sourceTree = "<group>"; };
-		J10000000000000000000006 /* CoreBoxAssetManifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CoreBoxAssetManifest.json; sourceTree = "<group>"; };
 		J10000000000000000000007 /* StoreRecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryService.swift; sourceTree = "<group>"; };
 		J10000000000000000000008 /* Recovery/StoreRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recovery/StoreRecoveryView.swift; sourceTree = "<group>"; };
 		J10000000000000000000009 /* StoreRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryTests.swift; sourceTree = "<group>"; };
@@ -257,6 +254,7 @@
 		N10000000000000000000006 /* UITestLaunchConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestLaunchConfiguration.swift; sourceTree = "<group>"; };
 		N10000000000000000000007 /* Support/UITestLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Support/UITestLauncher.swift; sourceTree = "<group>"; };
 		N10000000000000000000008 /* UITestLaunchConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestLaunchConfigurationTests.swift; sourceTree = "<group>"; };
+		O10000000000000000000001 /* CoreBoxApplicationAssetSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxApplicationAssetSource.swift; sourceTree = "<group>"; };
 		D30000000000000000000001 /* CoreBoxCompatibilityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxCompatibilityHostApp.swift; sourceTree = "<group>"; };
 		D30000000000000000000002 /* CoreBoxCompatibilityProbeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxCompatibilityProbeView.swift; sourceTree = "<group>"; };
 		D30000000000000000000003 /* CoreBoxProofAssetSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProofAssetSource.swift; sourceTree = "<group>"; };
@@ -421,8 +419,6 @@
 				G10000000000000000000002 /* Info.plist */,
 				A1000000000000000000000B /* Localizable.xcstrings */,
 				A1000000000000000000000C /* PrivacyInfo.xcprivacy */,
-				J10000000000000000000005 /* CoreBox.usda */,
-				J10000000000000000000006 /* CoreBoxAssetManifest.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -513,6 +509,7 @@
 				M10000000000000000000008 /* CoreBoxInteractionSurface.swift */,
 				N10000000000000000000002 /* CoreBoxStage.swift */,
 				N10000000000000000000003 /* CoreBoxRealityStage.swift */,
+				O10000000000000000000001 /* CoreBoxApplicationAssetSource.swift */,
 			);
 			path = CoreBox;
 			sourceTree = "<group>";
@@ -725,8 +722,6 @@
 			files = (
 				A0000000000000000000000B /* Localizable.xcstrings in Resources */,
 				A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */,
-				J00000000000000000000005 /* CoreBox.usda in Resources */,
-				J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -800,6 +795,7 @@
 				L00000000000000000000004 /* CoreBox2DAdapter.swift in Sources */,
 				N00000000000000000000002 /* CoreBoxStage.swift in Sources */,
 				N00000000000000000000003 /* CoreBoxRealityStage.swift in Sources */,
+				O00000000000000000000001 /* CoreBoxApplicationAssetSource.swift in Sources */,
 				A00000000000000000000007 /* HomeView.swift in Sources */,
 				N00000000000000000000005 /* DrawContextPicker.swift in Sources */,
 				N00000000000000000000006 /* UITestLaunchConfiguration.swift in Sources */,

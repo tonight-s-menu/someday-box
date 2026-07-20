@@ -214,15 +214,15 @@ public struct CoreBoxSceneSnapshot: Equatable, Sendable {
 
 /// Adapter-neutral stable state used by both RealityKit and the functional 2D fallback.
 struct CoreBoxStablePose: Equatable, Sendable {
-    let snapshotVersion: UInt64
-    let inBoxCount: Int
-    let visiblePapers: [CoreBoxPaperProjection]
-    let hasCurrentPick: Bool
-    let memorySeamVisible: Bool
-    let lid: CoreBoxLidState
-    let draw: CoreBoxDrawState
-    let rendererTier: CoreBoxRendererTier
-    let motionMode: CoreBoxMotionMode
+    var snapshotVersion: UInt64
+    var inBoxCount: Int
+    var visiblePapers: [CoreBoxPaperProjection]
+    var hasCurrentPick: Bool
+    var memorySeamVisible: Bool
+    var lid: CoreBoxLidState
+    var draw: CoreBoxDrawState
+    var rendererTier: CoreBoxRendererTier
+    var motionMode: CoreBoxMotionMode
 
     init(
         snapshotVersion: UInt64,
@@ -275,6 +275,7 @@ public enum CoreBoxPresentationEvent: Equatable, Sendable {
     case captureReceive
     case captureDeposit(itemID: UUID)
     case drawReveal(attemptID: UUID, itemID: UUID)
+    case shareArrival(freshItemIDs: [UUID])
     case currentAttach(attemptID: UUID, itemID: UUID)
     case paperReturn(itemID: UUID)
     case memoryStamp(itemID: UUID, memoryID: UUID)

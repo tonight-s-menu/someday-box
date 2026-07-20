@@ -70,4 +70,12 @@ struct CoreBoxTransactionReceiptTests {
         #expect(batch.value.alreadyImportedCount == 1)
         #expect(batch.boundedFreshItemIDs.count == 3)
     }
+
+    @Test func sharePresentationCarriesAllFreshIDsForAggregateNotice() {
+        let ids = (0..<4).map { _ in UUID() }
+        let event = CoreBoxPresentationEventMapper.share(
+            ShareImportBatchResult(freshItemIDs: ids, alreadyImportedCount: 2)
+        )
+        #expect(event == .shareArrival(freshItemIDs: ids))
+    }
 }

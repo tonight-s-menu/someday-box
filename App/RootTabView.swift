@@ -69,8 +69,37 @@ struct RootTabView: View {
         } message: {
             Text(appModel.errorMessage ?? "")
         }
+#if DEBUG
+        .overlay(alignment: .topLeading) {
+            CoreBoxPresentationProbe()
+        }
+#endif
     }
 }
+
+#if DEBUG
+private struct CoreBoxPresentationProbe: View {
+    @Environment(AppModel.self) private var appModel
+
+    private let names = [
+        "capture.deposit", "draw.reveal", "current.attach", "paper.return",
+        "memory.stamp", "react.touch", "react.notice.single", "react.notice.aggregate"
+    ]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(names, id: \.self) { name in
+                Text("")
+                    .accessibilityIdentifier("debug.motion.\(name).count")
+                    .accessibilityValue(String(appModel.presentationEventCounts[name, default: 0]))
+            }
+        }
+        .frame(width: 1, height: 1)
+        .opacity(0.01)
+        .allowsHitTesting(false)
+    }
+}
+#endif
 
 private struct ProjectionReconciliationView: View {
     @Environment(AppModel.self) private var appModel
@@ -92,6 +121,7 @@ private struct ProjectionReconciliationView: View {
                     Task { await appModel.retryProjection() }
                 }
                 .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("projection.retry")
                 .disabled(appModel.isMutating)
             }
             .padding(28)
@@ -440,6 +470,10 @@ struct DrawRevealGate: View {
                             item.durationLabel
                         )
                     )
+                    Text("Persisted unresolved attempt")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("draw.reveal.persistence")
                 }
 
                 VStack(spacing: 12) {

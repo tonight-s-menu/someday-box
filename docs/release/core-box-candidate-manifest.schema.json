@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestVersion", "featureStatus", "candidateSHA", "coreBoxRendererVersion",
+    "coreBoxAssetVersion", "coreBoxAssetIdentity", "coreBoxInteractionVersion",
+    "coreBoxAnimationTimingVersion", "coreBoxRendererDefault", "coreBoxRendererChoices",
+    "coreBoxRendererTiers", "coreBoxMotionModes", "coreBoxFallbackPolicyVersion",
+    "committedOutcomeVersion", "preferenceNamespace", "drawContextVersion",
+    "selectionPolicyVersion", "schemaVersion", "backupFormatVersion",
+    "backupCanonicalizationVersion", "generationDigestVersion", "evidence", "archive",
+    "releaseGate"
+  ],
+  "properties": {
+    "manifestVersion": { "const": 2 },
+    "featureStatus": { "const": "shipped-in-candidate-release-blocked" },
+    "candidateSHA": { "$ref": "#/$defs/sha256" },
+    "coreBoxRendererVersion": { "const": "core-box-renderer-v2" },
+    "coreBoxAssetVersion": { "type": "string", "minLength": 1 },
+    "coreBoxAssetIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manifestSHA256", "fullTierSHA256", "liteTierSHA256", "authoringTreeSHA256"],
+      "properties": {
+        "manifestSHA256": { "$ref": "#/$defs/sha256" },
+        "fullTierSHA256": { "$ref": "#/$defs/sha256" },
+        "liteTierSHA256": { "$ref": "#/$defs/sha256" },
+        "authoringTreeSHA256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "coreBoxInteractionVersion": { "const": "core-box-interaction-v2" },
+    "coreBoxAnimationTimingVersion": { "const": "core-box-timing-v2" },
+    "coreBoxRendererDefault": { "const": "automatic" },
+    "coreBoxRendererChoices": { "const": ["automatic", "full3D", "simplified2D"] },
+    "coreBoxRendererTiers": { "const": ["full3D", "lite3D", "swiftUI2D"] },
+    "coreBoxMotionModes": { "const": ["normal", "quick", "reduced"] },
+    "coreBoxFallbackPolicyVersion": { "const": "core-box-fallback-v2" },
+    "committedOutcomeVersion": { "const": "core-box-outcome-v2" },
+    "preferenceNamespace": { "const": "core-box-presentation-v2" },
+    "drawContextVersion": { "const": "time-context-v2" },
+    "selectionPolicyVersion": { "const": "time-context-v2" },
+    "schemaVersion": { "const": "3.0.0" },
+    "backupFormatVersion": { "const": 3 },
+    "backupCanonicalizationVersion": { "const": 1 },
+    "generationDigestVersion": { "const": "generation-digest-v3" },
+    "evidence": { "type": "object", "additionalProperties": true },
+    "archive": { "type": "object", "additionalProperties": true },
+    "releaseGate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["localSourceAndSimulator", "physicalDevicePerformance", "manualAssistiveTechnology", "runtimeNetworkPrivacy", "signedPackagedCandidate", "decision"],
+      "properties": {
+        "localSourceAndSimulator": { "enum": ["pass", "blocked", "not-run"] },
+        "physicalDevicePerformance": { "enum": ["pass", "blocked", "not-run"] },
+        "manualAssistiveTechnology": { "enum": ["pass", "blocked", "not-run"] },
+        "runtimeNetworkPrivacy": { "enum": ["pass", "blocked", "not-run"] },
+        "signedPackagedCandidate": { "enum": ["pass", "blocked", "not-run"] },
+        "decision": { "enum": ["pass", "blocked"] }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -168,6 +168,7 @@ final class AppModel {
     private let projectionLoader: CoreBoxProjectionLoader
     private let mutationHooks: AppModelMutationHooks
     private var isRefreshingSharedCaptures = false
+    private var pendingShareItemIDs: [UUID] = []
     private var effectiveRendererTierOverride: CoreBoxRendererTier?
 
     var state = PersistedProductState(items: [])
@@ -178,6 +179,13 @@ final class AppModel {
     var shareRecoveryItems: [ShareCaptureRecoveryItem] = []
     var sharedImportPresentation: SharedImportPresentationBatch?
     var sceneSnapshot: CoreBoxSceneSnapshot?
+    /// The last accepted committed presentation event; stage adapters deduplicate
+    /// it by sequence while SwiftUI recomputes the page.
+    private(set) var latestPresentationEvent: CoreBoxCorrelatedEvent?
+    private(set) var presentationCoordinator: CoreBoxPresentationCoordinator?
+#if DEBUG
+    private(set) var presentationEventCounts: [String: Int] = [:]
+#endif
     var snapshotVersion: UInt64 = 0
     var requiresProjectionReconciliation = false
     private(set) var selectedDrawContext: DrawContext?
@@ -279,6 +287,7 @@ final class AppModel {
                 state = try await repository.snapshot()
             }
             try await publishProjection(for: state)
+            emitPendingSharePresentation()
             errorMessage = nil
             loadFailed = false
         } catch {
@@ -289,13 +298,15 @@ final class AppModel {
     }
 
     func capture(title: String, note: String?, duration: DurationBucket) async -> AppMutationProjection<CapturePaperResult> {
-        await projectMutation {
+        let projection = await projectMutation {
             try await self.captureUseCase.execute(
                 title: title,
                 note: note,
                 durationBucketRaw: duration.rawValue
             )
         }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.capture(projection), from: projection)
+        return projection
     }
 
     func edit(itemID: UUID, title: String, note: String?, duration: DurationBucket) async -> Bool {
@@ -310,35 +321,47 @@ final class AppModel {
     }
 
     func startDraw(availableTime: AvailableTime) async -> AppMutationProjection<StartDrawResult> {
-        await projectMutation { try await self.startDrawUseCase.execute(availableTime: availableTime) }
+        let projection = await projectMutation { try await self.startDrawUseCase.execute(availableTime: availableTime) }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.startDraw(projection), from: projection)
+        return projection
     }
 
     func startDraw(context: DrawContext) async -> AppMutationProjection<StartDrawResult> {
-        await projectMutation { try await self.startDrawUseCase.execute(context: context) }
+        let projection = await projectMutation { try await self.startDrawUseCase.execute(context: context) }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.startDraw(projection), from: projection)
+        return projection
     }
 
     func redraw() async -> AppMutationProjection<RedrawResult> {
-        await projectMutation { try await self.redrawUseCase.execute() }
+        let projection = await projectMutation { try await self.redrawUseCase.execute() }
+        recordPresentationSequence(CoreBoxPresentationEventMapper.redraw(projection), from: projection)
+        return projection
     }
 
     func acceptDraw() async -> AppMutationProjection<AcceptDrawResult> {
         let accepted = await projectMutation { try await self.acceptUseCase.execute() }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.accept(accepted), from: accepted)
         if accepted.isCommitted { await refreshSharedCaptures() }
         return accepted
     }
 
     func dismissDraw() async -> AppMutationProjection<DismissDrawResult> {
         let dismissed = await projectMutation { try await self.dismissUseCase.execute() }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.dismiss(dismissed), from: dismissed)
         if dismissed.isCommitted { await refreshSharedCaptures() }
         return dismissed
     }
 
     func complete(itemID: UUID) async -> AppMutationProjection<CompletePaperResult> {
-        await projectMutation { try await self.completeUseCase.execute(itemID: itemID) }
+        let projection = await projectMutation { try await self.completeUseCase.execute(itemID: itemID) }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.complete(projection), from: projection)
+        return projection
     }
 
     func putBack(itemID: UUID) async -> AppMutationProjection<PutBackPaperResult> {
-        await projectMutation { try await self.putBackUseCase.execute(itemID: itemID) }
+        let projection = await projectMutation { try await self.putBackUseCase.execute(itemID: itemID) }
+        recordPresentationEvent(CoreBoxPresentationEventMapper.putBack(projection), from: projection)
+        return projection
     }
 
     func archive(itemID: UUID) async -> Bool {
@@ -482,7 +505,7 @@ final class AppModel {
             )
             state = latestState
             snapshotVersion = nextVersion
-            sceneSnapshot = snapshot
+            publishSceneSnapshot(snapshot)
             requiresProjectionReconciliation = false
             errorMessage = nil
         } catch {
@@ -509,6 +532,7 @@ final class AppModel {
                 recordFreshSharedImport(outcome)
                 try shareMailboxReader.remove(entry, at: groupURL)
                 shareRecoveryItems.removeFirst()
+                emitPendingSharePresentation()
                 errorMessage = nil
                 return projection
             } catch {
@@ -555,6 +579,7 @@ final class AppModel {
         do {
             state = try await repository.snapshot()
             try await publishProjection(for: state)
+            emitPendingSharePresentation()
         } catch {
             errorMessage = message(for: error)
         }
@@ -569,21 +594,32 @@ final class AppModel {
         do {
             let inspection = try shareMailboxReader.inspect(at: shareGroupContainerURL)
             shareRecoveryItems = inspection.problems.map { .invalid($0) }
+            var accumulator = ShareImportBatchAccumulator()
             for entry in inspection.entries {
                 let projection = await projectMutation {
                     try await self.importSharedPaperUseCase.execute(envelope: entry.envelope)
                 }
-                guard let outcome = projection.outcome else {
+                guard case let .committed(outcome, _) = projection else {
                     shareRecoveryItems.append(.pending(entry, message: errorMessage ?? ""))
-                    continue
+                    break
                 }
                 do {
-                    recordFreshSharedImport(outcome)
+                    accumulator.append(outcome)
                     try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
                 } catch {
                     shareRecoveryItems.append(.pending(entry, message: message(for: error)))
+                    break
                 }
             }
+            let batch = accumulator.value
+            guard batch.isFresh else { return }
+            pendingShareItemIDs.append(contentsOf: batch.freshItemIDs)
+            let now = Date()
+            sharedImportPresentation = .init(
+                count: batch.freshItemIDs.count,
+                boundedItemIDs: Array(batch.freshItemIDs.prefix(3)),
+                expiresAt: now.addingTimeInterval(30)
+            )
         } catch {
             errorMessage = message(for: error)
         }
@@ -591,6 +627,7 @@ final class AppModel {
 
     private func recordFreshSharedImport(_ result: ImportSharedPaperResult) {
         guard case let .imported(itemID, _) = result else { return }
+        pendingShareItemIDs.append(itemID)
         let now = Date()
         if var batch = sharedImportPresentation, batch.expiresAt > now {
             batch.count += 1
@@ -600,6 +637,22 @@ final class AppModel {
         } else {
             sharedImportPresentation = .init(count: 1, boundedItemIDs: [itemID], expiresAt: now.addingTimeInterval(30))
         }
+    }
+
+    private func emitPendingSharePresentation() {
+        guard !pendingShareItemIDs.isEmpty,
+              let coordinator = presentationCoordinator,
+              let snapshot = sceneSnapshot,
+              let event = CoreBoxPresentationEventMapper.share(
+                ShareImportBatchResult(freshItemIDs: pendingShareItemIDs, alreadyImportedCount: 0)
+              ),
+              let result = coordinator.enqueue(event: event, sourceSnapshotVersion: snapshot.snapshotVersion)
+        else { return }
+        latestPresentationEvent = result.event
+#if DEBUG
+        incrementPresentationCount(for: event)
+#endif
+        pendingShareItemIDs.removeAll(keepingCapacity: true)
     }
 
     private func mutate(
@@ -639,7 +692,7 @@ final class AppModel {
                     projectionInputs
                 )
                 snapshotVersion = nextVersion
-                sceneSnapshot = snapshot
+                publishSceneSnapshot(snapshot)
                 requiresProjectionReconciliation = false
                 errorMessage = nil
                 return .committed(outcome: transaction.outcome, snapshot: snapshot)
@@ -678,9 +731,80 @@ final class AppModel {
         let snapshot = try await projectionLoader.load(committedState, nextVersion, projectionInputs)
         state = committedState
         snapshotVersion = nextVersion
-        sceneSnapshot = snapshot
+        publishSceneSnapshot(snapshot)
         requiresProjectionReconciliation = false
     }
+
+    private func publishSceneSnapshot(_ snapshot: CoreBoxSceneSnapshot) {
+        sceneSnapshot = snapshot
+        if let presentationCoordinator {
+            presentationCoordinator.update(snapshot: snapshot)
+        } else {
+            presentationCoordinator = CoreBoxPresentationCoordinator(snapshot: snapshot)
+        }
+    }
+
+    private func recordPresentationEvent<Outcome>(
+        _ event: CoreBoxPresentationEvent?,
+        from projection: AppMutationProjection<Outcome>
+    ) where Outcome: Equatable & Sendable {
+        guard let event,
+              case let .committed(_, snapshot) = projection,
+              let presentationCoordinator,
+              let result = presentationCoordinator.enqueue(event: event, sourceSnapshotVersion: snapshot.snapshotVersion)
+        else { return }
+        latestPresentationEvent = result.event
+#if DEBUG
+        incrementPresentationCount(for: event)
+#endif
+    }
+
+    private func recordPresentationSequence<Outcome>(
+        _ events: [CoreBoxPresentationEvent],
+        from projection: AppMutationProjection<Outcome>
+    ) where Outcome: Equatable & Sendable {
+        guard !events.isEmpty,
+              case let .committed(_, snapshot) = projection,
+              let presentationCoordinator
+        else { return }
+        let sequence = CoreBoxCorrelatedSequence(
+            sequence: presentationCoordinator.latestSequence + 1,
+            sourceSnapshotVersion: snapshot.snapshotVersion,
+            motionMode: snapshot.motionMode,
+            events: events
+        )
+        guard presentationCoordinator.enqueue(sequence: sequence) else { return }
+        if let event = events.last {
+            latestPresentationEvent = CoreBoxCorrelatedEvent(
+                sequence: sequence.sequence,
+                event: event,
+                sourceSnapshotVersion: sequence.sourceSnapshotVersion,
+                motionMode: sequence.motionMode
+            )
+        }
+#if DEBUG
+        for event in events { incrementPresentationCount(for: event) }
+#endif
+    }
+
+#if DEBUG
+    private func incrementPresentationCount(for event: CoreBoxPresentationEvent) {
+        let name: String
+        switch event {
+        case .touch: name = "react.touch"
+        case .captureReceive: name = "capture.receive"
+        case .captureDeposit: name = "capture.deposit"
+        case .drawReveal: name = "draw.reveal"
+        case .shareArrival(let ids): name = ids.count <= 3 ? "react.notice.single" : "react.notice.aggregate"
+        case .currentAttach: name = "current.attach"
+        case .paperReturn: name = "paper.return"
+        case .memoryStamp: name = "memory.stamp"
+        case .failureSettle: name = "failure.settle"
+        case .fallbackSettle: name = "fallback.settle"
+        }
+        presentationEventCounts[name, default: 0] += 1
+    }
+#endif
 
     private func replaceProductData(
         _ operation: () async throws -> PersistedProductState

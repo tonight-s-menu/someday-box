@@ -100,7 +100,7 @@ def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, obje
         action = bpy.data.actions.get(name)
         end = clip["authoringFrameCount"]
         if action is None or tuple(round(value) for value in action.frame_range) != (0, end):
-            raise RuntimeError(f"invalid proof action: {name}")
+            raise RuntimeError(f"invalid configured action: {name}")
         activate_action(action)
         bpy.context.scene.frame_start = 0
         bpy.context.scene.frame_end = end
@@ -122,9 +122,11 @@ def main() -> None:
     config = json.loads(args.config.read_text(encoding="utf-8"))
     if args.profile not in config.get("exportProfiles", {}):
         raise RuntimeError("unknown export profile")
-    if args.profile != "pipeline-spike-v1":
-        raise RuntimeError("static exporter supports pipeline-spike-v1 only")
-    clip_names = config["exportProfiles"][args.profile]["clipSelection"]["names"]
+    selection = config["exportProfiles"][args.profile]["clipSelection"]
+    if selection["mode"] == "allConfigured":
+        clip_names = [clip["name"] for clip in config["clips"]]
+    else:
+        clip_names = selection["names"]
     configured = {clip["name"]: clip for clip in config["clips"]}
     clips = [configured[name] for name in clip_names]
     output_root = args.output.resolve()

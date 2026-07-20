@@ -1,7 +1,4 @@
-import CryptoKit
-import RealityKit
 import SwiftUI
-import UIKit
 import UniformTypeIdentifiers
 
 struct HomeView: View {
@@ -16,14 +13,14 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     CoreBoxStage(
-                        inBoxCount: inBoxCount,
-                        drawableCount: appModel.drawableCount,
-                        memoryCount: appModel.state.memories.count,
-                        preferredRenderer: appModel.presentationPreferences.renderer.maximumTier,
-                        quickAnimations: appModel.presentationPreferences.quickAnimations,
+                        snapshot: presentationSnapshot,
+                        event: appModel.latestPresentationEvent,
                         ribbonArmed: appModel.selectedDrawContext != nil && appModel.drawAvailability.selectedContextEligibleCount > 0,
                         pullsRibbon: requestDraw,
-                        opensPeek: { presentsPeek = true }
+                        opensPeek: { presentsPeek = true },
+                        requestEffectiveTier: { tier, reason in
+                            Task { await appModel.requestEffectiveRendererTier(tier, reason: reason) }
+                        }
                     )
 
                     VStack(spacing: 8) {
@@ -47,7 +44,6 @@ struct HomeView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(SomedayPrimaryActionButtonStyle())
-                        .accessibilityIdentifier("home.capture")
                         .accessibilityIdentifier("home.draw")
                         .disabled(!drawEnabled)
 
@@ -61,6 +57,7 @@ struct HomeView: View {
                         .buttonStyle(.bordered)
                         .tint(.primary)
                         .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 14))
+                        .accessibilityIdentifier("home.peek")
 
                         Button {
                             presentsCapture = true
@@ -70,6 +67,7 @@ struct HomeView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(SomedayPrimaryActionButtonStyle())
+                        .accessibilityIdentifier("home.capture")
                     }
                     .frame(maxWidth: 440)
 
@@ -113,6 +111,19 @@ struct HomeView: View {
         } else {
             String(localized: "\(appModel.drawableCount) papers are ready for a surprise.")
         }
+    }
+
+    private var presentationSnapshot: CoreBoxSceneSnapshot {
+        appModel.sceneSnapshot ?? CoreBoxSceneSnapshot(
+            inBoxCount: inBoxCount,
+            drawableCount: appModel.drawableCount,
+            memoryCount: appModel.state.memories.count,
+            hasCurrentPick: appModel.currentItem != nil,
+            papers: [],
+            rendererTier: appModel.presentationPreferences.renderer.maximumTier,
+            motionMode: appModel.presentationPreferences.quickAnimations ? .quick : .normal,
+            snapshotVersion: appModel.snapshotVersion
+        )
     }
 
     private var drawEnabled: Bool {
@@ -168,50 +179,60 @@ struct HomeView: View {
     }
 }
 
-/// A presentation-only scene. Product mutation remains in AppModel use cases.
+/// A presentation-only scene. Product mutation remains in AppModel use cases;
+/// RealityKit is entered only through the validated asset loader.
 private struct CoreBoxStage: View {
-    let inBoxCount: Int
-    let drawableCount: Int
-    let memoryCount: Int
-    let preferredRenderer: CoreBoxRendererTier
-    let quickAnimations: Bool
+    let snapshot: CoreBoxSceneSnapshot
+    let event: CoreBoxCorrelatedEvent?
     let ribbonArmed: Bool
     let pullsRibbon: () -> Void
     let opensPeek: () -> Void
+    let requestEffectiveTier: @MainActor (CoreBoxRendererTier, CoreBoxFallbackReason) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @State private var renderer = CoreBoxRendererTier.swiftUI2D
+    @State private var adapter: CoreBox2DAdapter
+    @State private var controller: CoreBoxStageController
     @State private var pullProgress = 0.0
     @State private var submittedPull = false
+
+    init(
+        snapshot: CoreBoxSceneSnapshot,
+        event: CoreBoxCorrelatedEvent?,
+        ribbonArmed: Bool,
+        pullsRibbon: @escaping () -> Void,
+        opensPeek: @escaping () -> Void,
+        requestEffectiveTier: @escaping @MainActor (CoreBoxRendererTier, CoreBoxFallbackReason) -> Void
+    ) {
+        self.snapshot = snapshot
+        self.event = event
+        self.ribbonArmed = ribbonArmed
+        self.pullsRibbon = pullsRibbon
+        self.opensPeek = opensPeek
+        self.requestEffectiveTier = requestEffectiveTier
+        let adapter = CoreBox2DAdapter()
+        _adapter = State(initialValue: adapter)
+        _controller = State(initialValue: CoreBoxStageController(
+            loader: .application,
+            adapter: adapter,
+            requestEffectiveTier: requestEffectiveTier
+        ))
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
-                if renderer == .swiftUI2D {
-                    CoreBox2DStage(inBoxCount: inBoxCount, memoryCount: memoryCount)
+                if snapshot.rendererTier == .swiftUI2D || controller.isAwaitingTierProjection {
+                    CoreBox2DStage(snapshot: snapshot)
                 } else {
-                    RealityView { content in
-                        content.camera = .virtual
-                        do {
-                            guard validateBundledAssetManifest() else { throw CoreBoxAssetLoadError.invalidContract }
-                            let scene = makeCoreBoxScene()
-                            guard validate(scene: scene) else { throw CoreBoxAssetLoadError.invalidContract }
-                            configure(scene: scene, tier: renderer)
-                            content.add(scene)
-                            content.cameraTarget = scene
-                        } catch {
-                            await MainActor.run { renderer = .swiftUI2D }
-                        }
-                    }
-                    .transition(.opacity)
+                    CoreBoxRealityStage(snapshot: snapshot, event: event, controller: controller)
                 }
             }
             .allowsHitTesting(false)
             .accessibilityHidden(true)
 
             Button(action: opensPeek) {
-                Text(stageSummary)
+                    Text(stageSummary)
                     .font(.footnote.weight(.medium))
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 14)
@@ -221,7 +242,7 @@ private struct CoreBoxStage: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("home.box.summary")
             .accessibilityLabel("Peek inside your Box")
-            .accessibilityValue("\(inBoxCount) papers in the Box. \(drawableCount) ready to draw. \(memoryCount) memories.")
+            .accessibilityValue("\(snapshot.inBoxCount) papers in the Box. \(snapshot.drawAvailability.totalSupportedCount) ready to draw. \(snapshot.memoryCount) memories.")
 
             HStack {
                 Spacer()
@@ -250,20 +271,21 @@ private struct CoreBoxStage: View {
         .background(SomedayBoxBrand.canvas.opacity(0.7), in: RoundedRectangle(cornerRadius: 32))
         .contentShape(RoundedRectangle(cornerRadius: 32))
         .onTapGesture(perform: opensPeek)
-        .onAppear { selectSafeRenderer() }
-        .onChange(of: preferredRenderer) { _, _ in selectSafeRenderer() }
         .onChange(of: scenePhase) { _, value in
-            if value == .active { selectSafeRenderer() }
+            if value != .active { controller.teardown() }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
-            renderer = renderer.degraded
+        .onChange(of: snapshot.snapshotVersion) { _, _ in
+            controller.update(snapshot: snapshot, event: event)
+        }
+        .task {
+            controller.update(snapshot: snapshot, event: event)
         }
         .accessibilityElement(children: .contain)
     }
 
     private var stageSummary: String {
-        if inBoxCount == 0 { return "Your Box is ready for an idea" }
-        return "\(inBoxCount) in the Box · \(drawableCount) ready"
+        if snapshot.inBoxCount == 0 { return "Your Box is ready for an idea" }
+        return "\(snapshot.inBoxCount) in the Box · \(snapshot.drawAvailability.totalSupportedCount) ready"
     }
 
     private var ribbonGesture: some Gesture {
@@ -276,141 +298,18 @@ private struct CoreBoxStage: View {
                 let committed = pullProgress >= 0.72 && !submittedPull
                 submittedPull = committed
                 if committed { pullsRibbon() }
-                withAnimation(reduceMotion ? nil : .snappy(duration: quickAnimations ? 0.12 : 0.22)) {
+                withAnimation(reduceMotion ? nil : .snappy(duration: snapshot.motionMode == .quick ? 0.12 : 0.22)) {
                     pullProgress = 0
                 }
                 submittedPull = false
             }
     }
 
-    private func selectSafeRenderer() {
-        renderer = ProcessInfo.processInfo.isLowPowerModeEnabled ? preferredRenderer.degraded : preferredRenderer
-    }
-
-    private func configure(scene root: Entity, tier: CoreBoxRendererTier) {
-        let boxMaterial = SimpleMaterial(color: UIColor(red: 0.62, green: 0.38, blue: 0.23, alpha: 1), roughness: 0.82, isMetallic: false)
-        let lidMaterial = SimpleMaterial(color: UIColor(red: 0.69, green: 0.44, blue: 0.27, alpha: 1), roughness: 0.8, isMetallic: false)
-        let ribbonMaterial = SimpleMaterial(color: UIColor(red: 0.91, green: 0.72, blue: 0.58, alpha: 1), roughness: 0.9, isMetallic: false)
-        (root.findEntity(named: "BoxBody") as? ModelEntity)?.model?.materials = [boxMaterial]
-        (root.findEntity(named: "LidMesh") as? ModelEntity)?.model?.materials = [lidMaterial]
-        (root.findEntity(named: "RibbonRoot") as? ModelEntity)?.model?.materials = [ribbonMaterial]
-        let paperPool = root.findEntity(named: "PaperPool") ?? root
-        let paperCount = min(inBoxCount, tier.maximumVisiblePapers)
-        for index in 0..<paperCount {
-            let paper = ModelEntity(
-                mesh: .generateBox(size: SIMD3<Float>(0.085, 0.006, 0.055), cornerRadius: 0.002),
-                materials: [SimpleMaterial(color: UIColor(white: 0.96, alpha: 1), roughness: 1, isMetallic: false)]
-            )
-            paper.name = String(format: "PaperRest_%02d", index)
-            let x = Float(index % 4 - 1) * 0.045
-            let y = 0.04 + Float(index / 4) * 0.009
-            let z = Float(index % 3 - 1) * 0.028
-            paper.position = SIMD3<Float>(x, y, z)
-            paper.orientation = simd_quatf(angle: Float(index) * 0.17, axis: [0, 1, 0])
-            paperPool.addChild(paper)
-        }
-
-        let keyLight = DirectionalLight()
-        keyLight.name = "Light_Key"
-        keyLight.light.intensity = tier == .full3D ? 1_200 : 850
-        keyLight.look(at: .zero, from: [0.4, 0.5, 0.5], relativeTo: nil)
-        root.addChild(keyLight)
-
-        let camera = PerspectiveCamera()
-        camera.name = "Camera_Default"
-        camera.position = [0, 0.20, 0.58]
-        camera.look(at: [0, 0.02, 0], from: camera.position, relativeTo: nil)
-        root.addChild(camera)
-    }
-
-    private func makeCoreBoxScene() -> Entity {
-        let root = Entity()
-        root.name = "BoxRoot"
-
-        let body = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.30, 0.16, 0.22), cornerRadius: 0.025),
-            materials: [SimpleMaterial(color: .brown, roughness: 0.82, isMetallic: false)]
-        )
-        body.name = "BoxBody"
-        body.position = [0, -0.05, 0]
-        root.addChild(body)
-
-        let lidPivot = Entity()
-        lidPivot.name = "LidPivot"
-        lidPivot.position = [0, 0.055, -0.10]
-        let lid = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.31, 0.035, 0.23), cornerRadius: 0.02),
-            materials: [SimpleMaterial(color: .brown, roughness: 0.8, isMetallic: false)]
-        )
-        lid.name = "LidMesh"
-        lid.position = [0, 0, 0.10]
-        lidPivot.addChild(lid)
-        root.addChild(lidPivot)
-
-        let ribbon = ModelEntity(
-            mesh: .generateBox(size: SIMD3<Float>(0.038, 0.006, 0.12), cornerRadius: 0.003),
-            materials: [SimpleMaterial(color: .systemRed, roughness: 0.9, isMetallic: false)]
-        )
-        ribbon.name = "RibbonRoot"
-        ribbon.position = [0, 0.075, 0.16]
-        root.addChild(ribbon)
-
-        let paperPool = Entity()
-        paperPool.name = "PaperPool"
-        root.addChild(paperPool)
-        for name in ["PaperReveal", "CurrentPaperAnchor", "MemorySeam"] {
-            let anchor = Entity()
-            anchor.name = name
-            root.addChild(anchor)
-        }
-
-        let ground = ModelEntity(
-            mesh: .generatePlane(width: 1.1, depth: 0.8),
-            materials: [SimpleMaterial(color: UIColor(white: 0.12, alpha: 1), roughness: 1, isMetallic: false)]
-        )
-        ground.name = "Ground"
-        ground.position = [0, -0.145, 0]
-        root.addChild(ground)
-
-        let overviewCamera = PerspectiveCamera()
-        overviewCamera.name = "Camera_Overview"
-        overviewCamera.position = [0.32, 0.25, 0.52]
-        overviewCamera.look(at: [0, 0, 0], from: overviewCamera.position, relativeTo: nil)
-        root.addChild(overviewCamera)
-
-        let fillLight = DirectionalLight()
-        fillLight.name = "Light_Fill"
-        fillLight.light.intensity = 350
-        fillLight.look(at: .zero, from: [-0.45, 0.35, 0.35], relativeTo: nil)
-        root.addChild(fillLight)
-        return root
-    }
-
-    private func validate(scene: Entity) -> Bool {
-        let required = ["BoxRoot", "BoxBody", "LidPivot", "LidMesh", "RibbonRoot", "PaperPool", "PaperReveal", "CurrentPaperAnchor", "MemorySeam", "Ground", "Camera_Default", "Camera_Overview", "Light_Key", "Light_Fill"]
-        return required.allSatisfy { name in scene.name == name || scene.findEntity(named: name) != nil }
-    }
-
-    private func validateBundledAssetManifest() -> Bool {
-        guard let assetURL = Bundle.main.url(forResource: "CoreBox", withExtension: "usda"),
-              let manifestURL = Bundle.main.url(forResource: "CoreBoxAssetManifest", withExtension: "json"),
-              let assetData = try? Data(contentsOf: assetURL),
-              let manifestData = try? Data(contentsOf: manifestURL),
-              let object = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
-              let expected = object["assetSHA256"] as? String
-        else { return false }
-        let actual = SHA256.hash(data: assetData).map { String(format: "%02x", $0) }.joined()
-        return actual == expected
-    }
-}
-
-private enum CoreBoxAssetLoadError: Error {
-    case invalidContract
+    private var inBoxCount: Int { snapshot.inBoxCount }
 }
 
 private struct CoreBox2DStage: View {
-    let inBoxCount: Int
-    let memoryCount: Int
+    let snapshot: CoreBoxSceneSnapshot
 
     var body: some View {
         ZStack {
@@ -431,8 +330,8 @@ private struct CoreBox2DStage: View {
                 .frame(width: 34, height: 106)
                 .rotationEffect(.degrees(-8))
                 .offset(x: 86, y: 12)
-            if inBoxCount > 0 {
-                ForEach(0..<min(inBoxCount, 6), id: \.self) { index in
+            if snapshot.inBoxCount > 0 {
+                ForEach(0..<min(snapshot.inBoxCount, 6), id: \.self) { index in
                     RoundedRectangle(cornerRadius: 3)
                         .fill(SomedayBoxBrand.paper)
                         .frame(width: 56, height: 22)
@@ -440,7 +339,7 @@ private struct CoreBox2DStage: View {
                         .offset(x: CGFloat((index % 3) - 1) * 32, y: -42 + CGFloat(index / 3) * 10)
                 }
             }
-            if memoryCount > 0 {
+            if snapshot.memoryCount > 0 {
                 Capsule()
                     .fill(SomedayBoxBrand.paperInk.opacity(0.55))
                     .frame(width: 116, height: 3)
