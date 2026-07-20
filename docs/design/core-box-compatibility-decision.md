@@ -9,7 +9,7 @@ and their required hierarchy, but exposes no values through
 `Entity.availableAnimations`. The composed USD clip names `idle.listen`,
 `capture.deposit`, and `draw.reveal` therefore cannot be used as runtime
 playback identifiers. The physical-device rerun is intentionally deferred
-until the final acceptance pass.
+until the final acceptance pass, per the current development instruction.
 
 The fallback preserves these public names and applies a deterministic recipe to
 the named authored entities. It is not a second asset format and does not add a
@@ -22,7 +22,7 @@ network dependency, a remote flag, or a production primitive scene.
 - Full SHA-256: `f92ad6341fd8f01e6c96d93f52814c2cab27dfca5fe5cd1f0dda47dc1941b3ab`
 - Lite SHA-256: `28db80b83e09e010bb20be8e4509a49e49d49e6c0fcebaeb02cbc7c8e3ac1357`
 - Simulator: iPhone 17 Pro, iOS 26.5
-- Physical device: iPhone 17 Pro Max, iOS 26.5.2 (final rerun pending)
+- Physical device: intentionally not run before final acceptance
 
 The verification-only compatibility host contains one RealityView make/update
 path, the three representative recipe terminals, ribbon samples at 0, 0.72,

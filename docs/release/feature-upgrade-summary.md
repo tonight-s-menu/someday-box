@@ -25,10 +25,10 @@
 
 | Upgrade | Current delivery |
 | --- | --- |
-| Presentation architecture | `RealityView` presents a bundled USD scene using an explicit virtual camera. It is non-AR and requests no camera permission. |
-| Renderer tiers | Full 3D, Lite 3D, and equivalent SwiftUI 2D paths preserve the same product actions. |
+| Presentation architecture | The production page enters `RealityView` only through the validated loader and uses an explicit virtual camera. Until the sealed production Full/Lite bytes exist, the app fails closed to the functional SwiftUI 2D path. |
+| Renderer tiers | Full 3D, Lite 3D, and equivalent SwiftUI 2D contracts are wired; the production Full/Lite packages remain an open authoring gate. |
 | Interaction | Versioned presentation state handles lid/peek, ribbon pull, draw threshold, interruption, stale commands, and fallback reasons. |
-| Asset contract | Required named entities, local-only provenance, scene budgets, bundled manifest, and runtime SHA-256 verification are enforced before 3D use. |
+| Asset contract | Required named entities, local-only provenance, scene budgets, bundled manifest, and runtime SHA-256 verification are enforced before 3D use; the sealed production manifest and identity are not checked in yet. |
 | Motion preferences | Normal, quick, and reduced motion are supported alongside independent sound, haptic, and ambience preferences. |
 | Automatic degradation | Low Power Mode, memory pressure, asset failure, and unsupported rendering move safely to a lower tier without blocking Capture, Draw, or Recovery. |
 | Accessibility | Semantic controls, native action equivalents, accessibility actions, Dynamic Type layout, and automated accessibility audit coverage are present. |
@@ -47,14 +47,14 @@
 
 | Gate | Status |
 | --- | --- |
-| Source, configuration, asset, and release audits | Pass |
-| Deterministic domain and full simulator/UI test suite | Pass |
-| Physical-device performance | Not run |
+| Source, configuration, asset, and release audits | Blocked: production Full/Lite/manifest/identity are still missing; local App Group audit also reflects user-owned entitlement edits |
+| Deterministic domain and full simulator/UI test suite | Pass (Simulator only) |
+| Physical-device performance | Not run by request; deferred to final acceptance |
 | Manual VoiceOver, Voice Control, and Switch Control | Not run |
 | Runtime network/privacy evidence | Not run |
-| Signed packaged candidate | Not run |
+| Signed packaged candidate | Blocked until production assets and signed evidence exist |
 
-The candidate is therefore `shipped-in-candidate-release-blocked`. The remaining gates are intentionally not inferred from simulator or source evidence.
+The implementation is therefore `candidate-release-blocked`. The remaining gates are intentionally not inferred from simulator or source evidence.
 
 ## Deferred scope
 
