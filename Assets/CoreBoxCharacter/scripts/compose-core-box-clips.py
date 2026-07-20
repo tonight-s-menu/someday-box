@@ -19,6 +19,8 @@ def compose(base: Path, output: Path, clips: list[dict[str, object]]) -> None:
     layer = Sdf.Layer.CreateNew(str(output))
     layer.TransferContent(source)
     stage = Usd.Stage.Open(layer)
+    stage.SetTimeCodesPerSecond(1000)
+    stage.SetFramesPerSecond(60)
     root = stage.GetPrimAtPath("/BoxRoot")
     if not root.IsValid():
         raise RuntimeError("base stage lacks /BoxRoot")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -33,6 +34,25 @@ def require_startup_contract() -> None:
     for name in ("PYTHONPATH", "PYTHONHOME", "PYTHONUSERBASE"):
         if os.environ.get(name) != "":
             raise RuntimeError(f"{name} must be present and empty")
+
+
+def action_value(action: bpy.types.Action, object_name: str, data_path: str, index: int, frame: int) -> float:
+    """Read one real action-slot F-curve without changing the opened source scene."""
+    slots = json.loads(action["coreBoxActionSlots"])
+    slot = action.slots.get(slots[object_name])
+    if slot is None:
+        raise RuntimeError(f"{action.name} is missing {object_name}'s action slot")
+    bag = action.layers[0].strips[0].channelbag(slot)
+    curve = next((item for item in bag.fcurves if item.data_path == data_path and item.array_index == index), None)
+    if curve is None:
+        raise RuntimeError(f"{action.name} is missing {object_name}'s {data_path}[{index}]")
+    return curve.evaluate(frame)
+
+
+def require_close(actual: float, expected: float, label: str) -> None:
+    """Keep motion tolerances explicit in the source preflight report path."""
+    if not math.isclose(actual, expected, abs_tol=1e-5):
+        raise RuntimeError(f"{label}: expected {expected}, got {actual}")
 
 
 def main() -> None:
@@ -107,6 +127,30 @@ def main() -> None:
         raise RuntimeError("runtime material maps must contain exactly basecolor, normal, and roughness")
     root = bpy.data.objects["BoxRoot"]
     ribbon = bpy.data.objects["RibbonRoot"]
+    if bpy.context.scene.render.fps != 60 or bpy.context.scene.render.fps_base != 1.0:
+        raise RuntimeError("proof actions must be authored at 60 fps")
+    idle = bpy.data.actions["idle.listen"]
+    require_close(action_value(idle, "BoxRoot", "rotation_euler", 0, 30), math.radians(1.5), "idle root lean")
+    require_close(action_value(idle, "LidPivot", "rotation_euler", 0, 30), math.radians(3.0), "idle lid raise")
+    require_close(action_value(idle, "RibbonRoot", "rotation_euler", 2, 6), 0.0, "idle ribbon delay")
+    require_close(action_value(idle, "RibbonRoot", "rotation_euler", 2, 33), math.radians(2.0), "idle ribbon motion")
+    require_close(action_value(idle, "BoxRoot", "rotation_euler", 0, 60), 0.0, "idle terminal root")
+    require_close(action_value(idle, "LidPivot", "rotation_euler", 0, 60), 0.0, "idle terminal lid")
+    capture = bpy.data.actions["capture.deposit"]
+    compression = action_value(capture, "BoxRoot", "scale", 1, 17)
+    if not 0.9879 <= compression <= 1.0001:
+        raise RuntimeError("capture root compression exceeds 1.2%")
+    require_close(action_value(capture, "LidPivot", "rotation_euler", 0, 34), 0.0, "capture terminal lid")
+    require_close(action_value(capture, "PaperDeposit", "location", 1, 34), 0.19, "capture deposit terminal")
+    draw = bpy.data.actions["draw.reveal"]
+    require_close(action_value(draw, "PaperVisual", "location", 1, 0), 0.115, "draw spawn")
+    require_close(action_value(draw, "PaperVisual", "location", 0, 22), 0.11, "draw exit")
+    require_close(action_value(draw, "PaperVisual", "location", 1, 45), 0.22, "draw reveal")
+    pull = json.loads(root["core_box_ribbon_pull"])
+    if set(pull) != {"0.0", "0.72", "1.0"} or set(pull["1.0"]) != {"BoxRoot", "RibbonRoot"}:
+        raise RuntimeError("ribbon pull snapshots are incomplete")
+    if abs(pull["1.0"]["BoxRoot"]["rotationEuler"][0]) > math.radians(2.0):
+        raise RuntimeError("ribbon pull root lean exceeds 2 degrees")
     camera = bpy.data.objects["Camera_Default"]
     ribbon_screen_x = world_to_camera_view(bpy.context.scene, camera, ribbon.matrix_world.translation).x
     eye_screen_x = world_to_camera_view(bpy.context.scene, camera, bpy.data.objects["EyeRightPivot"].matrix_world.translation).x
@@ -116,6 +160,7 @@ def main() -> None:
         "ribbonRootScreenX": ribbon_screen_x, "rightEyeSafeMaxX": eye_screen_x + 0.025,
         "actionTargets": action_targets, "actionFrameRanges": action_frame_ranges,
         "actionChannelCounts": action_channel_counts,
+        "framesPerSecond": bpy.context.scene.render.fps,
         "configAssetVersion": config["assetVersion"],
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

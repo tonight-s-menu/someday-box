@@ -53,6 +53,8 @@ def activate_action(action: bpy.types.Action) -> None:
     for obj in bpy.data.objects:
         if obj.animation_data is not None:
             obj.animation_data.action = None
+            for track in list(obj.animation_data.nla_tracks):
+                obj.animation_data.nla_tracks.remove(track)
     for object_name, slot_identifier in slot_identifiers.items():
         obj = bpy.data.objects.get(object_name)
         slot = action.slots.get(slot_identifier)
@@ -61,6 +63,7 @@ def activate_action(action: bpy.types.Action) -> None:
         obj.animation_data_create()
         obj.animation_data.action = action
         obj.animation_data.action_slot = slot
+    bpy.context.scene.frame_set(0)
 
 
 def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, object]], output_root: Path) -> dict[str, object]:

@@ -132,6 +132,8 @@ def build(output: Path) -> None:
     scene = bpy.context.scene
     scene.unit_settings.system = "METRIC"
     scene.unit_settings.scale_length = 1.0
+    scene.render.fps = 60
+    scene.render.fps_base = 1.0
     root_collection = scene.collection
     shared = make_collection("SOURCE_SHARED")
     full = make_collection("EXPORT_FULL")
@@ -239,7 +241,11 @@ def build(output: Path) -> None:
         root: ((0, rest_location, rest_rotation, rest_scale), (22, rest_location, (math.radians(1.5), 0.0, 0.0), rest_scale), (45, rest_location, rest_rotation, rest_scale)),
         paper_visual: ((0, anchor_positions["PaperSpawn"], rest_rotation, rest_scale), (22, anchor_positions["PaperExit"], rest_rotation, rest_scale), (45, anchor_positions["PaperReveal"], rest_rotation, rest_scale)),
     })
-    root["core_box_ribbon_pull"] = '{"0.0": [0, 0, 0], "0.72": [0.01, 0, 0], "1.0": [0.02, 0, 0]}'
+    root["core_box_ribbon_pull"] = json.dumps({
+        "0.0": {"BoxRoot": {"rotationEuler": [0.0, 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, 0.0]}},
+        "0.72": {"BoxRoot": {"rotationEuler": [0.01, 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, 0.02]}},
+        "1.0": {"BoxRoot": {"rotationEuler": [math.radians(2.0), 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, math.radians(3.0)]}},
+    }, sort_keys=True, separators=(",", ":"))
     bpy.context.view_layer.objects.active = root
     root.select_set(True)
     scene.frame_set(0)

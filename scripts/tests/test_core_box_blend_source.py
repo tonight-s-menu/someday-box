@@ -64,6 +64,7 @@ class BlendSourceTests(unittest.TestCase):
         self.assertEqual(tuple(report["boxRootScale"]), (1.0, 1.0, 1.0))
         self.assertAlmostEqual(report["ribbonRootTranslation"][0], 0.132, places=4)
         self.assertGreater(report["ribbonRootScreenX"], report["rightEyeSafeMaxX"])
+        self.assertEqual(report["framesPerSecond"], 60)
         self.assertEqual(report["actionTargets"], {
             name: sorted(targets) for name, targets in EXPECTED_ACTION_TARGETS.items()
         })
