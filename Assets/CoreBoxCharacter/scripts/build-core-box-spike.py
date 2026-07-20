@@ -79,6 +79,29 @@ def make_texture(path: Path, color: tuple[float, float, float, float]) -> None:
     bpy.data.images.remove(image)
 
 
+def attach_runtime_maps(material: bpy.types.Material, textures: Path) -> None:
+    """Bind exactly the three proof runtime maps with repository-relative paths."""
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    shader = nodes.get("Principled BSDF")
+    base = nodes.new("ShaderNodeTexImage")
+    base.image = bpy.data.images.load(str(textures / "core-box-basecolor.png"), check_existing=True)
+    base.image.filepath = "//textures/core-box-basecolor.png"
+    normal = nodes.new("ShaderNodeTexImage")
+    normal.image = bpy.data.images.load(str(textures / "core-box-normal.png"), check_existing=True)
+    normal.image.filepath = "//textures/core-box-normal.png"
+    normal.image.colorspace_settings.name = "Non-Color"
+    normal_map = nodes.new("ShaderNodeNormalMap")
+    roughness = nodes.new("ShaderNodeTexImage")
+    roughness.image = bpy.data.images.load(str(textures / "core-box-roughness.png"), check_existing=True)
+    roughness.image.filepath = "//textures/core-box-roughness.png"
+    roughness.image.colorspace_settings.name = "Non-Color"
+    links.new(base.outputs["Color"], shader.inputs["Base Color"])
+    links.new(normal.outputs["Color"], normal_map.inputs["Color"])
+    links.new(normal_map.outputs["Normal"], shader.inputs["Normal"])
+    links.new(roughness.outputs["Color"], shader.inputs["Roughness"])
+
+
 def action(name: str, obj: bpy.types.Object, end: int, rotation: float = 0.0) -> None:
     """Author a real non-looping root channel that returns to rest."""
     obj.animation_data_clear()
@@ -174,6 +197,7 @@ def build(output: Path) -> None:
     textures.mkdir(parents=True, exist_ok=True)
     for filename, color in (("core-box-basecolor.png", colors["MAT_MaplePaper"]), ("core-box-normal.png", (0.5, 0.5, 1.0, 1.0)), ("core-box-roughness.png", (0.8, 0.8, 0.8, 1.0)), ("core-box-ao.png", (0.9, 0.9, 0.9, 1.0))):
         make_texture(textures / filename, color)
+    attach_runtime_maps(bpy.data.materials["MAT_MaplePaper"], textures)
 
     action("idle.listen", root, 60, 0.026)
     action("capture.deposit", root, 34, 0.012)

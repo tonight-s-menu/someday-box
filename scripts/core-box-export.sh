@@ -32,3 +32,17 @@ BLENDER_BIN="${BLENDER_BIN}" "${SOURCE_ROOT}/scripts/run-core-box-blender.sh" \
     "${SOURCE_ROOT}/Assets/CoreBoxCharacter/CoreBoxCharacter.blend" \
     --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/export-core-box.py" -- \
     --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json" --output "${OUTPUT_ROOT}" --profile "${PROFILE}"
+
+for TIER in full lite; do
+    case "${TIER}" in
+        full) RESOURCE="CoreBoxCharacterFull" ;;
+        lite) RESOURCE="CoreBoxCharacterLite" ;;
+    esac
+    SOURCE_STAGE="${OUTPUT_ROOT}/stage/${TIER}/${RESOURCE}.usda"
+    NORMALIZED_STAGE="${OUTPUT_ROOT}/stage/${TIER}/${RESOURCE}.normalized.usda"
+    BLENDER_BIN="${BLENDER_BIN}" "${SOURCE_ROOT}/scripts/run-core-box-blender.sh" \
+        --background --factory-startup --disable-autoexec --offline-mode --python-use-system-env --python-exit-code 1 \
+        --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/compose-core-box-static.py" -- \
+        --source "${SOURCE_STAGE}" --output "${NORMALIZED_STAGE}"
+    mv "${NORMALIZED_STAGE}" "${SOURCE_STAGE}"
+done

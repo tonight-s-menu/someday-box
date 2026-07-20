@@ -77,6 +77,9 @@ def main() -> None:
     expected_materials = {"MAT_MaplePaper", "MAT_SageRibbon", "MAT_MossInk", "MAT_InteriorMemory", "MAT_ContactShadow"}
     if not expected_materials.issubset(set(bpy.data.materials.keys())):
         raise RuntimeError("proof material family is incomplete")
+    images = {Path(image.filepath).name for image in bpy.data.images}
+    if images != {"core-box-basecolor.png", "core-box-normal.png", "core-box-roughness.png"}:
+        raise RuntimeError("runtime material maps must contain exactly basecolor, normal, and roughness")
     root = bpy.data.objects["BoxRoot"]
     ribbon = bpy.data.objects["RibbonRoot"]
     camera = bpy.data.objects["Camera_Default"]
