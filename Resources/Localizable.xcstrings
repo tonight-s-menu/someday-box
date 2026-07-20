@@ -1,6 +1,19 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld minutes" : {
+
+    },
+    "%lld papers are in your Box. %lld are ready to draw." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld papers are in your Box. %2$lld are ready to draw."
+          }
+        }
+      }
+    },
     "%lld papers are ready for a surprise." : {
       "localizations" : {
         "en" : {
@@ -16,6 +29,19 @@
           }
         }
       }
+    },
+    "%lld papers in the Box. %lld ready to draw. %lld memories." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld papers in the Box. %2$lld ready to draw. %3$lld memories."
+          }
+        }
+      }
+    },
+    "%lld shared papers arrived" : {
+
     },
     "1 paper is ready for a surprise." : {
       "localizations" : {
@@ -33,6 +59,15 @@
         }
       }
     },
+    "2D" : {
+
+    },
+    "A few hours" : {
+
+    },
+    "A few minutes" : {
+
+    },
     "A local data operation is already in progress." : {
       "localizations" : {
         "en" : {
@@ -49,6 +84,12 @@
         }
       }
     },
+    "A quiet look inside" : {
+
+    },
+    "A shared paper arrived" : {
+
+    },
     "About" : {
       "localizations" : {
         "en" : {
@@ -64,6 +105,9 @@
           }
         }
       }
+    },
+    "About an hour" : {
+
     },
     "Actions" : {
       "localizations" : {
@@ -194,6 +238,9 @@
         }
       }
     },
+    "Available time" : {
+
+    },
     "Backup format" : {
       "localizations" : {
         "en" : {
@@ -226,6 +273,9 @@
         }
       }
     },
+    "Box renderer" : {
+
+    },
     "Cancel" : {
       "localizations" : {
         "en" : {
@@ -257,6 +307,9 @@
           }
         }
       }
+    },
+    "Choose a time, then draw a paper. The Draw a paper button offers the same action." : {
+
     },
     "Choose an upper limit. The draw will never quietly go over it." : {
       "localizations" : {
@@ -337,6 +390,9 @@
           }
         }
       }
+    },
+    "Custom time" : {
+
     },
     "Delete paper and its memories" : {
       "localizations" : {
@@ -706,6 +762,9 @@
         }
       }
     },
+    "Erase every app-owned local generation?" : {
+
+    },
     "Experience" : {
       "localizations" : {
         "en" : {
@@ -769,6 +828,9 @@
           }
         }
       }
+    },
+    "Full 3D" : {
+
     },
     "Haptics" : {
       "localizations" : {
@@ -866,6 +928,9 @@
         }
       }
     },
+    "Lite 3D" : {
+
+    },
     "Local data" : {
       "localizations" : {
         "en" : {
@@ -914,6 +979,9 @@
         }
       }
     },
+    "Memories will leave a small seam here when they are ready." : {
+
+    },
     "Memory" : {
       "localizations" : {
         "en" : {
@@ -945,6 +1013,9 @@
           }
         }
       }
+    },
+    "Most of the day" : {
+
     },
     "No change needed" : {
       "extractionState" : "stale",
@@ -1042,6 +1113,9 @@
           }
         }
       }
+    },
+    "Not sure keeps every supported paper available." : {
+
     },
     "OK" : {
       "localizations" : {
@@ -1156,6 +1230,9 @@
         }
       }
     },
+    "Organize your Box" : {
+
+    },
     "Paper" : {
       "localizations" : {
         "en" : {
@@ -1220,6 +1297,12 @@
         }
       }
     },
+    "Peek inside" : {
+
+    },
+    "Peek inside your Box" : {
+
+    },
     "Previous duration unavailable" : {
       "localizations" : {
         "en" : {
@@ -1235,6 +1318,9 @@
           }
         }
       }
+    },
+    "Pull to draw" : {
+
     },
     "Put back" : {
       "localizations" : {
@@ -1316,7 +1402,14 @@
         }
       }
     },
+    "Quick animations" : {
+
+    },
+    "Quiet ambience" : {
+
+    },
     "Recent memories" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1331,6 +1424,18 @@
           }
         }
       }
+    },
+    "Recover from backup" : {
+
+    },
+    "Recovery could not finish. Existing local generations were kept where possible." : {
+
+    },
+    "Recovery error: %@" : {
+
+    },
+    "Recovery validates a separate generation before switching to it. The unreadable generation is retained." : {
+
     },
     "Replace everything in this Box?" : {
       "localizations" : {
@@ -1540,6 +1645,9 @@
         }
       }
     },
+    "Sound" : {
+
+    },
     "Storage" : {
       "localizations" : {
         "en" : {
@@ -1556,6 +1664,9 @@
         }
       }
     },
+    "Store Recovery" : {
+
+    },
     "The app will switch to a verified empty store, then remove its prior local generations. Exported files and system backups are outside the app's control." : {
       "localizations" : {
         "en" : {
@@ -1571,6 +1682,9 @@
           }
         }
       }
+    },
+    "The selected local store could not be opened. It has not been replaced or described as empty." : {
+
     },
     "There are no papers ready to draw yet." : {
       "localizations" : {
@@ -1616,6 +1730,9 @@
           }
         }
       }
+    },
+    "This backup could not be validated. The selected store was kept." : {
+
     },
     "This backup is damaged or was changed after export." : {
       "localizations" : {
@@ -1664,6 +1781,9 @@
           }
         }
       }
+    },
+    "This deliberately creates and validates an empty local generation, selects it, and removes prior app-owned generations." : {
+
     },
     "This file is not a valid someday-box backup." : {
       "localizations" : {
@@ -1744,6 +1864,12 @@
           }
         }
       }
+    },
+    "Try opening again" : {
+
+    },
+    "Up to %lld min" : {
+
     },
     "Up to 1 hour" : {
       "localizations" : {
@@ -1841,6 +1967,12 @@
         }
       }
     },
+    "Use backup recovery first if you may want these papers again." : {
+
+    },
+    "Use this time" : {
+
+    },
     "We couldn't open your Box. Your data was not changed." : {
       "localizations" : {
         "en" : {
@@ -1937,6 +2069,9 @@
         }
       }
     },
+    "Your Box carries a small memory seam." : {
+
+    },
     "Your Box has reached a local format limit. Export or remove content before adding more." : {
       "localizations" : {
         "en" : {
@@ -1968,6 +2103,9 @@
           }
         }
       }
+    },
+    "Your Box needs Recovery" : {
+
     },
     "Your Box was not changed" : {
       "localizations" : {
