@@ -115,9 +115,9 @@ public actor GenerationProductRepository: ProductRepository {
         return try await participant(state)
     }
 
-    public func withTransaction(
-        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
-    ) async throws -> PersistedProductState {
+    public func withTransaction<Outcome: Sendable>(
+        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Outcome
+    ) async throws -> ProductTransaction<Outcome> {
         guard gateState == .idle else { throw GenerationRepositoryError.operationInProgress }
         gateState = .ordinaryMutation
         defer { gateState = .idle }

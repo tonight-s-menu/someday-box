@@ -164,7 +164,7 @@ final class SharePayloadExtractionTests: XCTestCase {
         XCTAssertEqual(try ShareMailboxReader().entries(at: fixture.mailbox).count, 1)
 
         let dismissed = await fixture.appModel.dismissDraw()
-        XCTAssertTrue(dismissed)
+        XCTAssertTrue(dismissed.isCommitted)
         XCTAssertEqual(Set(fixture.appModel.state.items.map(\.title)), ["Drawn paper", "Deferred share"])
         XCTAssertTrue(try ShareMailboxReader().entries(at: fixture.mailbox).isEmpty)
     }

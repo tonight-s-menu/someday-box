@@ -1,6 +1,6 @@
 {
   "assetVersion": "core-box-character-v1",
-  "animationEncoding": "usdNamedResourcesV1",
+  "animationEncoding": "runtimeTransformRecipesV1",
   "aoIntegration": "bakedIntoBasecolorLinearMultiplyV1",
   "packagingComplianceMode": "preAndPostUsdcheckerStrictV1",
   "schemaVersion": 1,

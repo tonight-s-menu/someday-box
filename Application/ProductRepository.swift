@@ -1,14 +1,24 @@
 import Foundation
 
+public struct ProductTransaction<Outcome: Sendable>: Sendable {
+    public let outcome: Outcome
+    public let state: PersistedProductState
+
+    public init(outcome: Outcome, state: PersistedProductState) {
+        self.outcome = outcome
+        self.state = state
+    }
+}
+
 public protocol ProductRepository: Sendable {
     /// Returns the latest committed state for launch and explicit UI refreshes.
     func snapshot() async throws -> PersistedProductState
 
     /// Applies one mutation atomically and returns the committed domain state.
     /// Actor-backed adapters must serialize this entire closure, including persistence.
-    func withTransaction(
-        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
-    ) async throws -> PersistedProductState
+    func withTransaction<Outcome: Sendable>(
+        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Outcome
+    ) async throws -> ProductTransaction<Outcome>
 }
 
 public enum ProductMutationKind: Equatable, Sendable {

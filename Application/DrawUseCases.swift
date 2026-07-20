@@ -4,9 +4,33 @@ public enum StartDrawResult: Equatable, Sendable {
     case revealed(DrawAttempt)
 }
 
+public struct AcceptDrawResult: Equatable, Sendable {
+    public let attemptID: UUID
+    public let sessionID: UUID
+    public let itemID: UUID
+
+    public init(attemptID: UUID, sessionID: UUID, itemID: UUID) {
+        self.attemptID = attemptID
+        self.sessionID = sessionID
+        self.itemID = itemID
+    }
+}
+
+public struct DismissDrawResult: Equatable, Sendable {
+    public let attemptID: UUID
+    public let sessionID: UUID
+    public let itemID: UUID
+
+    public init(attemptID: UUID, sessionID: UUID, itemID: UUID) {
+        self.attemptID = attemptID
+        self.sessionID = sessionID
+        self.itemID = itemID
+    }
+}
+
 public enum RedrawResult: Equatable, Sendable {
-    case revealed(DrawAttempt)
-    case exhausted
+    case revealed(previousAttemptID: UUID, previousItemID: UUID, attempt: DrawAttempt)
+    case exhausted(previousAttemptID: UUID, previousItemID: UUID, sessionID: UUID, context: DrawContext)
 }
 
 private struct SuppliedUnitRandomGenerator: RandomNumberGenerating {
@@ -33,20 +57,20 @@ public struct StartDrawUseCase: Sendable {
         self.randomUnitInterval = randomUnitInterval
     }
 
-    public func execute(availableTime: AvailableTime) async throws -> StartDrawResult {
+    public func execute(availableTime: AvailableTime) async throws -> ProductTransaction<StartDrawResult> {
         guard let context = DrawContext(storageValue: availableTime.rawValue) else {
             throw ApplicationError.emptyPool(.overTimeBudget)
         }
         return try await execute(context: context)
     }
 
-    public func execute(context: DrawContext) async throws -> StartDrawResult {
+    public func execute(context: DrawContext) async throws -> ProductTransaction<StartDrawResult> {
         guard context.isValid else { throw ApplicationError.emptyPool(.overTimeBudget) }
         let sessionID = makeID()
         let attemptID = makeID()
         let timestamp = clock.now()
         let randomValue = randomUnitInterval()
-        let state = try await arbiter.perform(.startDraw) { state in
+        let committed = try await arbiter.perform(.startDraw) { state in
             guard state.currentPick == nil else { throw ApplicationError.currentPickExists }
             ApplicationDomainRules.compactEndedJournal(&state)
 
@@ -84,21 +108,21 @@ public struct StartDrawUseCase: Sendable {
             state.sessions.append(
                 DrawSession(id: sessionID, startedAt: timestamp, context: context)
             )
-            state.attempts.append(
-                DrawAttempt(
-                    id: attemptID,
-                    sessionID: sessionID,
-                    sequence: 1,
-                    itemID: selected.id,
-                    eligibleCount: candidates.count,
-                    shownAt: timestamp,
-                    outcome: .unresolved
-                )
+            let attempt = DrawAttempt(
+                id: attemptID,
+                sessionID: sessionID,
+                sequence: 1,
+                itemID: selected.id,
+                eligibleCount: candidates.count,
+                shownAt: timestamp,
+                outcome: .unresolved
             )
+            state.attempts.append(attempt)
             let itemIndex = try ApplicationDomainRules.itemIndex(id: selected.id, in: state)
             state.items[itemIndex].lastShownAt = timestamp
+            return StartDrawResult.revealed(attempt)
         }
-        return .revealed(state.attempts.first { $0.id == attemptID }!)
+        return committed
     }
 }
 
@@ -120,11 +144,11 @@ public struct RedrawUseCase: Sendable {
         self.randomUnitInterval = randomUnitInterval
     }
 
-    public func execute() async throws -> RedrawResult {
+    public func execute() async throws -> ProductTransaction<RedrawResult> {
         let nextAttemptID = makeID()
         let timestamp = clock.now()
         let randomValue = randomUnitInterval()
-        let state = try await arbiter.perform(.redraw) { state in
+        return try await arbiter.perform(.redraw) { state in
             ApplicationDomainRules.compactEndedJournal(&state)
             let unresolvedIndex = try ApplicationDomainRules.unresolvedAttemptIndex(in: state)
             let unresolved = state.attempts[unresolvedIndex]
@@ -152,7 +176,12 @@ public struct RedrawUseCase: Sendable {
                 state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
                 state.attempts[unresolvedIndex].resolvedAt = timestamp
                 state.sessions[sessionIndex].endedAt = timestamp
-                return
+                return .exhausted(
+                    previousAttemptID: unresolved.id,
+                    previousItemID: unresolved.itemID,
+                    sessionID: unresolved.sessionID,
+                    context: context
+                )
             }
 
             var generator = SuppliedUnitRandomGenerator(value: randomValue)
@@ -165,7 +194,12 @@ public struct RedrawUseCase: Sendable {
                 state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
                 state.attempts[unresolvedIndex].resolvedAt = timestamp
                 state.sessions[sessionIndex].endedAt = timestamp
-                return
+                return .exhausted(
+                    previousAttemptID: unresolved.id,
+                    previousItemID: unresolved.itemID,
+                    sessionID: unresolved.sessionID,
+                    context: context
+                )
             }
             try ApplicationDomainRules.requireCapacity(
                 for: .drawAttempts,
@@ -173,24 +207,24 @@ public struct RedrawUseCase: Sendable {
             )
             state.attempts[unresolvedIndex].outcomeRaw = DrawAttemptOutcome.redrawn.rawValue
             state.attempts[unresolvedIndex].resolvedAt = timestamp
-            state.attempts.append(
-                DrawAttempt(
-                    id: nextAttemptID,
-                    sessionID: unresolved.sessionID,
-                    sequence: unresolved.sequence + 1,
-                    itemID: selected.id,
-                    eligibleCount: candidates.count,
-                    shownAt: timestamp,
-                    outcome: .unresolved
-                )
+            let nextAttempt = DrawAttempt(
+                id: nextAttemptID,
+                sessionID: unresolved.sessionID,
+                sequence: unresolved.sequence + 1,
+                itemID: selected.id,
+                eligibleCount: candidates.count,
+                shownAt: timestamp,
+                outcome: .unresolved
             )
+            state.attempts.append(nextAttempt)
             let itemIndex = try ApplicationDomainRules.itemIndex(id: selected.id, in: state)
             state.items[itemIndex].lastShownAt = timestamp
+            return .revealed(
+                previousAttemptID: unresolved.id,
+                previousItemID: unresolved.itemID,
+                attempt: nextAttempt
+            )
         }
-        if let attempt = state.attempts.first(where: { $0.id == nextAttemptID }) {
-            return .revealed(attempt)
-        }
-        return .exhausted
     }
 }
 
@@ -203,9 +237,9 @@ public struct AcceptDrawUseCase: Sendable {
         self.clock = clock
     }
 
-    public func execute() async throws {
+    public func execute() async throws -> ProductTransaction<AcceptDrawResult> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.accept) { state in
+        return try await arbiter.perform(.accept) { state in
             ApplicationDomainRules.compactEndedJournal(&state)
             let attemptIndex = try ApplicationDomainRules.unresolvedAttemptIndex(in: state)
             let attempt = state.attempts[attemptIndex]
@@ -215,6 +249,7 @@ public struct AcceptDrawUseCase: Sendable {
             let sessionIndex = try ApplicationDomainRules.sessionIndex(id: attempt.sessionID, in: state)
             state.sessions[sessionIndex].endedAt = timestamp
             state.currentPick = CurrentPick(itemID: attempt.itemID, acceptedAt: timestamp)
+            return AcceptDrawResult(attemptID: attempt.id, sessionID: attempt.sessionID, itemID: attempt.itemID)
         }
     }
 }
@@ -228,16 +263,18 @@ public struct DismissDrawUseCase: Sendable {
         self.clock = clock
     }
 
-    public func execute() async throws {
+    public func execute() async throws -> ProductTransaction<DismissDrawResult> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.dismiss) { state in
+        return try await arbiter.perform(.dismiss) { state in
             ApplicationDomainRules.compactEndedJournal(&state)
             let attemptIndex = try ApplicationDomainRules.unresolvedAttemptIndex(in: state)
-            let sessionID = state.attempts[attemptIndex].sessionID
+            let attempt = state.attempts[attemptIndex]
+            let sessionID = attempt.sessionID
             state.attempts[attemptIndex].outcomeRaw = DrawAttemptOutcome.dismissed.rawValue
             state.attempts[attemptIndex].resolvedAt = timestamp
             let sessionIndex = try ApplicationDomainRules.sessionIndex(id: sessionID, in: state)
             state.sessions[sessionIndex].endedAt = timestamp
+            return DismissDrawResult(attemptID: attempt.id, sessionID: attempt.sessionID, itemID: attempt.itemID)
         }
     }
 }

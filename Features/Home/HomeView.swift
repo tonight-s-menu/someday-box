@@ -19,9 +19,10 @@ struct HomeView: View {
                         inBoxCount: inBoxCount,
                         drawableCount: appModel.drawableCount,
                         memoryCount: appModel.state.memories.count,
-                        preferredRenderer: appModel.presentationPreferences.renderer,
+                        preferredRenderer: appModel.presentationPreferences.renderer.maximumTier,
                         quickAnimations: appModel.presentationPreferences.quickAnimations,
-                        pullsRibbon: { presentsDrawContext = true },
+                        ribbonArmed: appModel.selectedDrawContext != nil && appModel.drawAvailability.selectedContextEligibleCount > 0,
+                        pullsRibbon: requestDraw,
                         opensPeek: { presentsPeek = true }
                     )
 
@@ -39,14 +40,16 @@ struct HomeView: View {
 
                     VStack(spacing: 12) {
                         Button {
-                            presentsDrawContext = true
+                            requestDraw()
                         } label: {
                             Label("Draw a paper", systemImage: "sparkles")
                                 .frame(maxWidth: .infinity, minHeight: 54)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(SomedayPrimaryActionButtonStyle())
-                        .disabled(appModel.drawableCount == 0 || appModel.currentItem != nil)
+                        .accessibilityIdentifier("home.capture")
+                        .accessibilityIdentifier("home.draw")
+                        .disabled(!drawEnabled)
 
                         Button {
                             presentsPeek = true
@@ -79,6 +82,7 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape") { presentsSettings = true }
+                        .accessibilityIdentifier("home.settings")
                 }
             }
             .sheet(isPresented: $presentsSettings) { SettingsView() }
@@ -111,6 +115,24 @@ struct HomeView: View {
         }
     }
 
+    private var drawEnabled: Bool {
+        appModel.selectedDrawContext != nil
+            && appModel.drawAvailability.selectedContextEligibleCount > 0
+            && !appModel.requiresProjectionReconciliation
+            && !appModel.isMutating
+            && appModel.unresolvedAttempt == nil
+            && appModel.currentItem == nil
+    }
+
+    private func requestDraw() {
+        guard let context = appModel.selectedDrawContext else {
+            presentsDrawContext = true
+            return
+        }
+        guard drawEnabled else { return }
+        Task { _ = await appModel.startDraw(context: context) }
+    }
+
     private var inBoxCount: Int {
         let reserved = Set([appModel.currentItem?.id, appModel.unresolvedItem?.id].compactMap { $0 })
         return appModel.state.items.filter { $0.lifecycle == .active && !reserved.contains($0.id) }.count
@@ -129,10 +151,12 @@ struct HomeView: View {
                     Task { _ = await appModel.complete(itemID: item.id) }
                 }
                 .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("home.current.complete")
                 Button("Put back") {
                     Task { _ = await appModel.putBack(itemID: item.id) }
                 }
                 .buttonStyle(.bordered)
+                .accessibilityIdentifier("home.current.putBack")
             }
             .controlSize(.large)
         }
@@ -140,6 +164,7 @@ struct HomeView: View {
         .frame(maxWidth: 520, alignment: .leading)
         .background(SomedayBoxBrand.paper, in: RoundedRectangle(cornerRadius: 22))
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home.current")
     }
 }
 
@@ -150,6 +175,7 @@ private struct CoreBoxStage: View {
     let memoryCount: Int
     let preferredRenderer: CoreBoxRendererTier
     let quickAnimations: Bool
+    let ribbonArmed: Bool
     let pullsRibbon: () -> Void
     let opensPeek: () -> Void
 
@@ -193,6 +219,7 @@ private struct CoreBoxStage: View {
                     .background(.regularMaterial, in: Capsule())
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("home.box.summary")
             .accessibilityLabel("Peek inside your Box")
             .accessibilityValue("\(inBoxCount) papers in the Box. \(drawableCount) ready to draw. \(memoryCount) memories.")
 
@@ -210,8 +237,10 @@ private struct CoreBoxStage: View {
                 .contentShape(Rectangle())
                 .gesture(ribbonGesture)
                 .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("home.ribbon")
                 .accessibilityLabel("Pull to draw")
-                .accessibilityHint("Choose a time, then draw a paper. The Draw a paper button offers the same action.")
+                .accessibilityValue(ribbonArmed ? "Armed" : "Not armed")
+                .accessibilityHint(ribbonArmed ? "Pull down to draw." : "Choose a time before pulling.")
                 .accessibilityAction { pullsRibbon() }
             }
             .padding(.trailing, 14)
@@ -479,6 +508,7 @@ struct CaptureView: View {
                         .focused($titleFocused)
                         .submitLabel(.done)
                         .accessibilityLabel("Paper title")
+                        .accessibilityIdentifier("capture.title")
                     Text("Write one small thing you can start in a single free period.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -496,6 +526,7 @@ struct CaptureView: View {
                                     .frame(maxWidth: .infinity, minHeight: 48)
                             }
                             .buttonStyle(SomedayChoiceButtonStyle(isSelected: duration == value))
+                            .accessibilityIdentifier("capture.duration.\(value.rawValue)")
                             .accessibilityAddTraits(duration == value ? .isSelected : [])
                         }
                     }
@@ -519,6 +550,7 @@ struct CaptureView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .accessibilityIdentifier("capture.cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Put it in the Box") {
@@ -528,9 +560,10 @@ struct CaptureView: View {
                                 title: title,
                                 note: showsNote && !note.isEmpty ? note : nil,
                                 duration: duration
-                            ) { dismiss() }
+                            ).isCommitted { dismiss() }
                         }
                     }
+                    .accessibilityIdentifier("capture.save")
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || duration == nil || appModel.isMutating)
                 }
             }
@@ -576,12 +609,16 @@ private struct SettingsView: View {
                     settingsSectionTitle("Experience")
                     Picker("Box renderer", selection: Binding(
                         get: { appModel.presentationPreferences.renderer },
-                        set: { appModel.presentationPreferences.renderer = $0 }
+                        set: { value in Task { await appModel.requestRendererPreference(value) } }
                     )) {
-                        Text("Full 3D").tag(CoreBoxRendererTier.full3D)
-                        Text("Lite 3D").tag(CoreBoxRendererTier.lite3D)
-                        Text("2D").tag(CoreBoxRendererTier.swiftUI2D)
+                        Text("Automatic").tag(CoreBoxRendererPreference.automatic)
+                            .accessibilityIdentifier("renderer.automatic")
+                        Text("Full 3D").tag(CoreBoxRendererPreference.full3D)
+                            .accessibilityIdentifier("renderer.full3D")
+                        Text("Simplified 2D").tag(CoreBoxRendererPreference.simplified2D)
+                            .accessibilityIdentifier("renderer.simplified2D")
                     }
+                    .accessibilityIdentifier("renderer.preference.control")
                     Toggle("Quick animations", isOn: Binding(
                         get: { appModel.presentationPreferences.quickAnimations },
                         set: { appModel.presentationPreferences.quickAnimations = $0 }

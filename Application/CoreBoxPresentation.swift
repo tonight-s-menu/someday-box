@@ -1,6 +1,6 @@
 import Foundation
 
-public enum CoreBoxRendererTier: String, CaseIterable, Codable, Sendable {
+public enum CoreBoxRendererTier: String, CaseIterable, Codable, Sendable, Comparable {
     case full3D
     case lite3D
     case swiftUI2D
@@ -17,6 +17,30 @@ public enum CoreBoxRendererTier: String, CaseIterable, Codable, Sendable {
         switch self {
         case .full3D: .lite3D
         case .lite3D, .swiftUI2D: .swiftUI2D
+        }
+    }
+
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        func rank(_ tier: Self) -> Int {
+            switch tier {
+            case .swiftUI2D: 0
+            case .lite3D: 1
+            case .full3D: 2
+            }
+        }
+        return rank(lhs) < rank(rhs)
+    }
+}
+
+public enum CoreBoxRendererPreference: String, CaseIterable, Codable, Sendable {
+    case automatic
+    case full3D
+    case simplified2D
+
+    public var maximumTier: CoreBoxRendererTier {
+        switch self {
+        case .automatic, .full3D: .full3D
+        case .simplified2D: .swiftUI2D
         }
     }
 }
@@ -101,15 +125,65 @@ public struct CoreBoxPaperProjection: Equatable, Sendable {
     }
 }
 
+public struct CoreBoxPresetDrawCount: Equatable, Sendable {
+    public let preset: DrawPresentationPreset
+    public let count: Int
+
+    public init(preset: DrawPresentationPreset, count: Int) {
+        self.preset = preset
+        self.count = count
+    }
+}
+
+public struct CoreBoxDrawAvailability: Equatable, Sendable {
+    public let totalSupportedCount: Int
+    public let selectedContextEligibleCount: Int
+    public let presetCounts: [CoreBoxPresetDrawCount]
+
+    public init(
+        totalSupportedCount: Int,
+        selectedContextEligibleCount: Int,
+        presetCounts: [CoreBoxPresetDrawCount]
+    ) {
+        self.totalSupportedCount = totalSupportedCount
+        self.selectedContextEligibleCount = selectedContextEligibleCount
+        self.presetCounts = presetCounts
+    }
+}
+
 public struct CoreBoxSceneSnapshot: Equatable, Sendable {
     public let inBoxCount: Int
-    public let drawableCount: Int
+    public let drawAvailability: CoreBoxDrawAvailability
     public let memoryCount: Int
     public let hasCurrentPick: Bool
     public let papers: [CoreBoxPaperProjection]
     public let rendererTier: CoreBoxRendererTier
     public let motionMode: CoreBoxMotionMode
     public let snapshotVersion: UInt64
+
+    public init(
+        inBoxCount: Int,
+        drawAvailability: CoreBoxDrawAvailability,
+        memoryCount: Int,
+        hasCurrentPick: Bool,
+        papers: [CoreBoxPaperProjection],
+        rendererTier: CoreBoxRendererTier,
+        motionMode: CoreBoxMotionMode,
+        snapshotVersion: UInt64
+    ) {
+        self.inBoxCount = inBoxCount
+        self.drawAvailability = drawAvailability
+        self.memoryCount = memoryCount
+        self.hasCurrentPick = hasCurrentPick
+        self.papers = Array(papers.prefix(rendererTier.maximumVisiblePapers))
+        self.rendererTier = rendererTier
+        self.motionMode = motionMode
+        self.snapshotVersion = snapshotVersion
+    }
+
+    /// Compatibility accessor for older presentation surfaces; new code should use
+    /// `drawAvailability.totalSupportedCount` so context-specific counts stay visible.
+    public var drawableCount: Int { drawAvailability.totalSupportedCount }
 
     public init(
         inBoxCount: Int,
@@ -121,14 +195,67 @@ public struct CoreBoxSceneSnapshot: Equatable, Sendable {
         motionMode: CoreBoxMotionMode,
         snapshotVersion: UInt64
     ) {
+        self.init(
+            inBoxCount: inBoxCount,
+            drawAvailability: CoreBoxDrawAvailability(
+                totalSupportedCount: drawableCount,
+                selectedContextEligibleCount: drawableCount,
+                presetCounts: []
+            ),
+            memoryCount: memoryCount,
+            hasCurrentPick: hasCurrentPick,
+            papers: papers,
+            rendererTier: rendererTier,
+            motionMode: motionMode,
+            snapshotVersion: snapshotVersion
+        )
+    }
+}
+
+/// Adapter-neutral stable state used by both RealityKit and the functional 2D fallback.
+struct CoreBoxStablePose: Equatable, Sendable {
+    let snapshotVersion: UInt64
+    let inBoxCount: Int
+    let visiblePapers: [CoreBoxPaperProjection]
+    let hasCurrentPick: Bool
+    let memorySeamVisible: Bool
+    let lid: CoreBoxLidState
+    let draw: CoreBoxDrawState
+    let rendererTier: CoreBoxRendererTier
+    let motionMode: CoreBoxMotionMode
+
+    init(
+        snapshotVersion: UInt64,
+        inBoxCount: Int,
+        visiblePapers: [CoreBoxPaperProjection],
+        hasCurrentPick: Bool,
+        memorySeamVisible: Bool,
+        lid: CoreBoxLidState,
+        draw: CoreBoxDrawState,
+        rendererTier: CoreBoxRendererTier,
+        motionMode: CoreBoxMotionMode
+    ) {
+        self.snapshotVersion = snapshotVersion
         self.inBoxCount = inBoxCount
-        self.drawableCount = drawableCount
-        self.memoryCount = memoryCount
+        self.visiblePapers = visiblePapers
         self.hasCurrentPick = hasCurrentPick
-        self.papers = Array(papers.prefix(rendererTier.maximumVisiblePapers))
+        self.memorySeamVisible = memorySeamVisible
+        self.lid = lid
+        self.draw = draw
         self.rendererTier = rendererTier
         self.motionMode = motionMode
-        self.snapshotVersion = snapshotVersion
+    }
+
+    init(snapshot: CoreBoxSceneSnapshot) {
+        snapshotVersion = snapshot.snapshotVersion
+        inBoxCount = snapshot.inBoxCount
+        visiblePapers = snapshot.papers
+        hasCurrentPick = snapshot.hasCurrentPick
+        memorySeamVisible = snapshot.memoryCount > 0
+        lid = .closed
+        draw = snapshot.drawAvailability.selectedContextEligibleCount > 0 ? .armed : .idle
+        rendererTier = snapshot.rendererTier
+        motionMode = snapshot.motionMode
     }
 }
 
@@ -139,6 +266,38 @@ public enum CoreBoxFallbackReason: String, Codable, Sendable {
     case thermalPressure
     case sustainedFrameBudget
     case lowPowerMode
+}
+
+/// Presentation events are deliberately independent of RealityKit so the 2D fallback
+/// can preserve product semantics when a 3D asset is rejected.
+public enum CoreBoxPresentationEvent: Equatable, Sendable {
+    case touch
+    case captureReceive
+    case captureDeposit(itemID: UUID)
+    case drawReveal(attemptID: UUID, itemID: UUID)
+    case currentAttach(attemptID: UUID, itemID: UUID)
+    case paperReturn(itemID: UUID)
+    case memoryStamp(itemID: UUID, memoryID: UUID)
+    case failureSettle
+    case fallbackSettle(CoreBoxFallbackReason)
+}
+
+public enum CoreBoxSettleReason: Equatable, Sendable {
+    case completed
+    case cancelled
+    case background
+    case coveringGate
+    case rendererTransition
+    case reconciliation
+    case validationFailure
+}
+
+@MainActor
+protocol CoreBoxPresentationAdapter: AnyObject {
+    func apply(snapshot: CoreBoxSceneSnapshot)
+    func apply(event: CoreBoxPresentationEvent, sourceSnapshotVersion: UInt64)
+    func applyRibbon(progress: Double, latched: Bool)
+    func settle(reason: CoreBoxSettleReason)
 }
 
 public struct CoreBoxPresentationStateMachine: Equatable, Sendable {
@@ -213,9 +372,10 @@ public struct CoreBoxPresentationStateMachine: Equatable, Sendable {
 }
 
 public struct CoreBoxPresentationPreferences: Equatable, Sendable {
-    public static let namespace = "core-box-presentation-v1"
+    public static let namespace = "core-box-presentation-v2"
+    public static let legacyNamespace = "core-box-presentation-v1"
 
-    public var renderer: CoreBoxRendererTier
+    public var renderer: CoreBoxRendererPreference
     public var quickAnimations: Bool
     public var soundEnabled: Bool
     public var hapticsEnabled: Bool
@@ -224,7 +384,7 @@ public struct CoreBoxPresentationPreferences: Equatable, Sendable {
     public var hasSeenFirstAnimation: Bool
 
     public init(
-        renderer: CoreBoxRendererTier = .full3D,
+        renderer: CoreBoxRendererPreference = .automatic,
         quickAnimations: Bool = false,
         soundEnabled: Bool = true,
         hapticsEnabled: Bool = true,
@@ -253,6 +413,8 @@ public struct CoreBoxPresentationPreferenceStore: @unchecked Sendable {
         static let firstAnimation = "first-animation"
     }
 
+    public static let migrationCompletedKey = "\(CoreBoxPresentationPreferences.namespace).migrationCompleted"
+
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {
@@ -262,7 +424,8 @@ public struct CoreBoxPresentationPreferenceStore: @unchecked Sendable {
     private func key(_ value: String) -> String { "\(CoreBoxPresentationPreferences.namespace).\(value)" }
 
     public func load() -> CoreBoxPresentationPreferences {
-        let renderer = defaults.string(forKey: key(Key.renderer)).flatMap(CoreBoxRendererTier.init(rawValue:)) ?? .full3D
+        _ = loadMigratingIfNeeded()
+        let renderer = defaults.string(forKey: key(Key.renderer)).flatMap(CoreBoxRendererPreference.init(rawValue:)) ?? .automatic
         return CoreBoxPresentationPreferences(
             renderer: renderer,
             quickAnimations: defaults.object(forKey: key(Key.quick)) as? Bool ?? false,
@@ -285,8 +448,101 @@ public struct CoreBoxPresentationPreferenceStore: @unchecked Sendable {
     }
 
     public func reset() {
-        for value in [Key.renderer, Key.quick, Key.sound, Key.haptics, Key.ambience, Key.lastContext, Key.firstAnimation] {
-            defaults.removeObject(forKey: key(value))
+        resetAllNamespaces()
+    }
+
+    public func loadMigratingIfNeeded() -> CoreBoxPresentationPreferences {
+        if !defaults.bool(forKey: Self.migrationCompletedKey) {
+            let writes = CoreBoxPreferenceMigrator().v2Writes(from: defaults)
+            for write in writes {
+                switch write.value {
+                case let .string(value): defaults.set(value, forKey: write.key)
+                case let .bool(value): defaults.set(value, forKey: write.key)
+                }
+            }
+            removeLegacyKeys()
+        } else {
+            removeLegacyKeys()
         }
+        return readV2()
+    }
+
+    public func resetAllNamespaces() {
+        for namespace in [CoreBoxPresentationPreferences.legacyNamespace, CoreBoxPresentationPreferences.namespace] {
+            for value in [Key.renderer, Key.quick, Key.sound, Key.haptics, Key.ambience, Key.lastContext, Key.firstAnimation, "migrationCompleted"] {
+                defaults.removeObject(forKey: "\(namespace).\(value)")
+            }
+        }
+    }
+
+    private func readV2() -> CoreBoxPresentationPreferences {
+        let renderer = defaults.string(forKey: key(Key.renderer)).flatMap(CoreBoxRendererPreference.init(rawValue:)) ?? .automatic
+        return CoreBoxPresentationPreferences(
+            renderer: renderer,
+            quickAnimations: defaults.object(forKey: key(Key.quick)) as? Bool ?? false,
+            soundEnabled: defaults.object(forKey: key(Key.sound)) as? Bool ?? true,
+            hapticsEnabled: defaults.object(forKey: key(Key.haptics)) as? Bool ?? true,
+            ambienceEnabled: defaults.object(forKey: key(Key.ambience)) as? Bool ?? true,
+            lastDrawContext: defaults.string(forKey: key(Key.lastContext)),
+            hasSeenFirstAnimation: defaults.object(forKey: key(Key.firstAnimation)) as? Bool ?? false
+        )
+    }
+
+    private func removeLegacyKeys() {
+        for value in [Key.renderer, Key.quick, Key.sound, Key.haptics, Key.ambience, Key.lastContext, Key.firstAnimation] {
+            defaults.removeObject(forKey: "\(CoreBoxPresentationPreferences.legacyNamespace).\(value)")
+        }
+    }
+}
+
+public enum CoreBoxPreferenceValue: Equatable, Sendable {
+    case string(String)
+    case bool(Bool)
+}
+
+public struct CoreBoxPreferenceWrite: Equatable, Sendable {
+    public let key: String
+    public let value: CoreBoxPreferenceValue
+
+    public init(key: String, value: CoreBoxPreferenceValue) {
+        self.key = key
+        self.value = value
+    }
+}
+
+public struct CoreBoxPreferenceMigrator: Sendable {
+    public init() {}
+
+    public func v2Writes(from defaults: UserDefaults) -> [CoreBoxPreferenceWrite] {
+        let legacy = CoreBoxPresentationPreferences.legacyNamespace
+        let current = CoreBoxPresentationPreferences.namespace
+        let legacyRenderer = defaults.string(forKey: "\(legacy).renderer").flatMap { value -> String? in
+            switch value {
+            case "full3D": return CoreBoxRendererPreference.full3D.rawValue
+            case "swiftUI2D": return CoreBoxRendererPreference.simplified2D.rawValue
+            case "lite3D", "automatic": return CoreBoxRendererPreference.automatic.rawValue
+            default: return CoreBoxRendererPreference.automatic.rawValue
+            }
+        } ?? CoreBoxRendererPreference.automatic.rawValue
+        let renderer = defaults.string(forKey: "\(current).renderer")
+            .flatMap(CoreBoxRendererPreference.init(rawValue:))?.rawValue ?? legacyRenderer
+        var writes: [CoreBoxPreferenceWrite] = [
+            .init(key: "\(current).renderer", value: .string(renderer))
+        ]
+        let boolKeys = ["quick", "sound", "haptics", "ambience", "first-animation"]
+        let defaultsByKey: [String: Bool] = ["quick": false, "sound": true, "haptics": true, "ambience": true, "first-animation": false]
+        for value in boolKeys {
+            let key = "\(legacy).\(value)"
+            let currentKey = "\(current).\(value)"
+            let boolValue = defaults.object(forKey: currentKey) as? Bool
+                ?? defaults.object(forKey: key) as? Bool
+                ?? defaultsByKey[value]!
+            writes.append(.init(key: currentKey, value: .bool(boolValue)))
+        }
+        if let context = defaults.string(forKey: "\(current).last-context") ?? defaults.string(forKey: "\(legacy).last-context") {
+            writes.append(.init(key: "\(current).last-context", value: .string(context)))
+        }
+        writes.append(.init(key: CoreBoxPresentationPreferenceStore.migrationCompletedKey, value: .bool(true)))
+        return writes
     }
 }

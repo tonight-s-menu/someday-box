@@ -19,6 +19,8 @@ struct SharedImportPresentationBatch: Equatable {
     var expiresAt: Date
 }
 
+private struct VoidMutationReceipt: Equatable, Sendable {}
+
 @main
 struct SomedayBoxApp: App {
     @State private var appModel: AppModel?
@@ -85,10 +87,31 @@ enum AppComposition {
     }
 
     static func make() async throws -> AppModel {
-        let supportRoot = try supportRoot()
+        let launchConfiguration = UITestLaunchConfiguration.current
+        let supportRoot = try launchConfiguration.supportRoot(defaultRoot: supportRoot())
         let repository = try await GenerationProductRepository.open(
             configuration: StoreGenerationConfiguration(applicationSupportURL: supportRoot)
         )
+        if launchConfiguration.enabled, let fixture = launchConfiguration.fixture {
+            let count: Int
+            switch fixture {
+            case .emptyBox: count = 0
+            case let .activePapers(value): count = value
+            case .drawReady: count = 1
+            }
+            let now = Date()
+            let items = (0..<count).map { index in
+                BoxItem(
+                    id: UUID(),
+                    title: fixture == .drawReady ? "Fixture paper title" : "Fixture paper \(index + 1)",
+                    durationBucketRaw: DurationBucket.upTo30Minutes.rawValue,
+                    createdAt: now.addingTimeInterval(TimeInterval(-index)),
+                    updatedAt: now
+                )
+            }
+            _ = try await repository.withTransaction { $0 = PersistedProductState(items: items) }
+            UserDefaults.standard.removeObject(forKey: "lastDrawContext")
+        }
         let groupContainerURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: "group.com.somedaybox.app.share"
         )
@@ -108,11 +131,15 @@ enum AppComposition {
         } else if try sharedJournalStore.load() != nil {
             throw ShareCaptureError.publicationFailed
         }
-        return AppModel(
+        let model = AppModel(
             repository: repository,
             shareGroupContainerURL: groupContainerURL,
             sharedJournalStore: sharedJournalStore
         )
+        if let renderer = launchConfiguration.renderer {
+            model.presentationPreferences.renderer = renderer
+        }
+        return model
     }
 }
 
@@ -138,7 +165,10 @@ final class AppModel {
     private let shareMailboxMaintenance = ShareMailboxMaintenance()
     private let sharedJournalStore: SharedProductDataJournalStore
     private let presentationPreferenceStore = CoreBoxPresentationPreferenceStore()
+    private let projectionLoader: CoreBoxProjectionLoader
+    private let mutationHooks: AppModelMutationHooks
     private var isRefreshingSharedCaptures = false
+    private var effectiveRendererTierOverride: CoreBoxRendererTier?
 
     var state = PersistedProductState(items: [])
     var isLoading = true
@@ -147,6 +177,10 @@ final class AppModel {
     var errorMessage: String?
     var shareRecoveryItems: [ShareCaptureRecoveryItem] = []
     var sharedImportPresentation: SharedImportPresentationBatch?
+    var sceneSnapshot: CoreBoxSceneSnapshot?
+    var snapshotVersion: UInt64 = 0
+    var requiresProjectionReconciliation = false
+    private(set) var selectedDrawContext: DrawContext?
     var presentationPreferences: CoreBoxPresentationPreferences {
         didSet { presentationPreferenceStore.save(presentationPreferences) }
     }
@@ -161,29 +195,39 @@ final class AppModel {
     init(
         repository: GenerationProductRepository,
         shareGroupContainerURL: URL? = nil,
-        sharedJournalStore: SharedProductDataJournalStore? = nil
+        sharedJournalStore: SharedProductDataJournalStore? = nil,
+        projectionLoader: CoreBoxProjectionLoader = .live,
+        mutationHooks: AppModelMutationHooks = .live,
+        clock: any Clock = SystemClock(),
+        makeID: @escaping @Sendable () -> UUID = { UUID() }
     ) {
         self.repository = repository
         self.shareGroupContainerURL = shareGroupContainerURL
+        self.projectionLoader = projectionLoader
+        self.mutationHooks = mutationHooks
         self.sharedJournalStore = sharedJournalStore ?? SharedProductDataJournalStore(
             applicationSupportURL: FileManager.default.temporaryDirectory
                 .appendingPathComponent("SomedayBox-\(UUID().uuidString)", isDirectory: true)
         )
         presentationPreferences = presentationPreferenceStore.load()
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
+        if let data = UserDefaults.standard.data(forKey: "lastDrawContext"),
+           let context = try? JSONDecoder().decode(DrawContext.self, from: data) {
+            selectedDrawContext = context
+        }
         let arbiter = MutationArbiter(repository: repository)
-        captureUseCase = CapturePaperUseCase(arbiter: arbiter)
-        editUseCase = EditPaperUseCase(arbiter: arbiter)
-        startDrawUseCase = StartDrawUseCase(arbiter: arbiter)
-        redrawUseCase = RedrawUseCase(arbiter: arbiter)
-        acceptUseCase = AcceptDrawUseCase(arbiter: arbiter)
-        dismissUseCase = DismissDrawUseCase(arbiter: arbiter)
-        completeUseCase = CompletePaperUseCase(arbiter: arbiter)
-        putBackUseCase = PutBackPaperUseCase(arbiter: arbiter)
-        archiveUseCase = ArchivePaperUseCase(arbiter: arbiter)
-        restoreUseCase = RestorePaperUseCase(arbiter: arbiter)
+        captureUseCase = CapturePaperUseCase(arbiter: arbiter, clock: clock, makeID: makeID)
+        editUseCase = EditPaperUseCase(arbiter: arbiter, clock: clock)
+        startDrawUseCase = StartDrawUseCase(arbiter: arbiter, clock: clock, makeID: makeID)
+        redrawUseCase = RedrawUseCase(arbiter: arbiter, clock: clock, makeID: makeID)
+        acceptUseCase = AcceptDrawUseCase(arbiter: arbiter, clock: clock)
+        dismissUseCase = DismissDrawUseCase(arbiter: arbiter, clock: clock)
+        completeUseCase = CompletePaperUseCase(arbiter: arbiter, clock: clock, makeID: makeID)
+        putBackUseCase = PutBackPaperUseCase(arbiter: arbiter, clock: clock)
+        archiveUseCase = ArchivePaperUseCase(arbiter: arbiter, clock: clock)
+        restoreUseCase = RestorePaperUseCase(arbiter: arbiter, clock: clock)
         deleteUseCase = DeletePaperUseCase(arbiter: arbiter)
-        importSharedPaperUseCase = ImportSharedPaperUseCase(arbiter: arbiter)
+        importSharedPaperUseCase = ImportSharedPaperUseCase(arbiter: arbiter, clock: clock, makeItemID: makeID, makeSourceID: makeID)
         removeSourceUseCase = RemoveSourceUseCase(arbiter: arbiter)
     }
 
@@ -208,6 +252,14 @@ final class AppModel {
         }.count
     }
 
+    var drawAvailability: CoreBoxDrawAvailability {
+        sceneSnapshot?.drawAvailability ?? CoreBoxDrawAvailability(
+            totalSupportedCount: drawableCount,
+            selectedContextEligibleCount: drawableCount,
+            presetCounts: []
+        )
+    }
+
     func item(id: UUID) -> BoxItem? {
         state.items.first { $0.id == id }
     }
@@ -226,6 +278,7 @@ final class AppModel {
                 await ingestSharedCaptures()
                 state = try await repository.snapshot()
             }
+            try await publishProjection(for: state)
             errorMessage = nil
             loadFailed = false
         } catch {
@@ -235,9 +288,9 @@ final class AppModel {
         isLoading = false
     }
 
-    func capture(title: String, note: String?, duration: DurationBucket) async -> Bool {
-        await mutate {
-            _ = try await self.captureUseCase.execute(
+    func capture(title: String, note: String?, duration: DurationBucket) async -> AppMutationProjection<CapturePaperResult> {
+        await projectMutation {
+            try await self.captureUseCase.execute(
                 title: title,
                 note: note,
                 durationBucketRaw: duration.rawValue
@@ -256,36 +309,36 @@ final class AppModel {
         }
     }
 
-    func startDraw(availableTime: AvailableTime) async -> Bool {
-        await mutate { _ = try await self.startDrawUseCase.execute(availableTime: availableTime) }
+    func startDraw(availableTime: AvailableTime) async -> AppMutationProjection<StartDrawResult> {
+        await projectMutation { try await self.startDrawUseCase.execute(availableTime: availableTime) }
     }
 
-    func startDraw(context: DrawContext) async -> Bool {
-        await mutate { _ = try await self.startDrawUseCase.execute(context: context) }
+    func startDraw(context: DrawContext) async -> AppMutationProjection<StartDrawResult> {
+        await projectMutation { try await self.startDrawUseCase.execute(context: context) }
     }
 
-    func redraw() async -> Bool {
-        await mutate { _ = try await self.redrawUseCase.execute() }
+    func redraw() async -> AppMutationProjection<RedrawResult> {
+        await projectMutation { try await self.redrawUseCase.execute() }
     }
 
-    func acceptDraw() async -> Bool {
-        let accepted = await mutate { try await self.acceptUseCase.execute() }
-        if accepted { await refreshSharedCaptures() }
+    func acceptDraw() async -> AppMutationProjection<AcceptDrawResult> {
+        let accepted = await projectMutation { try await self.acceptUseCase.execute() }
+        if accepted.isCommitted { await refreshSharedCaptures() }
         return accepted
     }
 
-    func dismissDraw() async -> Bool {
-        let dismissed = await mutate { try await self.dismissUseCase.execute() }
-        if dismissed { await refreshSharedCaptures() }
+    func dismissDraw() async -> AppMutationProjection<DismissDrawResult> {
+        let dismissed = await projectMutation { try await self.dismissUseCase.execute() }
+        if dismissed.isCommitted { await refreshSharedCaptures() }
         return dismissed
     }
 
-    func complete(itemID: UUID) async -> Bool {
-        await mutate { try await self.completeUseCase.execute(itemID: itemID) }
+    func complete(itemID: UUID) async -> AppMutationProjection<CompletePaperResult> {
+        await projectMutation { try await self.completeUseCase.execute(itemID: itemID) }
     }
 
-    func putBack(itemID: UUID) async -> Bool {
-        await mutate { try await self.putBackUseCase.execute(itemID: itemID) }
+    func putBack(itemID: UUID) async -> AppMutationProjection<PutBackPaperResult> {
+        await projectMutation { try await self.putBackUseCase.execute(itemID: itemID) }
     }
 
     func archive(itemID: UUID) async -> Bool {
@@ -367,10 +420,12 @@ final class AppModel {
             )
         }
         if erased {
-            presentationPreferenceStore.reset()
+            presentationPreferenceStore.resetAllNamespaces()
             presentationPreferences = .init()
             hasSeenIntroduction = false
             UserDefaults.standard.removeObject(forKey: "hasSeenIntroduction")
+            selectedDrawContext = nil
+            UserDefaults.standard.removeObject(forKey: "lastDrawContext")
         }
         return erased
     }
@@ -383,29 +438,86 @@ final class AppModel {
         errorMessage = nil
     }
 
+    /// Updates only the presentation context; drawing remains an explicit second action.
+    func updateDrawContext(_ context: DrawContext?) async {
+        guard !isMutating, !requiresProjectionReconciliation else { return }
+        selectedDrawContext = context
+        if let context, let data = try? JSONEncoder().encode(context) {
+            UserDefaults.standard.set(data, forKey: "lastDrawContext")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "lastDrawContext")
+        }
+        do {
+            try await publishProjection(for: state)
+            errorMessage = nil
+        } catch {
+            requiresProjectionReconciliation = true
+            errorMessage = message(for: error)
+        }
+    }
+
+    func requestRendererPreference(_ preference: CoreBoxRendererPreference) async {
+        presentationPreferences.renderer = preference
+        effectiveRendererTierOverride = nil
+        do { try await publishProjection(for: state) }
+        catch { requiresProjectionReconciliation = true; errorMessage = message(for: error) }
+    }
+
+    func requestEffectiveRendererTier(_ tier: CoreBoxRendererTier, reason _: CoreBoxFallbackReason) async {
+        effectiveRendererTierOverride = tier
+        do { try await publishProjection(for: state) }
+        catch { requiresProjectionReconciliation = true; errorMessage = message(for: error) }
+    }
+
+    func retryProjection() async {
+        guard requiresProjectionReconciliation else { return }
+        do {
+            let latestState = try await repository.snapshot()
+            guard snapshotVersion < UInt64.max else { throw AppMutationFailure.reconciliationRequired }
+            let nextVersion = snapshotVersion + 1
+            let snapshot = try await projectionLoader.load(
+                latestState,
+                nextVersion,
+                projectionInputs
+            )
+            state = latestState
+            snapshotVersion = nextVersion
+            sceneSnapshot = snapshot
+            requiresProjectionReconciliation = false
+            errorMessage = nil
+        } catch {
+            requiresProjectionReconciliation = true
+            errorMessage = message(for: error)
+        }
+    }
+
     func report(_ error: Error) {
         errorMessage = message(for: error)
     }
 
-    func retryCurrentShareRecovery() async -> Bool {
-        guard let current = currentShareRecovery, let groupURL = shareGroupContainerURL else { return false }
+    func retryCurrentShareRecovery() async -> AppMutationProjection<ImportSharedPaperResult> {
+        guard let current = currentShareRecovery, let groupURL = shareGroupContainerURL else {
+            return .notCommitted(failure: .persistenceUnavailable)
+        }
         switch current {
         case let .pending(entry, _):
+            let projection = await projectMutation {
+                try await self.importSharedPaperUseCase.execute(envelope: entry.envelope)
+            }
+            guard let outcome = projection.outcome else { return projection }
             do {
-                let result = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
-                recordFreshSharedImport(result)
+                recordFreshSharedImport(outcome)
                 try shareMailboxReader.remove(entry, at: groupURL)
                 shareRecoveryItems.removeFirst()
-                state = try await repository.snapshot()
                 errorMessage = nil
-                return true
+                return projection
             } catch {
                 errorMessage = message(for: error)
-                return false
+                return .notCommitted(failure: .persistenceUnavailable)
             }
         case .invalid:
             errorMessage = shareFeatureText("This capture cannot be read safely. Export or discard it, or update someday-box if it came from a newer version.")
-            return false
+            return .notCommitted(failure: .persistenceUnavailable)
         }
     }
 
@@ -442,6 +554,7 @@ final class AppModel {
         await ingestSharedCaptures()
         do {
             state = try await repository.snapshot()
+            try await publishProjection(for: state)
         } catch {
             errorMessage = message(for: error)
         }
@@ -457,9 +570,15 @@ final class AppModel {
             let inspection = try shareMailboxReader.inspect(at: shareGroupContainerURL)
             shareRecoveryItems = inspection.problems.map { .invalid($0) }
             for entry in inspection.entries {
+                let projection = await projectMutation {
+                    try await self.importSharedPaperUseCase.execute(envelope: entry.envelope)
+                }
+                guard let outcome = projection.outcome else {
+                    shareRecoveryItems.append(.pending(entry, message: errorMessage ?? ""))
+                    continue
+                }
                 do {
-                    let result = try await importSharedPaperUseCase.execute(envelope: entry.envelope)
-                    recordFreshSharedImport(result)
+                    recordFreshSharedImport(outcome)
                     try shareMailboxReader.remove(entry, at: shareGroupContainerURL)
                 } catch {
                     shareRecoveryItems.append(.pending(entry, message: message(for: error)))
@@ -483,19 +602,84 @@ final class AppModel {
         }
     }
 
-    private func mutate(_ operation: () async throws -> Void) async -> Bool {
-        guard !isMutating else { return false }
+    private func mutate(
+        _ operation: () async throws -> ProductTransaction<Void>
+    ) async -> Bool {
+        await projectMutation {
+            let transaction = try await operation()
+            return ProductTransaction(outcome: VoidMutationReceipt(), state: transaction.state)
+        }.isCommitted
+    }
+
+    private func projectMutation<Outcome: Equatable & Sendable>(
+        _ operation: () async throws -> ProductTransaction<Outcome>
+    ) async -> AppMutationProjection<Outcome> {
+        guard !requiresProjectionReconciliation else {
+            return .notCommitted(failure: .reconciliationRequired)
+        }
+        guard !isMutating else {
+            return .notCommitted(failure: .operationInProgress)
+        }
         isMutating = true
         defer { isMutating = false }
+
         do {
-            try await operation()
-            state = try await repository.snapshot()
-            errorMessage = nil
-            return true
+            try await mutationHooks.beforeOperation()
+            let transaction = try await operation()
+            state = transaction.state
+            guard snapshotVersion < UInt64.max else {
+                requiresProjectionReconciliation = true
+                return .committedButProjectionUnavailable(outcome: transaction.outcome)
+            }
+            let nextVersion = snapshotVersion + 1
+            do {
+                let snapshot = try await projectionLoader.load(
+                    transaction.state,
+                    nextVersion,
+                    projectionInputs
+                )
+                snapshotVersion = nextVersion
+                sceneSnapshot = snapshot
+                requiresProjectionReconciliation = false
+                errorMessage = nil
+                return .committed(outcome: transaction.outcome, snapshot: snapshot)
+            } catch {
+                requiresProjectionReconciliation = true
+                return .committedButProjectionUnavailable(outcome: transaction.outcome)
+            }
+        } catch let error as ApplicationError {
+            errorMessage = message(for: error)
+            return .notCommitted(failure: .application(error))
+        } catch let error as AppMutationFailure {
+            return .notCommitted(failure: error)
         } catch {
             errorMessage = message(for: error)
-            return false
+            return .notCommitted(failure: .persistenceUnavailable)
         }
+    }
+
+    private var projectionInputs: CoreBoxProjectionInputs {
+        CoreBoxProjectionInputs(
+            rendererTier: effectiveRendererTierOverride ?? presentationPreferences.renderer.maximumTier,
+            motionMode: presentationPreferences.quickAnimations ? .quick : .normal,
+            drawContext: selectedDrawContext ?? unresolvedAttempt.flatMap { attempt in
+                state.sessions.first(where: { $0.id == attempt.sessionID })?.context
+            },
+            now: Date()
+        )
+    }
+
+    private func publishProjection(for committedState: PersistedProductState) async throws {
+        guard snapshotVersion < UInt64.max else {
+            requiresProjectionReconciliation = true
+            throw AppMutationFailure.reconciliationRequired
+        }
+        let nextVersion = snapshotVersion + 1
+        let snapshot = try await projectionLoader.load(committedState, nextVersion, projectionInputs)
+        state = committedState
+        snapshotVersion = nextVersion
+        sceneSnapshot = snapshot
+        requiresProjectionReconciliation = false
     }
 
     private func replaceProductData(

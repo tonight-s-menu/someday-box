@@ -25,6 +25,8 @@ struct RootTabView: View {
                 DrawRevealGate()
             } else if appModel.currentShareRecovery != nil {
                 SharedCaptureRecoveryView()
+            } else if appModel.requiresProjectionReconciliation {
+                ProjectionReconciliationView()
             } else if !appModel.hasSeenIntroduction {
                 IntroductionView()
             } else {
@@ -44,7 +46,7 @@ struct RootTabView: View {
                         .interactiveDismissDisabled(appModel.isMutating)
                 }
                 .sheet(isPresented: $presentsDrawContext) {
-                    DrawContextView()
+                    DrawContextPicker()
                 }
             }
         }
@@ -66,6 +68,34 @@ struct RootTabView: View {
             Button("OK", role: .cancel) { appModel.clearError() }
         } message: {
             Text(appModel.errorMessage ?? "")
+        }
+    }
+}
+
+private struct ProjectionReconciliationView: View {
+    @Environment(AppModel.self) private var appModel
+
+    var body: some View {
+        ZStack {
+            SomedayBoxBrand.canvas.ignoresSafeArea()
+            VStack(spacing: 18) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .font(.system(size: 48))
+                    .foregroundStyle(SomedayBoxBrand.tint)
+                    .accessibilityHidden(true)
+                Text("Your Box is saved")
+                    .font(.title.bold())
+                Text("The latest scene needs to be refreshed before another change can be made.")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                Button("Refresh scene") {
+                    Task { await appModel.retryProjection() }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(appModel.isMutating)
+            }
+            .padding(28)
+            .frame(maxWidth: 520)
         }
     }
 }
@@ -312,7 +342,7 @@ struct DrawContextView: View {
                     Button {
                         guard let selection else { return }
                         Task {
-                            if await appModel.startDraw(context: selection) { dismiss() }
+                            if (await appModel.startDraw(context: selection)).isCommitted { dismiss() }
                         }
                     } label: {
                         Label("Draw a paper", systemImage: "sparkles")
@@ -401,9 +431,8 @@ struct DrawRevealGate: View {
                     .frame(maxWidth: 520)
                     .background(SomedayBoxBrand.paper, in: RoundedRectangle(cornerRadius: 28))
                     .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
-                    .scaleEffect(isRevealed ? 1 : 0.94)
-                    .opacity(isRevealed ? 1 : 0)
                     .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("draw.reveal.result")
                     .accessibilityLabel(
                         String(
                             format: String(localized: "Drawn paper: %@, %@"),
@@ -421,6 +450,7 @@ struct DrawRevealGate: View {
                             .frame(maxWidth: .infinity, minHeight: 52)
                     }
                     .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("draw.accept")
 
                     Button {
                         Task { _ = await appModel.redraw() }
@@ -429,6 +459,7 @@ struct DrawRevealGate: View {
                             .frame(maxWidth: .infinity, minHeight: 48)
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityIdentifier("draw.redraw")
                     .disabled(!canRedraw || appModel.isMutating)
 
                     if !canRedraw {
@@ -442,6 +473,7 @@ struct DrawRevealGate: View {
                         Task { _ = await appModel.dismissDraw() }
                     }
                     .frame(minHeight: 44)
+                    .accessibilityIdentifier("draw.dismiss")
                 }
                 .frame(maxWidth: 420)
                 .disabled(appModel.isMutating)

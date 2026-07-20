@@ -268,11 +268,11 @@ private struct PaperDetailView: View {
     }
 
     private func complete(_ id: UUID) async {
-        if await appModel.complete(itemID: id) { dismiss() }
+        if (await appModel.complete(itemID: id)).isCommitted { dismiss() }
     }
 
     private func putBack(_ id: UUID) async {
-        if await appModel.putBack(itemID: id) { dismiss() }
+        if (await appModel.putBack(itemID: id)).isCommitted { dismiss() }
     }
 
     private func archive(_ id: UUID) async {

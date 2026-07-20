@@ -13,7 +13,7 @@
   ],
   "properties": {
     "assetVersion": { "type": "string", "const": "core-box-character-v1" },
-    "animationEncoding": { "type": "string", "const": "usdNamedResourcesV1" },
+    "animationEncoding": { "type": "string", "enum": ["usdNamedResourcesV1", "runtimeTransformRecipesV1"] },
     "aoIntegration": { "type": "string", "const": "bakedIntoBasecolorLinearMultiplyV1" },
     "packagingComplianceMode": { "type": "string", "const": "preAndPostUsdcheckerStrictV1" },
     "schemaVersion": { "type": "integer", "const": 1 },

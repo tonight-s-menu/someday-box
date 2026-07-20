@@ -40,7 +40,7 @@ final class SwiftDataPersistenceTests: XCTestCase {
         let committed = try await repository.withTransaction { state in
             state.items.append(item)
         }
-        XCTAssertEqual(committed.items, [item])
+        XCTAssertEqual(committed.state.items, [item])
         let completionTime = now
 
         do {

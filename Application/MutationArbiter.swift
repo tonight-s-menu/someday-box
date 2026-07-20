@@ -16,18 +16,19 @@ public struct MutationArbiter: Sendable {
         self.validator = validator
     }
 
-    public func perform(
+    public func perform<Outcome: Sendable>(
         _ kind: ProductMutationKind,
-        mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
-    ) async throws -> PersistedProductState {
+        mutation: @escaping @Sendable (inout PersistedProductState) throws -> Outcome
+    ) async throws -> ProductTransaction<Outcome> {
         try await repository.withTransaction { state in
             try validate(state)
             let hasUnresolvedAttempt = state.attempts.contains { $0.outcome == .unresolved }
             if hasUnresolvedAttempt && !kind.mayResolveUnresolvedDraw {
                 throw ApplicationError.drawResolutionRequired
             }
-            try mutation(&state)
+            let outcome = try mutation(&state)
             try validate(state)
+            return outcome
         }
     }
 

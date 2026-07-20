@@ -63,6 +63,12 @@ Asset-load failure, required-entity validation failure, memory pressure, serious
 - Physics may affect presentation-only settling but never business outcomes.
 - Stop animations, audio, particles, gesture processing, and unnecessary per-frame work when the app backgrounds.
 
+### Compatibility-gate animation encoding
+
+- RealityKit on the pinned iOS 26.5 simulator and iPhone 17 Pro Max / iOS 26.5.2 loads the proof USDZ hierarchy but does not expose its composed USD clip resources through Entity.availableAnimations.
+- The Task 5 proof therefore uses runtimeTransformRecipesV1: deterministic, named rigid-node transforms for the same public motion identifiers. This applies to the three proof motions only; Task 16 still requires the final 13-motion production verification.
+- Exact-byte validation, required hierarchy checks, one-root RealityView installation, sampled ribbon safety, and functional 2D rejection remain mandatory. The fallback never introduces extra runtime USDZ files, a network dependency, or a return to runtime primitive modeling.
+
 ## Alternatives considered
 
 ### SwiftUI-only 2D as the sole presentation

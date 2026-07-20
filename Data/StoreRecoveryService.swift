@@ -63,7 +63,7 @@ public actor StoreRecoveryService {
             try FileManager.default.removeItem(at: url)
         }
         try? journalStore.remove()
-        CoreBoxPresentationPreferenceStore().reset()
+        CoreBoxPresentationPreferenceStore().resetAllNamespaces()
         UserDefaults.standard.removeObject(forKey: "hasSeenIntroduction")
     }
 }

@@ -20,23 +20,23 @@ public actor SwiftDataProductRepository: ProductRepository {
         try loadValidatedState()
     }
 
-    public func withTransaction(
-        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
-    ) async throws -> PersistedProductState {
+    public func withTransaction<Outcome: Sendable>(
+        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Outcome
+    ) async throws -> ProductTransaction<Outcome> {
         do {
-            var committedState: PersistedProductState?
+            var committedTransaction: ProductTransaction<Outcome>?
             try context.transaction {
                 var state = try loadValidatedState()
-                try mutation(&state)
+                let outcome = try mutation(&state)
                 try validator.validate(state)
                 try synchronize(state)
                 try context.save()
-                committedState = state
+                committedTransaction = ProductTransaction(outcome: outcome, state: state)
             }
-            guard let committedState else {
+            guard let committedTransaction else {
                 preconditionFailure("A successful SwiftData transaction must produce a committed state")
             }
-            return committedState
+            return committedTransaction
         } catch {
             context.rollback()
             throw error

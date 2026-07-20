@@ -1,5 +1,21 @@
 import Foundation
 
+public struct CompletePaperResult: Equatable, Sendable {
+    public let itemID: UUID
+    public let memoryID: UUID
+
+    public init(itemID: UUID, memoryID: UUID) {
+        self.itemID = itemID
+        self.memoryID = memoryID
+    }
+}
+
+public struct PutBackPaperResult: Equatable, Sendable {
+    public let itemID: UUID
+
+    public init(itemID: UUID) { self.itemID = itemID }
+}
+
 public struct CompletePaperUseCase: Sendable {
     private let arbiter: MutationArbiter
     private let clock: any Clock
@@ -15,10 +31,10 @@ public struct CompletePaperUseCase: Sendable {
         self.makeID = makeID
     }
 
-    public func execute(itemID: UUID) async throws {
+    public func execute(itemID: UUID) async throws -> ProductTransaction<CompletePaperResult> {
         let timestamp = clock.now()
         let memoryID = makeID()
-        _ = try await arbiter.perform(.complete) { state in
+        return try await arbiter.perform(.complete) { state in
             let itemIndex = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
             try ApplicationDomainRules.requireCapacity(
                 for: .completionMemories,
@@ -39,6 +55,7 @@ public struct CompletePaperUseCase: Sendable {
                 )
             )
             if state.currentPick?.itemID == itemID { state.currentPick = nil }
+            return CompletePaperResult(itemID: itemID, memoryID: memoryID)
         }
     }
 }
@@ -52,18 +69,19 @@ public struct PutBackPaperUseCase: Sendable {
         self.clock = clock
     }
 
-    public func execute(itemID: UUID) async throws {
+    public func execute(itemID: UUID) async throws -> ProductTransaction<PutBackPaperResult> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.putBack) { state in
+        return try await arbiter.perform(.putBack) { state in
             let itemIndex = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
             if state.currentPick?.itemID == itemID {
                 state.currentPick = nil
                 state.items[itemIndex].updatedAt = timestamp
-                return
+                return PutBackPaperResult(itemID: itemID)
             }
             try ApplicationDomainRules.transition(&state.items[itemIndex], applying: .putBack)
             state.items[itemIndex].completedAt = nil
             state.items[itemIndex].updatedAt = timestamp
+            return PutBackPaperResult(itemID: itemID)
         }
     }
 }
@@ -77,9 +95,9 @@ public struct ArchivePaperUseCase: Sendable {
         self.clock = clock
     }
 
-    public func execute(itemID: UUID) async throws {
+    public func execute(itemID: UUID) async throws -> ProductTransaction<Void> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.archive) { state in
+        return try await arbiter.perform(.archive) { state in
             let itemIndex = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
             try ApplicationDomainRules.transition(&state.items[itemIndex], applying: .archive)
             state.items[itemIndex].updatedAt = timestamp
@@ -97,9 +115,9 @@ public struct RestorePaperUseCase: Sendable {
         self.clock = clock
     }
 
-    public func execute(itemID: UUID) async throws {
+    public func execute(itemID: UUID) async throws -> ProductTransaction<Void> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.restore) { state in
+        return try await arbiter.perform(.restore) { state in
             let itemIndex = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
             try ApplicationDomainRules.transition(&state.items[itemIndex], applying: .restore)
             state.items[itemIndex].updatedAt = timestamp
@@ -114,8 +132,8 @@ public struct DeletePaperUseCase: Sendable {
         self.arbiter = arbiter
     }
 
-    public func execute(itemID: UUID) async throws {
-        _ = try await arbiter.perform(.delete) { state in
+    public func execute(itemID: UUID) async throws -> ProductTransaction<Void> {
+        return try await arbiter.perform(.delete) { state in
             _ = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
             let sessionIDs = Set(
                 state.attempts.lazy.filter { $0.itemID == itemID }.map(\.sessionID)

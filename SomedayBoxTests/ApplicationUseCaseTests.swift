@@ -12,8 +12,9 @@ final class ApplicationUseCaseTests: XCTestCase {
     func testCaptureCommitsValidatedPaper() async throws {
         let repository = InMemoryProductRepository()
         let arbiter = MutationArbiter(repository: repository)
-        let itemID = try await CapturePaperUseCase(arbiter: arbiter, clock: FixedClock(value: now))
+        let transaction = try await CapturePaperUseCase(arbiter: arbiter, clock: FixedClock(value: now))
             .execute(title: "  Read outside  ", note: nil, durationBucketRaw: DurationBucket.upTo30Minutes.rawValue)
+        let itemID = transaction.outcome.itemID
 
         let state = await repository.snapshot()
         XCTAssertEqual(state.items.count, 1)
@@ -79,8 +80,8 @@ final class ApplicationUseCaseTests: XCTestCase {
 
         let imported = try await useCase.execute(envelope: envelope)
         let replayed = try await useCase.execute(envelope: envelope)
-        XCTAssertEqual(imported, .imported(itemID: itemID, sourceID: sourceID))
-        XCTAssertEqual(replayed, .alreadyImported(itemID: itemID, sourceID: sourceID))
+        XCTAssertEqual(imported.outcome, .imported(itemID: itemID, sourceID: sourceID))
+        XCTAssertEqual(replayed.outcome, .alreadyImported(itemID: itemID, sourceID: sourceID))
 
         let state = await repository.snapshot()
         XCTAssertEqual(state.items.count, 1)
@@ -109,8 +110,8 @@ final class ApplicationUseCaseTests: XCTestCase {
         async let firstResult = first.execute(envelope: envelope)
         async let secondResult = second.execute(envelope: envelope)
         let results = try await [firstResult, secondResult]
-        XCTAssertEqual(results.filter { if case .imported = $0 { true } else { false } }.count, 1)
-        XCTAssertEqual(results.filter { if case .alreadyImported = $0 { true } else { false } }.count, 1)
+        XCTAssertEqual(results.filter { if case .imported = $0.outcome { true } else { false } }.count, 1)
+        XCTAssertEqual(results.filter { if case .alreadyImported = $0.outcome { true } else { false } }.count, 1)
         let state = await repository.snapshot()
         XCTAssertEqual(state.items.count, 1)
         XCTAssertEqual(state.sources.count, 1)
@@ -177,7 +178,7 @@ final class ApplicationUseCaseTests: XCTestCase {
             randomUnitInterval: { 0 }
         ).execute(availableTime: .upTo30Minutes)
 
-        guard case let .revealed(returnedAttempt) = result else {
+        guard case let .revealed(returnedAttempt) = result.outcome else {
             return XCTFail("Expected a persisted reveal.")
         }
         let state = await repository.snapshot()
@@ -202,7 +203,7 @@ final class ApplicationUseCaseTests: XCTestCase {
             randomUnitInterval: { 0 }
         ).execute()
 
-        guard case let .revealed(nextAttempt) = result else {
+        guard case let .revealed(previousAttemptID: _, previousItemID: _, attempt: nextAttempt) = result.outcome else {
             return XCTFail("Expected the unseen paper.")
         }
         let state = await repository.snapshot()
@@ -395,12 +396,12 @@ private actor InMemoryProductRepository: ProductRepository {
         state
     }
 
-    func withTransaction(
-        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Void
-    ) throws -> PersistedProductState {
+    func withTransaction<Outcome: Sendable>(
+        _ mutation: @escaping @Sendable (inout PersistedProductState) throws -> Outcome
+    ) throws -> ProductTransaction<Outcome> {
         var candidate = state
-        try mutation(&candidate)
+        let outcome = try mutation(&candidate)
         state = candidate
-        return candidate
+        return ProductTransaction(outcome: outcome, state: candidate)
     }
 }

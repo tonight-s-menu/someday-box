@@ -59,13 +59,59 @@
 		J00000000000000000000005 /* CoreBox.usda in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000005 /* CoreBox.usda */; };
 		J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000006 /* CoreBoxAssetManifest.json */; };
 		J00000000000000000000007 /* StoreRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000007 /* StoreRecoveryService.swift */; };
-		J00000000000000000000008 /* StoreRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000008 /* StoreRecoveryView.swift */; };
+		J00000000000000000000008 /* Recovery/StoreRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000008 /* Recovery/StoreRecoveryView.swift */; };
 		J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000009 /* StoreRecoveryTests.swift */; };
 		K00000000000000000000001 /* CoreBoxProofIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */; };
-		K00000000000000000000002 /* CoreBoxProofIdentity.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */; };
-		K00000000000000000000003 /* CoreBoxProofFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000003 /* CoreBoxProofFull.usdz */; };
-		K00000000000000000000004 /* CoreBoxProofLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000004 /* CoreBoxProofLite.usdz */; };
-		K00000000000000000000005 /* CoreBoxProofReport.json in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000005 /* CoreBoxProofReport.json */; };
+		K00000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift */; };
+		K00000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz */; };
+		K00000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz */; };
+		K00000000000000000000005 /* Fixtures/CoreBoxProofReport.json in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000005 /* Fixtures/CoreBoxProofReport.json */; };
+		L00000000000000000000001 /* CoreBoxAssetLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000001 /* CoreBoxAssetLoader.swift */; };
+		L00000000000000000000002 /* CoreBoxAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000002 /* CoreBoxAssetValidator.swift */; };
+		L00000000000000000000003 /* CoreBoxSceneAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000003 /* CoreBoxSceneAdapter.swift */; };
+		L00000000000000000000004 /* CoreBox2DAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000004 /* CoreBox2DAdapter.swift */; };
+		L00000000000000000000005 /* Fixtures/CoreBoxProofAssetSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000005 /* Fixtures/CoreBoxProofAssetSource.swift */; };
+		L00000000000000000000006 /* CoreBoxRealityKitAssetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000006 /* CoreBoxRealityKitAssetTests.swift */; };
+		L00000000000000000000007 /* CoreBox2DParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000007 /* CoreBox2DParityTests.swift */; };
+		L00000000000000000000008 /* CoreBoxMotionRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000008 /* CoreBoxMotionRecipe.swift */; };
+		L00000000000000000000009 /* CoreBoxMotionRecipeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000009 /* CoreBoxMotionRecipeTests.swift */; };
+		L0000000000000000000000A /* Support/CoreBoxTestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = L1000000000000000000000A /* Support/CoreBoxTestFixtures.swift */; };
+		L0000000000000000000000B /* CoreBoxTransactionReceiptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L1000000000000000000000B /* CoreBoxTransactionReceiptTests.swift */; };
+		M00000000000000000000001 /* CoreBoxMutationOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000001 /* CoreBoxMutationOutcome.swift */; };
+		M00000000000000000000002 /* CoreBoxProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000002 /* CoreBoxProjection.swift */; };
+		M00000000000000000000003 /* AppModelPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000003 /* AppModelPresentationTests.swift */; };
+		M00000000000000000000004 /* CoreBoxPreferenceMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000004 /* CoreBoxPreferenceMigrationTests.swift */; };
+		M00000000000000000000005 /* CoreBoxProjectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000005 /* CoreBoxProjectionTests.swift */; };
+		M00000000000000000000006 /* CoreBoxPresentationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000006 /* CoreBoxPresentationCoordinator.swift */; };
+		M00000000000000000000007 /* CoreBoxPresentationCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000007 /* CoreBoxPresentationCoordinatorTests.swift */; };
+		M00000000000000000000008 /* CoreBoxInteractionSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000008 /* CoreBoxInteractionSurface.swift */; };
+		M00000000000000000000009 /* CoreBoxRibbonInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M10000000000000000000009 /* CoreBoxRibbonInteractionTests.swift */; };
+		M0000000000000000000000A /* CoreBoxIdleScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1000000000000000000000A /* CoreBoxIdleScheduler.swift */; };
+		M0000000000000000000000B /* CoreBoxRendererHealthPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1000000000000000000000B /* CoreBoxRendererHealthPolicy.swift */; };
+		M0000000000000000000000C /* CoreBoxIdleSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1000000000000000000000C /* CoreBoxIdleSchedulerTests.swift */; };
+		M0000000000000000000000D /* CoreBoxRendererHealthPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M1000000000000000000000D /* CoreBoxRendererHealthPolicyTests.swift */; };
+		N00000000000000000000001 /* CoreBoxRendererHealthMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000001 /* CoreBoxRendererHealthMonitor.swift */; };
+		N00000000000000000000002 /* CoreBoxStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000002 /* CoreBoxStage.swift */; };
+		N00000000000000000000003 /* CoreBoxRealityStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000003 /* CoreBoxRealityStage.swift */; };
+		N00000000000000000000004 /* CoreBoxStageLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000004 /* CoreBoxStageLifecycleTests.swift */; };
+		N00000000000000000000005 /* DrawContextPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000005 /* DrawContextPicker.swift */; };
+		N00000000000000000000006 /* UITestLaunchConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000006 /* UITestLaunchConfiguration.swift */; };
+		N00000000000000000000007 /* Support/UITestLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000007 /* Support/UITestLauncher.swift */; };
+		N00000000000000000000008 /* UITestLaunchConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000008 /* UITestLaunchConfigurationTests.swift */; };
+		D20000000000000000000001 /* CoreBoxCompatibilityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000001 /* CoreBoxCompatibilityHostApp.swift */; };
+		D20000000000000000000002 /* CoreBoxCompatibilityProbeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000002 /* CoreBoxCompatibilityProbeView.swift */; };
+		D20000000000000000000003 /* CoreBoxProofAssetSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30000000000000000000003 /* CoreBoxProofAssetSource.swift */; };
+		D20000000000000000000004 /* CoreBoxPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000001 /* CoreBoxPresentation.swift */; };
+		D20000000000000000000005 /* CoreBoxMotionRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000008 /* CoreBoxMotionRecipe.swift */; };
+		D20000000000000000000006 /* CoreBoxAssetLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000001 /* CoreBoxAssetLoader.swift */; };
+		D20000000000000000000007 /* CoreBoxAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000002 /* CoreBoxAssetValidator.swift */; };
+		D20000000000000000000008 /* CoreBoxSceneAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000003 /* CoreBoxSceneAdapter.swift */; };
+		D20000000000000000000009 /* CoreBox2DAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10000000000000000000004 /* CoreBox2DAdapter.swift */; };
+		D2000000000000000000000A /* CoreBoxProofIdentity.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift */; };
+		D2000000000000000000000B /* Fixtures/CoreBoxProofFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz */; };
+		D2000000000000000000000C /* Fixtures/CoreBoxProofLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz */; };
+		D2000000000000000000000D /* Fixtures/CoreBoxProofReport.json in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000005 /* Fixtures/CoreBoxProofReport.json */; };
+		E30000000000000000000001 /* CoreBoxCompatibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40000000000000000000001 /* CoreBoxCompatibilityUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +135,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = H40000000000000000000001;
 			remoteInfo = ShareExtension;
+		};
+		E90000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A90000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D60000000000000000000001;
+			remoteInfo = CoreBoxCompatibilityHost;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -162,13 +215,52 @@
 		J10000000000000000000005 /* CoreBox.usda */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBox.usda; sourceTree = "<group>"; };
 		J10000000000000000000006 /* CoreBoxAssetManifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CoreBoxAssetManifest.json; sourceTree = "<group>"; };
 		J10000000000000000000007 /* StoreRecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryService.swift; sourceTree = "<group>"; };
-		J10000000000000000000008 /* StoreRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recovery/StoreRecoveryView.swift; sourceTree = "<group>"; };
+		J10000000000000000000008 /* Recovery/StoreRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recovery/StoreRecoveryView.swift; sourceTree = "<group>"; };
 		J10000000000000000000009 /* StoreRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProofIdentityTests.swift; sourceTree = "<group>"; };
-		K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generated/CoreBoxProofIdentity.generated.swift; sourceTree = "<group>"; };
-		K10000000000000000000003 /* CoreBoxProofFull.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofFull.usdz; sourceTree = "<group>"; };
-		K10000000000000000000004 /* CoreBoxProofLite.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofLite.usdz; sourceTree = "<group>"; };
-		K10000000000000000000005 /* CoreBoxProofReport.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Fixtures/CoreBoxProofReport.json; sourceTree = "<group>"; };
+		K10000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generated/CoreBoxProofIdentity.generated.swift; sourceTree = "<group>"; };
+		K10000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofFull.usdz; sourceTree = "<group>"; };
+		K10000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofLite.usdz; sourceTree = "<group>"; };
+		K10000000000000000000005 /* Fixtures/CoreBoxProofReport.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Fixtures/CoreBoxProofReport.json; sourceTree = "<group>"; };
+		L10000000000000000000001 /* CoreBoxAssetLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxAssetLoader.swift; sourceTree = "<group>"; };
+		L10000000000000000000002 /* CoreBoxAssetValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxAssetValidator.swift; sourceTree = "<group>"; };
+		L10000000000000000000003 /* CoreBoxSceneAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxSceneAdapter.swift; sourceTree = "<group>"; };
+		L10000000000000000000004 /* CoreBox2DAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBox2DAdapter.swift; sourceTree = "<group>"; };
+		L10000000000000000000005 /* Fixtures/CoreBoxProofAssetSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fixtures/CoreBoxProofAssetSource.swift; sourceTree = "<group>"; };
+		L10000000000000000000006 /* CoreBoxRealityKitAssetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRealityKitAssetTests.swift; sourceTree = "<group>"; };
+		L10000000000000000000007 /* CoreBox2DParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBox2DParityTests.swift; sourceTree = "<group>"; };
+		L10000000000000000000008 /* CoreBoxMotionRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxMotionRecipe.swift; sourceTree = "<group>"; };
+		L10000000000000000000009 /* CoreBoxMotionRecipeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxMotionRecipeTests.swift; sourceTree = "<group>"; };
+		L1000000000000000000000A /* Support/CoreBoxTestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Support/CoreBoxTestFixtures.swift; sourceTree = "<group>"; };
+		L1000000000000000000000B /* CoreBoxTransactionReceiptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxTransactionReceiptTests.swift; sourceTree = "<group>"; };
+		M10000000000000000000001 /* CoreBoxMutationOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxMutationOutcome.swift; sourceTree = "<group>"; };
+		M10000000000000000000002 /* CoreBoxProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProjection.swift; sourceTree = "<group>"; };
+		M10000000000000000000003 /* AppModelPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelPresentationTests.swift; sourceTree = "<group>"; };
+		M10000000000000000000004 /* CoreBoxPreferenceMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPreferenceMigrationTests.swift; sourceTree = "<group>"; };
+		M10000000000000000000005 /* CoreBoxProjectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProjectionTests.swift; sourceTree = "<group>"; };
+		M10000000000000000000006 /* CoreBoxPresentationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationCoordinator.swift; sourceTree = "<group>"; };
+		M10000000000000000000007 /* CoreBoxPresentationCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxPresentationCoordinatorTests.swift; sourceTree = "<group>"; };
+		M10000000000000000000008 /* CoreBoxInteractionSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxInteractionSurface.swift; sourceTree = "<group>"; };
+		M10000000000000000000009 /* CoreBoxRibbonInteractionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRibbonInteractionTests.swift; sourceTree = "<group>"; };
+		M1000000000000000000000A /* CoreBoxIdleScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxIdleScheduler.swift; sourceTree = "<group>"; };
+		M1000000000000000000000B /* CoreBoxRendererHealthPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRendererHealthPolicy.swift; sourceTree = "<group>"; };
+		M1000000000000000000000C /* CoreBoxIdleSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxIdleSchedulerTests.swift; sourceTree = "<group>"; };
+		M1000000000000000000000D /* CoreBoxRendererHealthPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRendererHealthPolicyTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000001 /* CoreBoxRendererHealthMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRendererHealthMonitor.swift; sourceTree = "<group>"; };
+		N10000000000000000000002 /* CoreBoxStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxStage.swift; sourceTree = "<group>"; };
+		N10000000000000000000003 /* CoreBoxRealityStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxRealityStage.swift; sourceTree = "<group>"; };
+		N10000000000000000000004 /* CoreBoxStageLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxStageLifecycleTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000005 /* DrawContextPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawContextPicker.swift; sourceTree = "<group>"; };
+		N10000000000000000000006 /* UITestLaunchConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestLaunchConfiguration.swift; sourceTree = "<group>"; };
+		N10000000000000000000007 /* Support/UITestLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Support/UITestLauncher.swift; sourceTree = "<group>"; };
+		N10000000000000000000008 /* UITestLaunchConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestLaunchConfigurationTests.swift; sourceTree = "<group>"; };
+		D30000000000000000000001 /* CoreBoxCompatibilityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxCompatibilityHostApp.swift; sourceTree = "<group>"; };
+		D30000000000000000000002 /* CoreBoxCompatibilityProbeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxCompatibilityProbeView.swift; sourceTree = "<group>"; };
+		D30000000000000000000003 /* CoreBoxProofAssetSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProofAssetSource.swift; sourceTree = "<group>"; };
+		D30000000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D30000000000000000000005 /* CoreBoxCompatibilityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoreBoxCompatibilityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E40000000000000000000001 /* CoreBoxCompatibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxCompatibilityUITests.swift; sourceTree = "<group>"; };
+		E40000000000000000000002 /* CoreBoxCompatibilityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreBoxCompatibilityUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +292,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D40000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E50000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -216,6 +322,7 @@
 				A30000000000000000000009 /* SomedayBoxTests */,
 				A3000000000000000000000A /* SomedayBoxUITests */,
 				H30000000000000000000001 /* ShareExtension */,
+				D50000000000000000000001 /* CompatibilityHost */,
 				A1000000000000000000000D /* SomedayBox.entitlements */,
 				A3000000000000000000000B /* Products */,
 			);
@@ -226,6 +333,8 @@
 			children = (
 				A10000000000000000000001 /* SomedayBoxApp.swift */,
 				A10000000000000000000002 /* RootTabView.swift */,
+				N10000000000000000000001 /* CoreBoxRendererHealthMonitor.swift */,
+				N10000000000000000000006 /* UITestLaunchConfiguration.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -254,6 +363,12 @@
 				D10000000000000000000003 /* DrawUseCases.swift */,
 				D10000000000000000000004 /* LifecycleUseCases.swift */,
 				J10000000000000000000001 /* CoreBoxPresentation.swift */,
+				L10000000000000000000008 /* CoreBoxMotionRecipe.swift */,
+				M10000000000000000000001 /* CoreBoxMutationOutcome.swift */,
+				M10000000000000000000002 /* CoreBoxProjection.swift */,
+				M10000000000000000000006 /* CoreBoxPresentationCoordinator.swift */,
+				M1000000000000000000000A /* CoreBoxIdleScheduler.swift */,
+				M1000000000000000000000B /* CoreBoxRendererHealthPolicy.swift */,
 			);
 			path = Application;
 			sourceTree = "<group>";
@@ -281,9 +396,10 @@
 			isa = PBXGroup;
 			children = (
 				A3000000000000000000000C /* Home */,
+				A3000000000000000000000F /* Draw */,
 				A3000000000000000000000D /* Box */,
 				A3000000000000000000000E /* Memories */,
-				J10000000000000000000008 /* StoreRecoveryView.swift */,
+				J10000000000000000000008 /* Recovery/StoreRecoveryView.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -322,10 +438,25 @@
 				J10000000000000000000002 /* CoreBoxPresentationTests.swift */,
 				J10000000000000000000009 /* StoreRecoveryTests.swift */,
 				K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */,
-				K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */,
-				K10000000000000000000003 /* CoreBoxProofFull.usdz */,
-				K10000000000000000000004 /* CoreBoxProofLite.usdz */,
-				K10000000000000000000005 /* CoreBoxProofReport.json */,
+				K10000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift */,
+				K10000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz */,
+				K10000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz */,
+				K10000000000000000000005 /* Fixtures/CoreBoxProofReport.json */,
+				L10000000000000000000005 /* Fixtures/CoreBoxProofAssetSource.swift */,
+				L10000000000000000000006 /* CoreBoxRealityKitAssetTests.swift */,
+				L10000000000000000000007 /* CoreBox2DParityTests.swift */,
+				L10000000000000000000009 /* CoreBoxMotionRecipeTests.swift */,
+				L1000000000000000000000A /* Support/CoreBoxTestFixtures.swift */,
+				L1000000000000000000000B /* CoreBoxTransactionReceiptTests.swift */,
+				M10000000000000000000003 /* AppModelPresentationTests.swift */,
+				M10000000000000000000004 /* CoreBoxPreferenceMigrationTests.swift */,
+				M10000000000000000000005 /* CoreBoxProjectionTests.swift */,
+				M10000000000000000000007 /* CoreBoxPresentationCoordinatorTests.swift */,
+				M10000000000000000000009 /* CoreBoxRibbonInteractionTests.swift */,
+				M1000000000000000000000C /* CoreBoxIdleSchedulerTests.swift */,
+				M1000000000000000000000D /* CoreBoxRendererHealthPolicyTests.swift */,
+				N10000000000000000000004 /* CoreBoxStageLifecycleTests.swift */,
+				N10000000000000000000008 /* UITestLaunchConfigurationTests.swift */,
 			);
 			path = SomedayBoxTests;
 			sourceTree = "<group>";
@@ -334,6 +465,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000000000000000000000F /* AppLaunchTests.swift */,
+				N10000000000000000000007 /* Support/UITestLauncher.swift */,
 			);
 			path = SomedayBoxUITests;
 			sourceTree = "<group>";
@@ -345,6 +477,8 @@
 				A10000000000000000000011 /* SomedayBoxTests.xctest */,
 				A10000000000000000000012 /* SomedayBoxUITests.xctest */,
 				H10000000000000000000006 /* ShareExtension.appex */,
+				D30000000000000000000005 /* CoreBoxCompatibilityHost.app */,
+				E40000000000000000000002 /* CoreBoxCompatibilityUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -353,8 +487,31 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000007 /* HomeView.swift */,
+				L30000000000000000000001 /* CoreBox */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		A3000000000000000000000F /* Draw */ = {
+			isa = PBXGroup;
+			children = (
+				N10000000000000000000005 /* DrawContextPicker.swift */,
+			);
+			path = Draw;
+			sourceTree = "<group>";
+		};
+		L30000000000000000000001 /* CoreBox */ = {
+			isa = PBXGroup;
+			children = (
+				L10000000000000000000001 /* CoreBoxAssetLoader.swift */,
+				L10000000000000000000002 /* CoreBoxAssetValidator.swift */,
+				L10000000000000000000003 /* CoreBoxSceneAdapter.swift */,
+				L10000000000000000000004 /* CoreBox2DAdapter.swift */,
+				M10000000000000000000008 /* CoreBoxInteractionSurface.swift */,
+				N10000000000000000000002 /* CoreBoxStage.swift */,
+				N10000000000000000000003 /* CoreBoxRealityStage.swift */,
+			);
+			path = CoreBox;
 			sourceTree = "<group>";
 		};
 		A3000000000000000000000D /* Box */ = {
@@ -381,6 +538,18 @@
 				H10000000000000000000005 /* ShareExtension.entitlements */,
 			);
 			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		D50000000000000000000001 /* CompatibilityHost */ = {
+			isa = PBXGroup;
+			children = (
+				D30000000000000000000001 /* CoreBoxCompatibilityHostApp.swift */,
+				D30000000000000000000002 /* CoreBoxCompatibilityProbeView.swift */,
+				D30000000000000000000003 /* CoreBoxProofAssetSource.swift */,
+				D30000000000000000000004 /* Info.plist */,
+				E40000000000000000000001 /* CoreBoxCompatibilityUITests.swift */,
+			);
+			path = CompatibilityHost;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +625,40 @@
 			productReference = H10000000000000000000006 /* ShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		D60000000000000000000001 /* CoreBoxCompatibilityHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D70000000000000000000001 /* Build configuration list for PBXNativeTarget "CoreBoxCompatibilityHost" */;
+			buildPhases = (
+				D80000000000000000000001 /* Sources */,
+				D40000000000000000000001 /* Frameworks */,
+				D90000000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CoreBoxCompatibilityHost;
+			productName = CoreBoxCompatibilityHost;
+			productReference = D30000000000000000000005 /* CoreBoxCompatibilityHost.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E60000000000000000000001 /* CoreBoxCompatibilityUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E70000000000000000000001 /* Build configuration list for PBXNativeTarget "CoreBoxCompatibilityUITests" */;
+			buildPhases = (
+				E80000000000000000000001 /* Sources */,
+				E50000000000000000000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E90000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = CoreBoxCompatibilityUITests;
+			productName = CoreBoxCompatibilityUITests;
+			productReference = E40000000000000000000002 /* CoreBoxCompatibilityUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -480,6 +683,13 @@
 					H40000000000000000000001 = {
 						CreatedOnToolsVersion = 26.0;
 					};
+					D60000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					E60000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = D60000000000000000000001;
+					};
 				};
 			};
 			buildConfigurationList = A50000000000000000000001 /* Build configuration list for PBXProject "SomedayBox" */;
@@ -499,21 +709,13 @@
 				A40000000000000000000002 /* SomedayBoxTests */,
 				A40000000000000000000003 /* SomedayBoxUITests */,
 				H40000000000000000000001 /* ShareExtension */,
+				D60000000000000000000001 /* CoreBoxCompatibilityHost */,
+				E60000000000000000000001 /* CoreBoxCompatibilityUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		K70000000000000000000001 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				K00000000000000000000003 /* CoreBoxProofFull.usdz in Resources */,
-				K00000000000000000000004 /* CoreBoxProofLite.usdz in Resources */,
-				K00000000000000000000005 /* CoreBoxProofReport.json in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		A70000000000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -522,6 +724,26 @@
 				A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */,
 				J00000000000000000000005 /* CoreBox.usda in Resources */,
 				J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		K70000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				K00000000000000000000003 /* Fixtures/CoreBoxProofFull.usdz in Resources */,
+				K00000000000000000000004 /* Fixtures/CoreBoxProofLite.usdz in Resources */,
+				K00000000000000000000005 /* Fixtures/CoreBoxProofReport.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D90000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2000000000000000000000B /* Fixtures/CoreBoxProofFull.usdz in Resources */,
+				D2000000000000000000000C /* Fixtures/CoreBoxProofLite.usdz in Resources */,
+				D2000000000000000000000D /* Fixtures/CoreBoxProofReport.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -548,6 +770,14 @@
 				D00000000000000000000003 /* DrawUseCases.swift in Sources */,
 				D00000000000000000000004 /* LifecycleUseCases.swift in Sources */,
 				J00000000000000000000001 /* CoreBoxPresentation.swift in Sources */,
+				L00000000000000000000008 /* CoreBoxMotionRecipe.swift in Sources */,
+				M00000000000000000000001 /* CoreBoxMutationOutcome.swift in Sources */,
+				M00000000000000000000002 /* CoreBoxProjection.swift in Sources */,
+				M00000000000000000000006 /* CoreBoxPresentationCoordinator.swift in Sources */,
+				M0000000000000000000000A /* CoreBoxIdleScheduler.swift in Sources */,
+				M0000000000000000000000B /* CoreBoxRendererHealthPolicy.swift in Sources */,
+				N00000000000000000000001 /* CoreBoxRendererHealthMonitor.swift in Sources */,
+				M00000000000000000000008 /* CoreBoxInteractionSurface.swift in Sources */,
 				A00000000000000000000006 /* StoreGenerationConfiguration.swift in Sources */,
 				D00000000000000000000005 /* SomedayBoxSchemaV1.swift in Sources */,
 				D00000000000000000000006 /* StoreGenerationBootstrap.swift in Sources */,
@@ -560,8 +790,16 @@
 				J00000000000000000000003 /* LegacyV2ProductReader.swift in Sources */,
 				J00000000000000000000004 /* BackupDocumentV3.swift in Sources */,
 				J00000000000000000000007 /* StoreRecoveryService.swift in Sources */,
-				J00000000000000000000008 /* StoreRecoveryView.swift in Sources */,
+				J00000000000000000000008 /* Recovery/StoreRecoveryView.swift in Sources */,
+				L00000000000000000000001 /* CoreBoxAssetLoader.swift in Sources */,
+				L00000000000000000000002 /* CoreBoxAssetValidator.swift in Sources */,
+				L00000000000000000000003 /* CoreBoxSceneAdapter.swift in Sources */,
+				L00000000000000000000004 /* CoreBox2DAdapter.swift in Sources */,
+				N00000000000000000000002 /* CoreBoxStage.swift in Sources */,
+				N00000000000000000000003 /* CoreBoxRealityStage.swift in Sources */,
 				A00000000000000000000007 /* HomeView.swift in Sources */,
+				N00000000000000000000005 /* DrawContextPicker.swift in Sources */,
+				N00000000000000000000006 /* UITestLaunchConfiguration.swift in Sources */,
 				A00000000000000000000008 /* BoxView.swift in Sources */,
 				A00000000000000000000009 /* MemoriesView.swift in Sources */,
 				A0000000000000000000000A /* Brand.swift in Sources */,
@@ -583,7 +821,22 @@
 				J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */,
 				J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */,
 				K00000000000000000000001 /* CoreBoxProofIdentityTests.swift in Sources */,
-				K00000000000000000000002 /* CoreBoxProofIdentity.generated.swift in Sources */,
+				K00000000000000000000002 /* Generated/CoreBoxProofIdentity.generated.swift in Sources */,
+				L00000000000000000000005 /* Fixtures/CoreBoxProofAssetSource.swift in Sources */,
+				L00000000000000000000006 /* CoreBoxRealityKitAssetTests.swift in Sources */,
+				L00000000000000000000007 /* CoreBox2DParityTests.swift in Sources */,
+				L00000000000000000000009 /* CoreBoxMotionRecipeTests.swift in Sources */,
+				L0000000000000000000000A /* Support/CoreBoxTestFixtures.swift in Sources */,
+				L0000000000000000000000B /* CoreBoxTransactionReceiptTests.swift in Sources */,
+				M00000000000000000000003 /* AppModelPresentationTests.swift in Sources */,
+				M00000000000000000000004 /* CoreBoxPreferenceMigrationTests.swift in Sources */,
+				M00000000000000000000005 /* CoreBoxProjectionTests.swift in Sources */,
+				M00000000000000000000007 /* CoreBoxPresentationCoordinatorTests.swift in Sources */,
+				M00000000000000000000009 /* CoreBoxRibbonInteractionTests.swift in Sources */,
+				M0000000000000000000000C /* CoreBoxIdleSchedulerTests.swift in Sources */,
+				M0000000000000000000000D /* CoreBoxRendererHealthPolicyTests.swift in Sources */,
+				N00000000000000000000004 /* CoreBoxStageLifecycleTests.swift in Sources */,
+				N00000000000000000000008 /* UITestLaunchConfigurationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,6 +845,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0000000000000000000000E /* AppLaunchTests.swift in Sources */,
+				N00000000000000000000007 /* Support/UITestLauncher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -604,6 +858,31 @@
 				H00000000000000000000005 /* ContentValidation.swift in Sources */,
 				H00000000000000000000006 /* SharePayloadExtraction.swift in Sources */,
 				I00000000000000000000002 /* ShareMailbox.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D80000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D20000000000000000000001 /* CoreBoxCompatibilityHostApp.swift in Sources */,
+				D20000000000000000000002 /* CoreBoxCompatibilityProbeView.swift in Sources */,
+				D20000000000000000000003 /* CoreBoxProofAssetSource.swift in Sources */,
+				D20000000000000000000004 /* CoreBoxPresentation.swift in Sources */,
+				D20000000000000000000005 /* CoreBoxMotionRecipe.swift in Sources */,
+				D20000000000000000000006 /* CoreBoxAssetLoader.swift in Sources */,
+				D20000000000000000000007 /* CoreBoxAssetValidator.swift in Sources */,
+				D20000000000000000000008 /* CoreBoxSceneAdapter.swift in Sources */,
+				D20000000000000000000009 /* CoreBox2DAdapter.swift in Sources */,
+				D2000000000000000000000A /* CoreBoxProofIdentity.generated.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E80000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E30000000000000000000001 /* CoreBoxCompatibilityUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -624,6 +903,11 @@
 			isa = PBXTargetDependency;
 			target = H40000000000000000000001 /* ShareExtension */;
 			targetProxy = H80000000000000000000002 /* PBXContainerItemProxy */;
+		};
+		E90000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D60000000000000000000001 /* CoreBoxCompatibilityHost */;
+			targetProxy = E90000000000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -672,13 +956,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 9R46SHMTW9;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -695,12 +979,12 @@
 				CODE_SIGN_ENTITLEMENTS = SomedayBox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9R46SHMTW9;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -715,10 +999,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SomedayBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SomedayBox";
@@ -742,10 +1030,14 @@
 		B00000000000000000000007 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TEST_TARGET_NAME = SomedayBox;
@@ -771,12 +1063,12 @@
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9R46SHMTW9;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.share;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -792,18 +1084,85 @@
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9R46SHMTW9;
+				DEVELOPMENT_TEAM = X43ZLX7882;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShareExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.somedaybox.app.share;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E20000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X43ZLX7882;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CompatibilityHost/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.compatibility;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E20000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X43ZLX7882;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CompatibilityHost/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.compatibility;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		F20000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X43ZLX7882;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.compatibility.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = CoreBoxCompatibilityHost;
+			};
+			name = Debug;
+		};
+		F20000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sy.somedaybox.compatibility.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = CoreBoxCompatibilityHost;
 			};
 			name = Release;
 		};
@@ -851,6 +1210,24 @@
 			buildConfigurations = (
 				H90000000000000000000001 /* Debug */,
 				H90000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D70000000000000000000001 /* Build configuration list for PBXNativeTarget "CoreBoxCompatibilityHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E20000000000000000000001 /* Debug */,
+				E20000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E70000000000000000000001 /* Build configuration list for PBXNativeTarget "CoreBoxCompatibilityUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F20000000000000000000001 /* Debug */,
+				F20000000000000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

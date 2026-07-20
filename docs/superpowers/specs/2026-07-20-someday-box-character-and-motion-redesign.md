@@ -371,7 +371,7 @@ Idle is an optional cancellable presentation layer, not a business or interactio
 
 ### 6.3 Authored Animation and Parameter Contract
 
-Full and Lite assets expose the same exact set of 13 non-looping `availableAnimations` resources. The scheduler or coordinator may invoke a resource more than once, but no resource contains an infinite loop.
+The production Full and Lite assets will expose the same exact set of 13 non-looping motion names. The scheduler or coordinator may invoke a resource more than once, but no resource contains an infinite loop. The pipeline spike proves only idle.listen, capture.deposit, and draw.reveal on Simulator and physical hardware; Task 16 is the separate physical-device gate for the complete 13-motion vocabulary.
 
 | Exact resource name | Canonical asset duration | Stable terminal pose |
 | --- | ---: | --- |
@@ -401,7 +401,7 @@ The canonical resource duration is the asset sample duration, not a promise that
 
 The channel contains local transforms for `RibbonRoot`, `RibbonJoint_01...05`, `RibbonTip`, and the bounded `BoxRoot` lean. Runtime clamps input to `0...1`, uses smoothstep within the `0...0.72` and `0.72...1.0` segments, linearly interpolates translation/scale, and uses shortest-arc quaternion interpolation for rotation. Release/cancel samples from the current pose back to Rest; a threshold crossing only updates the feedback latch. The Full and Lite sample transforms may differ, but names, progress samples, safe regions, and terminal semantics are identical.
 
-The pipeline spike must load each tier through RealityKit on Simulator and a physical device, compare the unordered `availableAnimations` name set with the exact 13-name manifest inventory, play every resource to its stable terminal pose, and sample `ribbon.pull` at `0`, `0.72`, and `1`. Acceptance records transform tolerances, screenshots, eye-safe-region checks, and the absence of NaN, missing-resource, or hierarchy-detachment failures.
+The pipeline spike must load each tier through RealityKit on Simulator and a physical device, compare the three representative names with the proof inventory, play those three resources to their stable terminal poses, and sample ribbon.pull at 0, 0.72, and 1. If RealityKit does not expose the composed USD resources, the same three public names use the approved deterministic rigid-node transform recipes. Acceptance records transform tolerances, screenshots, eye-safe-region checks, and the absence of NaN, missing-resource, or hierarchy-detachment failures. Task 16 later repeats this gate for all 13 names.
 
 ### 6.4 Approved Motion Vocabulary
 
@@ -738,7 +738,7 @@ The first implementation slice must prove the pipeline before full character wor
 3. export deterministic Full and Lite USDA from Blender headless, then package and strictly check both USDZ assets with Apple USD Tools;
 4. validate named nodes, pivots, digest, and budgets;
 5. load the actual asset in `RealityView` with an update closure;
-6. prove three motions end to end: `idle.listen`, `capture.deposit`, and `draw.pull(progress)`;
+6. prove three discrete motions end to end: idle.listen, capture.deposit, and draw.reveal, plus draw.pull(progress) samples;
 7. prove asset failure selects functional 2D;
 8. only then expand the full approved motion vocabulary and page integration.
 

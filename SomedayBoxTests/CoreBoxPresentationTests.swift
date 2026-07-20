@@ -56,8 +56,8 @@ final class CoreBoxPresentationTests: XCTestCase {
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let store = CoreBoxPresentationPreferenceStore(defaults: defaults)
-        store.save(.init(renderer: .swiftUI2D, quickAnimations: true, soundEnabled: false, hapticsEnabled: false, ambienceEnabled: false, lastDrawContext: "custom:45", hasSeenFirstAnimation: true))
-        XCTAssertEqual(store.load().renderer, .swiftUI2D)
+        store.save(.init(renderer: .simplified2D, quickAnimations: true, soundEnabled: false, hapticsEnabled: false, ambienceEnabled: false, lastDrawContext: "custom:45", hasSeenFirstAnimation: true))
+        XCTAssertEqual(store.load().renderer, .simplified2D)
         store.reset()
         XCTAssertEqual(store.load(), .init())
     }

@@ -1,5 +1,11 @@
 import Foundation
 
+public struct CapturePaperResult: Equatable, Sendable {
+    public let itemID: UUID
+
+    public init(itemID: UUID) { self.itemID = itemID }
+}
+
 public struct CapturePaperUseCase: Sendable {
     private let arbiter: MutationArbiter
     private let clock: any Clock
@@ -16,10 +22,14 @@ public struct CapturePaperUseCase: Sendable {
     }
 
     @discardableResult
-    public func execute(title: String, note: String?, durationBucketRaw: String) async throws -> UUID {
+    public func execute(
+        title: String,
+        note: String?,
+        durationBucketRaw: String
+    ) async throws -> ProductTransaction<CapturePaperResult> {
         let id = makeID()
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.capture) { state in
+        return try await arbiter.perform(.capture) { state in
             let content = try ApplicationDomainRules.validatedContent(title: title, note: note)
             try ApplicationDomainRules.requireSupportedDuration(durationBucketRaw)
             try ApplicationDomainRules.requireCapacity(
@@ -36,8 +46,8 @@ public struct CapturePaperUseCase: Sendable {
                     updatedAt: timestamp
                 )
             )
+            return CapturePaperResult(itemID: id)
         }
-        return id
     }
 }
 
@@ -55,9 +65,9 @@ public struct EditPaperUseCase: Sendable {
         title: String,
         note: String?,
         durationBucketRaw: String
-    ) async throws {
+    ) async throws -> ProductTransaction<Void> {
         let timestamp = clock.now()
-        _ = try await arbiter.perform(.edit) { state in
+        return try await arbiter.perform(.edit) { state in
             let content = try ApplicationDomainRules.validatedContent(title: title, note: note)
             try ApplicationDomainRules.requireSupportedDuration(durationBucketRaw)
             let index = try ApplicationDomainRules.itemIndex(id: itemID, in: state)
@@ -92,20 +102,16 @@ public struct ImportSharedPaperUseCase: Sendable {
         self.makeSourceID = makeSourceID
     }
 
-    public func execute(envelope: ShareCaptureEnvelopeV1) async throws -> ImportSharedPaperResult {
-        if let existing = try await existingSource(for: envelope) {
-            return .alreadyImported(itemID: existing.itemID, sourceID: existing.id)
-        }
-
+    public func execute(envelope: ShareCaptureEnvelopeV1) async throws -> ProductTransaction<ImportSharedPaperResult> {
         let itemID = makeItemID()
         let sourceID = makeSourceID()
         let ingestedAt = clock.now()
-        let committed = try await arbiter.perform(.importShared) { state in
+        return try await arbiter.perform(.importShared) { state in
             if let existing = state.sources.first(where: { $0.importEnvelopeID == envelope.envelopeID }) {
                 guard Self.matches(existing, envelope: envelope, state: state) else {
                     throw ApplicationError.invalidPersistedState(.invalidSource(id: existing.id))
                 }
-                return
+                return .alreadyImported(itemID: existing.itemID, sourceID: existing.id)
             }
             let content = try ApplicationDomainRules.validatedContent(title: envelope.title, note: envelope.note)
             try ApplicationDomainRules.requireSupportedDuration(envelope.durationBucketRaw)
@@ -131,24 +137,8 @@ public struct ImportSharedPaperUseCase: Sendable {
                     capturedAt: Date(timeIntervalSince1970: Double(envelope.createdAtMilliseconds) / 1_000)
                 )
             )
+            return .imported(itemID: itemID, sourceID: sourceID)
         }
-        guard let committedSource = committed.sources.first(where: { $0.importEnvelopeID == envelope.envelopeID }) else {
-            throw ApplicationError.invalidPersistedState(.invalidSource(id: sourceID))
-        }
-        return committedSource.id == sourceID
-            ? .imported(itemID: committedSource.itemID, sourceID: committedSource.id)
-            : .alreadyImported(itemID: committedSource.itemID, sourceID: committedSource.id)
-    }
-
-    private func existingSource(for envelope: ShareCaptureEnvelopeV1) async throws -> SourceReference? {
-        let state = try await arbiter.snapshotForIdempotencyCheck()
-        guard let source = state.sources.first(where: { $0.importEnvelopeID == envelope.envelopeID }) else {
-            return nil
-        }
-        guard Self.matches(source, envelope: envelope, state: state) else {
-            throw ApplicationError.invalidPersistedState(.invalidSource(id: source.id))
-        }
-        return source
     }
 
     private static func matches(
@@ -173,8 +163,8 @@ public struct RemoveSourceUseCase: Sendable {
         self.arbiter = arbiter
     }
 
-    public func execute(itemID: UUID) async throws {
-        _ = try await arbiter.perform(.removeSource) { state in
+    public func execute(itemID: UUID) async throws -> ProductTransaction<Void> {
+        return try await arbiter.perform(.removeSource) { state in
             guard state.items.contains(where: { $0.id == itemID }) else {
                 throw ApplicationError.itemNotFound(itemID)
             }
