@@ -232,7 +232,7 @@ private struct CoreBoxStage: View {
             .accessibilityHidden(true)
 
             Button(action: opensPeek) {
-                    Text(stageSummary)
+                Text(stageSummary)
                     .font(.footnote.weight(.medium))
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 14)
