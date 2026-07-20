@@ -133,7 +133,14 @@ struct CoreBoxAssetValidator {
     }
 
     private func validateDescriptorContract(_ descriptor: CoreBoxProofDescriptor) throws {
-        guard descriptor.clips == ["idle.listen", "capture.deposit", "draw.reveal"],
+        let proofNames = ["idle.listen", "capture.deposit", "draw.reveal"]
+        let productionNames = [
+            "idle.blink", "idle.listen", "idle.paperRustle", "idle.currentGlance",
+            "react.touch", "react.notice.single", "react.notice.aggregate",
+            "capture.receive", "capture.deposit", "draw.reveal", "current.attach",
+            "paper.return", "memory.stamp",
+        ]
+        guard descriptor.clips == proofNames || descriptor.clips == productionNames,
               Set(descriptor.clips).count == descriptor.clips.count,
               descriptor.parentByEntity.keys.count == descriptor.requiredEntityNames.count,
               Set(descriptor.parentByEntity.keys) == Set(descriptor.requiredEntityNames),
@@ -157,24 +164,50 @@ struct CoreBoxAssetValidator {
             "capture.deposit": ("LidPivot", 560),
             "draw.reveal": ("PaperReveal", 750),
         ]
-        guard descriptor.runtimeTransformRecipes.count == expectedRecipes.count else {
-            throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe count is invalid.")
-        }
-        for recipe in descriptor.runtimeTransformRecipes {
-            guard let expected = expectedRecipes[recipe.name],
-                  !recipe.keyframes.isEmpty,
-                  recipe.durationMilliseconds == expected.duration,
-                  recipe.keyframes.first?.timeMilliseconds == 0,
-                  recipe.keyframes.last?.timeMilliseconds == recipe.durationMilliseconds,
-                  recipe.keyframes.allSatisfy({ $0.entity == expected.entity && isValid($0.transform) }),
-                  recipe.keyframes.map(\.timeMilliseconds) == recipe.keyframes.map(\.timeMilliseconds).sorted(),
-                  Set(recipe.keyframes.map(\.timeMilliseconds)).count == recipe.keyframes.count
-            else {
-                throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe (recipe.name) is invalid.")
+        if descriptor.clips == proofNames {
+            guard descriptor.runtimeTransformRecipes.count == expectedRecipes.count else {
+                throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe count is invalid.")
             }
-        }
-        guard Set(descriptor.runtimeTransformRecipes.map(\.name)) == Set(expectedRecipes.keys) else {
-            throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe names are invalid.")
+            for recipe in descriptor.runtimeTransformRecipes {
+                guard let expected = expectedRecipes[recipe.name],
+                      !recipe.keyframes.isEmpty,
+                      recipe.durationMilliseconds == expected.duration,
+                      recipe.keyframes.first?.timeMilliseconds == 0,
+                      recipe.keyframes.last?.timeMilliseconds == recipe.durationMilliseconds,
+                      recipe.keyframes.allSatisfy({ $0.entity == expected.entity && isValid($0.transform) }),
+                      recipe.keyframes.map(\.timeMilliseconds) == recipe.keyframes.map(\.timeMilliseconds).sorted(),
+                      Set(recipe.keyframes.map(\.timeMilliseconds)).count == recipe.keyframes.count
+                else {
+                    throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe is invalid.")
+                }
+            }
+            guard Set(descriptor.runtimeTransformRecipes.map(\.name)) == Set(expectedRecipes.keys) else {
+                throw CoreBoxAssetValidationError.invalidInventory("The proof runtime recipe names are invalid.")
+            }
+        } else if descriptor.animationEncoding == .runtimeTransformRecipesV1 {
+            guard descriptor.runtimeTransformRecipes.count == descriptor.clips.count else {
+                throw CoreBoxAssetValidationError.invalidInventory("The production runtime recipe count is invalid.")
+            }
+            for recipe in descriptor.runtimeTransformRecipes {
+                guard descriptor.clips.contains(recipe.name),
+                      !recipe.keyframes.isEmpty,
+                      recipe.durationMilliseconds > 0,
+                      recipe.keyframes.first?.timeMilliseconds == 0,
+                      recipe.keyframes.last?.timeMilliseconds == recipe.durationMilliseconds,
+                      recipe.keyframes.allSatisfy({ descriptor.requiredEntityNames.contains($0.entity) && isValid($0.transform) }),
+                      recipe.keyframes.map(\.timeMilliseconds) == recipe.keyframes.map(\.timeMilliseconds).sorted(),
+                      Set(recipe.keyframes.map(\.timeMilliseconds)).count == recipe.keyframes.count
+                else {
+                    throw CoreBoxAssetValidationError.invalidInventory("The production runtime recipe is invalid.")
+                }
+            }
+            guard Set(descriptor.runtimeTransformRecipes.map(\.name)) == Set(descriptor.clips) else {
+                throw CoreBoxAssetValidationError.invalidInventory("The production runtime recipe names are invalid.")
+            }
+        } else {
+            guard descriptor.runtimeTransformRecipes.isEmpty else {
+                throw CoreBoxAssetValidationError.invalidInventory("Named-resource production assets cannot embed runtime recipes.")
+            }
         }
 
         let ribbonNames = [

@@ -178,14 +178,24 @@ struct CoreBoxAssetLoader: Sendable {
         tier: CoreBoxRendererTier
     ) throws {
         let recipeNames = Set(descriptor.runtimeTransformRecipes.map(\.name))
-        guard descriptor.profile == "pipeline-spike-v1",
+        let proofNames = ["idle.listen", "capture.deposit", "draw.reveal"]
+        let productionNames = [
+            "idle.blink", "idle.listen", "idle.paperRustle", "idle.currentGlance",
+            "react.touch", "react.notice.single", "react.notice.aggregate",
+            "capture.receive", "capture.deposit", "draw.reveal", "current.attach",
+            "paper.return", "memory.stamp",
+        ]
+        guard (descriptor.profile == "pipeline-spike-v1" && descriptor.clips == proofNames)
+                || (descriptor.profile == "production-v1" && descriptor.clips == productionNames),
               descriptor.animationEncoding == source.animationEncoding,
               Set(descriptor.clips) == source.publicMotionNames,
               Set(descriptor.requiredEntityNames) == source.requiredEntityNames,
               Set(descriptor.parentByEntity.keys) == source.requiredEntityNames,
               descriptor.ribbonSampleProgress == [0, 0.72, 1],
               descriptor.ribbonSamples.map(\.progress) == descriptor.ribbonSampleProgress,
-              recipeNames == source.publicMotionNames,
+              descriptor.animationEncoding == .runtimeTransformRecipesV1
+                ? recipeNames == source.publicMotionNames
+                : recipeNames.isEmpty,
               descriptor.tiers[descriptorTierName(for: tier)] != nil
         else {
             throw CoreBoxAssetValidationError.invalidInventory("Proof descriptor contract does not match the loader source.")
