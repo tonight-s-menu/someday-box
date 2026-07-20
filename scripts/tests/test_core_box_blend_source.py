@@ -74,6 +74,11 @@ class BlendSourceTests(unittest.TestCase):
             "draw.reveal": [0, 45],
         })
         self.assertTrue(all(count > 1 for count in report["actionChannelCounts"].values()))
+        self.assertEqual(report["ribbonPullTargets"], [
+            "RibbonJoint_01", "RibbonJoint_02", "RibbonJoint_03", "RibbonJoint_04",
+            "RibbonJoint_05", "RibbonRoot", "RibbonTip",
+        ])
+        self.assertGreater(report["ribbonPullScreenMinX"], report["rightEyeSafeMaxX"])
 
 
 if __name__ == "__main__":

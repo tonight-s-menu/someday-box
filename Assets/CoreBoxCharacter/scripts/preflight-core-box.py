@@ -11,6 +11,7 @@ from pathlib import Path
 
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
+from mathutils import Euler, Matrix, Vector
 
 
 REQUIRED = {"BoxRoot", "BoxBody", "LidPivot", "LidMesh", "EyeLeftPivot", "EyeLeftMesh", "EyeRightPivot", "EyeRightMesh", "RibbonRoot", "RibbonJoint_01", "RibbonJoint_02", "RibbonJoint_03", "RibbonJoint_04", "RibbonJoint_05", "RibbonTip", "PaperPool", "PaperSpawn", "PaperExit", "PaperDeposit", "PaperReveal", "PaperVisual", "CurrentPaperAnchor", "MemorySeam", "DecorationRoot", "ShadowReceiver", "Hit_Lid", "Hit_Ribbon", "Hit_Box", "Hit_MemorySeam", "Camera_Default", "Camera_Peek", "Camera_Overview", "Light_Key", "Light_Fill"}
@@ -53,6 +54,29 @@ def require_close(actual: float, expected: float, label: str) -> None:
     """Keep motion tolerances explicit in the source preflight report path."""
     if not math.isclose(actual, expected, abs_tol=1e-5):
         raise RuntimeError(f"{label}: expected {expected}, got {actual}")
+
+
+def ribbon_pull_screen_min_x(scene: bpy.types.Scene, camera: bpy.types.Object, pull: object) -> float:
+    """Project the sampled ribbon chain and mesh bounds without mutating the source scene."""
+    snapshots = pull["1.0"]
+    cache: dict[str, Matrix] = {}
+
+    def matrix_for(obj: bpy.types.Object) -> Matrix:
+        if obj.name in cache:
+            return cache[obj.name]
+        if obj.name in snapshots:
+            transform = snapshots[obj.name]
+            local = Matrix.Translation(Vector(transform["location"])) @ Euler(transform["rotationEuler"]).to_matrix().to_4x4() @ Matrix.Diagonal((*transform["scale"], 1.0))
+        else:
+            local = obj.matrix_local.copy()
+        cache[obj.name] = matrix_for(obj.parent) @ local if obj.parent else local
+        return cache[obj.name]
+
+    ribbon_names = ["RibbonRoot", *(f"RibbonJoint_{index:02d}" for index in range(1, 6)), "RibbonTip"]
+    points = [matrix_for(bpy.data.objects[name]).translation for name in ribbon_names]
+    mesh = bpy.data.objects["RibbonMesh"]
+    points.extend(matrix_for(mesh) @ Vector(corner) for corner in mesh.bound_box)
+    return min(world_to_camera_view(scene, camera, point).x for point in points)
 
 
 def main() -> None:
@@ -146,18 +170,24 @@ def main() -> None:
     require_close(action_value(draw, "PaperVisual", "location", 1, 0), 0.115, "draw spawn")
     require_close(action_value(draw, "PaperVisual", "location", 0, 22), 0.11, "draw exit")
     require_close(action_value(draw, "PaperVisual", "location", 1, 45), 0.22, "draw reveal")
-    pull = json.loads(root["core_box_ribbon_pull"])
-    if set(pull) != {"0.0", "0.72", "1.0"} or set(pull["1.0"]) != {"BoxRoot", "RibbonRoot"}:
+    pull = root["core_box_ribbon_pull"]
+    ribbon_targets = {"RibbonRoot", *(f"RibbonJoint_{index:02d}" for index in range(1, 6)), "RibbonTip"}
+    expected_pull_targets = ribbon_targets | {"BoxRoot"}
+    if set(pull) != {"0.0", "0.72", "1.0"} or any(set(pull[point]) != expected_pull_targets for point in pull):
         raise RuntimeError("ribbon pull snapshots are incomplete")
     if abs(pull["1.0"]["BoxRoot"]["rotationEuler"][0]) > math.radians(2.0):
         raise RuntimeError("ribbon pull root lean exceeds 2 degrees")
     camera = bpy.data.objects["Camera_Default"]
     ribbon_screen_x = world_to_camera_view(bpy.context.scene, camera, ribbon.matrix_world.translation).x
-    eye_screen_x = world_to_camera_view(bpy.context.scene, camera, bpy.data.objects["EyeRightPivot"].matrix_world.translation).x
+    eye_screen_x = max(world_to_camera_view(bpy.context.scene, camera, bpy.data.objects[name].matrix_world.translation).x for name in ("EyeLeftPivot", "EyeRightPivot"))
+    ribbon_pull_min_x = ribbon_pull_screen_min_x(bpy.context.scene, camera, pull)
+    if ribbon_pull_min_x <= eye_screen_x + 0.025:
+        raise RuntimeError("ribbon pull crosses an eye safe region")
     report = {
         "collections": sorted(collections), "actions": sorted(actions),
         "boxRootScale": list(root.scale), "ribbonRootTranslation": list(ribbon.location),
         "ribbonRootScreenX": ribbon_screen_x, "rightEyeSafeMaxX": eye_screen_x + 0.025,
+        "ribbonPullTargets": sorted(ribbon_targets), "ribbonPullScreenMinX": ribbon_pull_min_x,
         "actionTargets": action_targets, "actionFrameRanges": action_frame_ranges,
         "actionChannelCounts": action_channel_counts,
         "framesPerSecond": bpy.context.scene.render.fps,

@@ -127,6 +127,15 @@ def action(
     clip["coreBoxActionSlots"] = json.dumps(slots, sort_keys=True, separators=(",", ":"))
 
 
+def transform_snapshot(obj: bpy.types.Object, rotation: tuple[float, float, float] | None = None) -> dict[str, tuple[float, float, float]]:
+    """Store a complete local transform for the app-owned ribbon pull parameter."""
+    return {
+        "location": tuple(obj.location),
+        "rotationEuler": rotation if rotation is not None else tuple(obj.rotation_euler),
+        "scale": tuple(obj.scale),
+    }
+
+
 def build(output: Path) -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -241,11 +250,17 @@ def build(output: Path) -> None:
         root: ((0, rest_location, rest_rotation, rest_scale), (22, rest_location, (math.radians(1.5), 0.0, 0.0), rest_scale), (45, rest_location, rest_rotation, rest_scale)),
         paper_visual: ((0, anchor_positions["PaperSpawn"], rest_rotation, rest_scale), (22, anchor_positions["PaperExit"], rest_rotation, rest_scale), (45, anchor_positions["PaperReveal"], rest_rotation, rest_scale)),
     })
-    root["core_box_ribbon_pull"] = json.dumps({
-        "0.0": {"BoxRoot": {"rotationEuler": [0.0, 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, 0.0]}},
-        "0.72": {"BoxRoot": {"rotationEuler": [0.01, 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, 0.02]}},
-        "1.0": {"BoxRoot": {"rotationEuler": [math.radians(2.0), 0.0, 0.0]}, "RibbonRoot": {"rotationEuler": [0.0, 0.0, math.radians(3.0)]}},
-    }, sort_keys=True, separators=(",", ":"))
+    ribbon_objects = [ribbon, *(bpy.data.objects[f"RibbonJoint_{index:02d}"] for index in range(1, 6)), bpy.data.objects["RibbonTip"]]
+    def ribbon_snapshot(root_rotation: float, joint_rotation: float) -> dict[str, dict[str, tuple[float, float, float]]]:
+        snapshots = {"BoxRoot": transform_snapshot(root, (root_rotation, 0.0, 0.0))}
+        for index, obj in enumerate(ribbon_objects):
+            snapshots[obj.name] = transform_snapshot(obj, (0.0, 0.0, joint_rotation * (index + 1)))
+        return snapshots
+    root["core_box_ribbon_pull"] = {
+        "0.0": ribbon_snapshot(0.0, 0.0),
+        "0.72": ribbon_snapshot(0.01, 0.006),
+        "1.0": ribbon_snapshot(math.radians(2.0), 0.012),
+    }
     bpy.context.view_layer.objects.active = root
     root.select_set(True)
     scene.frame_set(0)
