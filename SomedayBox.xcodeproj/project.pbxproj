@@ -58,8 +58,6 @@
 		J00000000000000000000004 /* BackupDocumentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000004 /* BackupDocumentV3.swift */; };
 		J00000000000000000000005 /* CoreBox.usda in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000005 /* CoreBox.usda */; };
 		J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000006 /* CoreBoxAssetManifest.json */; };
-		J0000000000000000000000A /* CoreBoxCharacterFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = J1000000000000000000000A /* CoreBoxCharacterFull.usdz */; };
-		J0000000000000000000000B /* CoreBoxCharacterLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = J1000000000000000000000B /* CoreBoxCharacterLite.usdz */; };
 		J00000000000000000000007 /* StoreRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000007 /* StoreRecoveryService.swift */; };
 		J00000000000000000000008 /* StoreRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000008 /* StoreRecoveryView.swift */; };
 		J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000009 /* StoreRecoveryTests.swift */; };
@@ -158,8 +156,6 @@
 		J10000000000000000000004 /* BackupDocumentV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupDocumentV3.swift; sourceTree = "<group>"; };
 		J10000000000000000000005 /* CoreBox.usda */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBox.usda; sourceTree = "<group>"; };
 		J10000000000000000000006 /* CoreBoxAssetManifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CoreBoxAssetManifest.json; sourceTree = "<group>"; };
-		J1000000000000000000000A /* CoreBoxCharacterFull.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBoxCharacterFull.usdz; sourceTree = "<group>"; };
-		J1000000000000000000000B /* CoreBoxCharacterLite.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usd; path = CoreBoxCharacterLite.usdz; sourceTree = "<group>"; };
 		J10000000000000000000007 /* StoreRecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryService.swift; sourceTree = "<group>"; };
 		J10000000000000000000008 /* StoreRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recovery/StoreRecoveryView.swift; sourceTree = "<group>"; };
 		J10000000000000000000009 /* StoreRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryTests.swift; sourceTree = "<group>"; };
@@ -298,8 +294,6 @@
 				A1000000000000000000000C /* PrivacyInfo.xcprivacy */,
 				J10000000000000000000005 /* CoreBox.usda */,
 				J10000000000000000000006 /* CoreBoxAssetManifest.json */,
-				J1000000000000000000000A /* CoreBoxCharacterFull.usdz */,
-				J1000000000000000000000B /* CoreBoxCharacterLite.usdz */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -502,8 +496,6 @@
 				A0000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */,
 				J00000000000000000000005 /* CoreBox.usda in Resources */,
 				J00000000000000000000006 /* CoreBoxAssetManifest.json in Resources */,
-				J0000000000000000000000A /* CoreBoxCharacterFull.usdz in Resources */,
-				J0000000000000000000000B /* CoreBoxCharacterLite.usdz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
