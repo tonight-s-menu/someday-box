@@ -277,6 +277,9 @@ private struct CoreBoxStage: View {
         .onChange(of: snapshot.snapshotVersion) { _, _ in
             controller.update(snapshot: snapshot, event: event)
         }
+        .onChange(of: event?.sequence) { _, _ in
+            controller.update(snapshot: snapshot, event: event)
+        }
         .task {
             controller.update(snapshot: snapshot, event: event)
         }
