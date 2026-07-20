@@ -52,4 +52,10 @@ for TIER in full lite; do
         --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/compose-core-box-clips.py" -- \
         --base "${SOURCE_STAGE}" --output "${COMPOSED_STAGE}" --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json"
     mv "${COMPOSED_STAGE}" "${SOURCE_STAGE}"
+
+    /usr/bin/usdcat --loadOnly "${SOURCE_STAGE}"
+    /usr/bin/usdchecker --arkit --strict "${SOURCE_STAGE}"
+    /usr/bin/usdzip "${OUTPUT_ROOT}/${RESOURCE}.usdz" --arkitAsset "${SOURCE_STAGE}"
+    /usr/bin/usdchecker --arkit --strict "${OUTPUT_ROOT}/${RESOURCE}.usdz"
+    /usr/bin/python3 -B "${SOURCE_ROOT}/scripts/verify-core-box-package.py" --package "${OUTPUT_ROOT}/${RESOURCE}.usdz" --tier "${TIER}"
 done
