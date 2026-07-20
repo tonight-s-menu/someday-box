@@ -4,7 +4,7 @@ DEVELOPER_DIR ?= $(shell /usr/bin/xcode-select -p)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests
+.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage
 
 help:
 	@echo "make test       Run deterministic pure-domain checks"
@@ -15,6 +15,7 @@ help:
 	@echo "make share-package-audit ARCHIVE_PATH=/absolute/path/to/archive.xcarchive"
 	@echo "make core-box-toolchain-audit Verify pinned Core Box tool provenance against the live machine"
 	@echo "make core-box-pipeline-tests  Run the Core Box asset contract unit tests"
+	@echo "make core-box-export-stage OUTPUT_ROOT=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "Override the simulator with SIMULATOR_DESTINATION='platform=iOS Simulator,...'"
 
 audit:
@@ -49,3 +50,10 @@ core-box-toolchain-audit:
 
 core-box-pipeline-tests:
 	PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -m unittest discover -s scripts/tests -p 'test_core_box_*.py' -v
+
+core-box-export-stage:
+	@test -n "$(OUTPUT_ROOT)" || { echo "OUTPUT_ROOT is required." >&2; exit 64; }
+	@test -n "$(EXPORT_PROFILE)" || { echo "EXPORT_PROFILE is required." >&2; exit 64; }
+	./scripts/core-box-export.sh --output "$(OUTPUT_ROOT)" --profile "$(EXPORT_PROFILE)"
+	/usr/bin/usdchecker --arkit --strict "$(OUTPUT_ROOT)/stage/full/CoreBoxCharacterFull.usda"
+	/usr/bin/usdchecker --arkit --strict "$(OUTPUT_ROOT)/stage/lite/CoreBoxCharacterLite.usda"
