@@ -4,7 +4,7 @@ DEVELOPER_DIR ?= $(shell /usr/bin/xcode-select -p)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check
+.PHONY: help audit test check ci-check xcode-test share-package-audit core-box-toolchain-audit core-box-pipeline-tests core-box-export-stage core-box-repro-check core-box-proof-audit
 
 help:
 	@echo "make test       Run deterministic pure-domain checks"
@@ -17,6 +17,7 @@ help:
 	@echo "make core-box-pipeline-tests  Run the Core Box asset contract unit tests"
 	@echo "make core-box-export-stage OUTPUT_ROOT=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
 	@echo "make core-box-repro-check CHECKED_OUT_ASSETS=/absolute/path EXPORT_PROFILE=pipeline-spike-v1"
+	@echo "make core-box-proof-audit Verify test-only Core Box proof bytes and identity"
 	@echo "Override the simulator with SIMULATOR_DESTINATION='platform=iOS Simulator,...'"
 
 audit:
@@ -63,3 +64,6 @@ core-box-repro-check:
 	@test -n "$(CHECKED_OUT_ASSETS)" || { echo "CHECKED_OUT_ASSETS is required." >&2; exit 64; }
 	@test -n "$(EXPORT_PROFILE)" || { echo "EXPORT_PROFILE is required." >&2; exit 64; }
 	./scripts/core-box-repro-check.sh --checked-out-assets "$(CHECKED_OUT_ASSETS)" --profile "$(EXPORT_PROFILE)"
+
+core-box-proof-audit:
+	./scripts/audit-core-box-proof.sh

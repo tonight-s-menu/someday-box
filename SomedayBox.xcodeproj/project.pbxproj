@@ -61,6 +61,11 @@
 		J00000000000000000000007 /* StoreRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000007 /* StoreRecoveryService.swift */; };
 		J00000000000000000000008 /* StoreRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000008 /* StoreRecoveryView.swift */; };
 		J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000009 /* StoreRecoveryTests.swift */; };
+		K00000000000000000000001 /* CoreBoxProofIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */; };
+		K00000000000000000000002 /* CoreBoxProofIdentity.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */; };
+		K00000000000000000000003 /* CoreBoxProofFull.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000003 /* CoreBoxProofFull.usdz */; };
+		K00000000000000000000004 /* CoreBoxProofLite.usdz in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000004 /* CoreBoxProofLite.usdz */; };
+		K00000000000000000000005 /* CoreBoxProofReport.json in Resources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000005 /* CoreBoxProofReport.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -159,6 +164,11 @@
 		J10000000000000000000007 /* StoreRecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryService.swift; sourceTree = "<group>"; };
 		J10000000000000000000008 /* StoreRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recovery/StoreRecoveryView.swift; sourceTree = "<group>"; };
 		J10000000000000000000009 /* StoreRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreRecoveryTests.swift; sourceTree = "<group>"; };
+		K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBoxProofIdentityTests.swift; sourceTree = "<group>"; };
+		K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generated/CoreBoxProofIdentity.generated.swift; sourceTree = "<group>"; };
+		K10000000000000000000003 /* CoreBoxProofFull.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofFull.usdz; sourceTree = "<group>"; };
+		K10000000000000000000004 /* CoreBoxProofLite.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fixtures/CoreBoxProofLite.usdz; sourceTree = "<group>"; };
+		K10000000000000000000005 /* CoreBoxProofReport.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Fixtures/CoreBoxProofReport.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -311,6 +321,11 @@
 				H10000000000000000000002 /* SharePayloadExtractionTests.swift */,
 				J10000000000000000000002 /* CoreBoxPresentationTests.swift */,
 				J10000000000000000000009 /* StoreRecoveryTests.swift */,
+				K10000000000000000000001 /* CoreBoxProofIdentityTests.swift */,
+				K10000000000000000000002 /* CoreBoxProofIdentity.generated.swift */,
+				K10000000000000000000003 /* CoreBoxProofFull.usdz */,
+				K10000000000000000000004 /* CoreBoxProofLite.usdz */,
+				K10000000000000000000005 /* CoreBoxProofReport.json */,
 			);
 			path = SomedayBoxTests;
 			sourceTree = "<group>";
@@ -396,6 +411,7 @@
 			buildPhases = (
 				A60000000000000000000002 /* Sources */,
 				A20000000000000000000002 /* Frameworks */,
+				K70000000000000000000001 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -488,6 +504,16 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		K70000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				K00000000000000000000003 /* CoreBoxProofFull.usdz in Resources */,
+				K00000000000000000000004 /* CoreBoxProofLite.usdz in Resources */,
+				K00000000000000000000005 /* CoreBoxProofReport.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A70000000000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -556,6 +582,8 @@
 				H00000000000000000000002 /* SharePayloadExtractionTests.swift in Sources */,
 				J00000000000000000000002 /* CoreBoxPresentationTests.swift in Sources */,
 				J00000000000000000000009 /* StoreRecoveryTests.swift in Sources */,
+				K00000000000000000000001 /* CoreBoxProofIdentityTests.swift in Sources */,
+				K00000000000000000000002 /* CoreBoxProofIdentity.generated.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
