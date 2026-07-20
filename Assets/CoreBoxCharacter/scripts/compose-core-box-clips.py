@@ -53,9 +53,17 @@ def main() -> None:
     parser.add_argument("--base", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--config", required=True, type=Path)
+    parser.add_argument("--profile", required=True)
     args = parser.parse_args(arguments)
     config = json.loads(args.config.read_text(encoding="utf-8"))
-    selected = config["exportProfiles"]["pipeline-spike-v1"]["clipSelection"]["names"]
+    try:
+        selection = config["exportProfiles"][args.profile]["clipSelection"]
+    except KeyError as error:
+        raise ValueError(f"unknown export profile: {args.profile}") from error
+    if selection["mode"] == "allConfigured":
+        selected = [clip["name"] for clip in config["clips"]]
+    else:
+        selected = selection["names"]
     by_name = {clip["name"]: clip for clip in config["clips"]}
     compose(args.base.resolve(), args.output.resolve(), [by_name[name] for name in selected])
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Export static USDA stages only; composition and USDZ sealing are the next task slice.
+# Export deterministic USDA stages from the authored source.
 set -eu
 export TZ=UTC LANG=C LC_ALL=C SOURCE_DATE_EPOCH=946684800
 
@@ -51,7 +51,7 @@ for TIER in full lite; do
     BLENDER_BIN="${BLENDER_BIN}" "${SOURCE_ROOT}/scripts/run-core-box-blender.sh" \
         --background --factory-startup --disable-autoexec --offline-mode --python-use-system-env --python-exit-code 1 \
         --python "${SOURCE_ROOT}/Assets/CoreBoxCharacter/scripts/compose-core-box-clips.py" -- \
-        --base "${SOURCE_STAGE}" --output "${COMPOSED_STAGE}" --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json"
+        --base "${SOURCE_STAGE}" --output "${COMPOSED_STAGE}" --config "${SOURCE_ROOT}/Assets/CoreBoxCharacter/export-config.json" --profile "${PROFILE}"
     mv "${COMPOSED_STAGE}" "${SOURCE_STAGE}"
 
     # USDZ records source mtimes; normalize every packaged dependency before usdzip.

@@ -3,7 +3,7 @@
 set -eu
 
 usage() {
-    echo "usage: core-box-repro-check.sh --checked-out-assets ABSOLUTE_DIRECTORY --profile pipeline-spike-v1" >&2
+    echo "usage: core-box-repro-check.sh --checked-out-assets ABSOLUTE_DIRECTORY --profile pipeline-spike-v1|production-v1" >&2
     exit 64
 }
 
@@ -19,7 +19,7 @@ done
 
 case "$CHECKED_OUT_ASSETS" in /*) ;; *) usage ;; esac
 [ -d "$CHECKED_OUT_ASSETS/.git" ] || usage
-[ "$PROFILE" = "pipeline-spike-v1" ] || usage
+case "$PROFILE" in pipeline-spike-v1|production-v1) ;; *) usage ;; esac
 
 SOURCE_ROOT="$(cd "$CHECKED_OUT_ASSETS" && pwd -P)"
 STATUS_BEFORE="$(git -C "$SOURCE_ROOT" status --porcelain=v1)"
