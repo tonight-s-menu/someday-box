@@ -79,6 +79,7 @@ class BlendSourceTests(unittest.TestCase):
             "RibbonJoint_05", "RibbonRoot", "RibbonTip",
         ])
         self.assertGreater(report["ribbonPullScreenMinX"], report["rightEyeSafeMaxX"])
+        self.assertEqual(report["ribbonPullMeshCount"], 6)
 
 
 if __name__ == "__main__":

@@ -162,9 +162,11 @@ def build(output: Path) -> None:
     cube("EyeRightMesh", (0.016, 0.022, 0.004), (0.0, 0.0, 0.0), shared, right_eye)
     ribbon = empty("RibbonRoot", (0.132, 0.102, 0.086), shared, root)
     parent = ribbon
+    ribbon_joints: list[bpy.types.Object] = []
     for index, offset in enumerate(((0.011, -0.003, 0.0), (0.011, -0.006, 0.0), (0.011, -0.009, 0.0), (0.011, -0.012, 0.0), (0.011, -0.015, 0.0)), 1):
         parent = empty(f"RibbonJoint_{index:02d}", offset, shared, parent)
-    empty("RibbonTip", (0.055, -0.030, 0.0), shared, parent)
+        ribbon_joints.append(parent)
+    ribbon_tip = empty("RibbonTip", (0.055, -0.030, 0.0), shared, parent)
     anchor_positions = {
         "PaperPool": (0.0, 0.0, 0.0),
         "PaperSpawn": (0.0, 0.115, 0.0),
@@ -180,7 +182,11 @@ def build(output: Path) -> None:
         empty(f"PaperRest_{index:02d}", ((index % 4 - 1.5) * 0.04, 0.10 + (index // 4) * 0.004, 0.0), collection, paper_pool)
 
     # The visible proof meshes keep all collision and lighting proxies explicit.
-    ribbon_mesh = cube("RibbonMesh", (0.082, 0.008, 0.018), (0.042, -0.018, 0.0), shared, ribbon)
+    ribbon_mesh = cube("RibbonMesh", (0.016, 0.008, 0.018), (0.008, 0.0, 0.0), shared, ribbon_joints[0])
+    ribbon_segments = [ribbon_mesh]
+    for index, joint in enumerate(ribbon_joints[1:], 2):
+        ribbon_segments.append(cube(f"RibbonSegment_{index:02d}", (0.016, 0.008, 0.018), (0.008, 0.0, 0.0), shared, joint))
+    ribbon_segments.append(cube("RibbonTipMesh", (0.014, 0.008, 0.018), (0.007, 0.0, 0.0), shared, ribbon_tip))
     paper_visual = cube("PaperVisual", (0.085, 0.006, 0.055), anchor_positions["PaperSpawn"], shared, root)
     seam_mesh = cube("MemorySeamMesh", (0.18, 0.003, 0.004), (0.0, 0.045, 0.111), shared, bpy.data.objects["MemorySeam"])
     shadow_mesh = cube("ShadowReceiverMesh", (0.240, 0.002, 0.105), (0.0, 0.001, 0.012), shared, bpy.data.objects["ShadowReceiver"])
@@ -223,7 +229,8 @@ def build(output: Path) -> None:
         material(name, color).use_fake_user = True
     body.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
     lid.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
-    ribbon_mesh.data.materials.append(bpy.data.materials["MAT_SageRibbon"])
+    for segment in ribbon_segments:
+        segment.data.materials.append(bpy.data.materials["MAT_SageRibbon"])
     paper_visual.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
     seam_mesh.data.materials.append(bpy.data.materials["MAT_InteriorMemory"])
     shadow_mesh.data.materials.append(bpy.data.materials["MAT_ContactShadow"])

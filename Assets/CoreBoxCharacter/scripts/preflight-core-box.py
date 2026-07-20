@@ -21,6 +21,14 @@ EXPECTED_ACTION_TARGETS = {
     "capture.deposit": {"BoxRoot", "LidPivot", "PaperDeposit"},
     "draw.reveal": {"BoxRoot", "PaperVisual"},
 }
+RIBBON_MESH_PARENTS = {
+    "RibbonMesh": "RibbonJoint_01",
+    "RibbonSegment_02": "RibbonJoint_02",
+    "RibbonSegment_03": "RibbonJoint_03",
+    "RibbonSegment_04": "RibbonJoint_04",
+    "RibbonSegment_05": "RibbonJoint_05",
+    "RibbonTipMesh": "RibbonTip",
+}
 
 
 def require_startup_contract() -> None:
@@ -74,8 +82,9 @@ def ribbon_pull_screen_min_x(scene: bpy.types.Scene, camera: bpy.types.Object, p
 
     ribbon_names = ["RibbonRoot", *(f"RibbonJoint_{index:02d}" for index in range(1, 6)), "RibbonTip"]
     points = [matrix_for(bpy.data.objects[name]).translation for name in ribbon_names]
-    mesh = bpy.data.objects["RibbonMesh"]
-    points.extend(matrix_for(mesh) @ Vector(corner) for corner in mesh.bound_box)
+    for mesh_name in RIBBON_MESH_PARENTS:
+        mesh = bpy.data.objects[mesh_name]
+        points.extend(matrix_for(mesh) @ Vector(corner) for corner in mesh.bound_box)
     return min(world_to_camera_view(scene, camera, point).x for point in points)
 
 
@@ -177,6 +186,10 @@ def main() -> None:
         raise RuntimeError("ribbon pull snapshots are incomplete")
     if abs(pull["1.0"]["BoxRoot"]["rotationEuler"][0]) > math.radians(2.0):
         raise RuntimeError("ribbon pull root lean exceeds 2 degrees")
+    for mesh_name, parent_name in RIBBON_MESH_PARENTS.items():
+        mesh = bpy.data.objects.get(mesh_name)
+        if mesh is None or mesh.parent is None or mesh.parent.name != parent_name:
+            raise RuntimeError(f"{mesh_name} is not bound to {parent_name}")
     camera = bpy.data.objects["Camera_Default"]
     ribbon_screen_x = world_to_camera_view(bpy.context.scene, camera, ribbon.matrix_world.translation).x
     eye_screen_x = max(world_to_camera_view(bpy.context.scene, camera, bpy.data.objects[name].matrix_world.translation).x for name in ("EyeLeftPivot", "EyeRightPivot"))
@@ -188,6 +201,7 @@ def main() -> None:
         "boxRootScale": list(root.scale), "ribbonRootTranslation": list(ribbon.location),
         "ribbonRootScreenX": ribbon_screen_x, "rightEyeSafeMaxX": eye_screen_x + 0.025,
         "ribbonPullTargets": sorted(ribbon_targets), "ribbonPullScreenMinX": ribbon_pull_min_x,
+        "ribbonPullMeshCount": len(RIBBON_MESH_PARENTS),
         "actionTargets": action_targets, "actionFrameRanges": action_frame_ranges,
         "actionChannelCounts": action_channel_counts,
         "framesPerSecond": bpy.context.scene.render.fps,
