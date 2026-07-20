@@ -24,20 +24,13 @@ def require_startup_contract() -> None:
             raise RuntimeError(f"{name} must be present and empty")
 
 
-def export_tier(config: dict[str, object], tier: str, output_root: Path) -> dict[str, object]:
-    tier_config = config["tiers"][tier]
-    collection = tier_config["collection"]
-    if collection not in bpy.data.collections:
-        raise RuntimeError(f"missing export collection: {collection}")
-    stage = output_root / "stage" / tier
-    stage.mkdir(parents=True, exist_ok=True)
-    resource_name = tier_config["resourceName"]
-    output = stage / Path(resource_name).with_suffix(".usda")
+def export_usda(output: Path, collection: str, *, animation: bool, materials: bool) -> None:
+    """Use the same frozen Blender options for the base and motion layers."""
     result = bpy.ops.wm.usd_export(
         filepath=str(output), allow_unicode=False, author_blender_name=False, check_existing=False,
-        collection=collection, evaluation_mode="RENDER", export_animation=False, export_armatures=True,
+        collection=collection, evaluation_mode="RENDER", export_animation=animation, export_armatures=True,
         export_cameras=True, export_curves=False, export_custom_properties=True, export_hair=False,
-        export_lights=True, export_materials=True, export_mesh_colors=False, export_meshes=True,
+        export_lights=True, export_materials=materials, export_mesh_colors=False, export_meshes=True,
         export_normals=True, export_points=False, export_shapekeys=True, export_subdivision="TESSELLATE",
         export_uvmaps=True, export_volumes=False, export_textures_mode="NEW", overwrite_textures=True,
         generate_preview_surface=True, generate_materialx_network=False, convert_world_material=False,
@@ -48,8 +41,38 @@ def export_tier(config: dict[str, object], tier: str, output_root: Path) -> dict
         use_instancing=False, xform_op_mode="TRS",
     )
     if "FINISHED" not in result or not output.is_file():
-        raise RuntimeError(f"USD export failed for {tier}")
-    return {"tier": tier, "collection": collection, "stage": output.relative_to(output_root).as_posix()}
+        raise RuntimeError(f"USD export failed: {output.name}")
+
+
+def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, object]], output_root: Path) -> dict[str, object]:
+    tier_config = config["tiers"][tier]
+    collection = tier_config["collection"]
+    if collection not in bpy.data.collections:
+        raise RuntimeError(f"missing export collection: {collection}")
+    stage = output_root / "stage" / tier
+    stage.mkdir(parents=True, exist_ok=True)
+    resource_name = tier_config["resourceName"]
+    output = stage / Path(resource_name).with_suffix(".usda")
+    export_usda(output, collection, animation=False, materials=True)
+    root = bpy.data.objects.get("BoxRoot")
+    if root is None:
+        raise RuntimeError("BoxRoot is missing")
+    action_paths = []
+    for clip in clips:
+        name = clip["name"]
+        action = bpy.data.actions.get(name)
+        end = clip["authoringFrameCount"]
+        if action is None or tuple(round(value) for value in action.frame_range) != (0, end):
+            raise RuntimeError(f"invalid proof action: {name}")
+        root.animation_data_create()
+        root.animation_data.action = action
+        bpy.context.scene.frame_start = 0
+        bpy.context.scene.frame_end = end
+        action_output = stage / "clips" / f"{name.replace('.', '_')}.usda"
+        action_output.parent.mkdir(parents=True, exist_ok=True)
+        export_usda(action_output, collection, animation=True, materials=False)
+        action_paths.append(action_output.relative_to(output_root).as_posix())
+    return {"tier": tier, "collection": collection, "stage": output.relative_to(output_root).as_posix(), "actions": action_paths}
 
 
 def main() -> None:
@@ -65,8 +88,11 @@ def main() -> None:
         raise RuntimeError("unknown export profile")
     if args.profile != "pipeline-spike-v1":
         raise RuntimeError("static exporter supports pipeline-spike-v1 only")
+    clip_names = config["exportProfiles"][args.profile]["clipSelection"]["names"]
+    configured = {clip["name"]: clip for clip in config["clips"]}
+    clips = [configured[name] for name in clip_names]
     output_root = args.output.resolve()
-    report = {"profile": args.profile, "tiers": [export_tier(config, tier, output_root) for tier in ("full", "lite")]}
+    report = {"profile": args.profile, "exportedClips": clip_names, "tiers": [export_tier(config, tier, clips, output_root) for tier in ("full", "lite")]}
     (output_root / "export-report.json").write_text(json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
