@@ -12,8 +12,13 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 
 
-REQUIRED = {"BoxRoot", "BoxBody", "LidPivot", "LidMesh", "EyeLeftPivot", "EyeLeftMesh", "EyeRightPivot", "EyeRightMesh", "RibbonRoot", "RibbonJoint_01", "RibbonJoint_02", "RibbonJoint_03", "RibbonJoint_04", "RibbonJoint_05", "RibbonTip", "PaperPool", "PaperSpawn", "PaperExit", "PaperDeposit", "PaperReveal", "CurrentPaperAnchor", "MemorySeam", "DecorationRoot", "ShadowReceiver", "Hit_Lid", "Hit_Ribbon", "Hit_Box", "Hit_MemorySeam", "Camera_Default", "Camera_Peek", "Camera_Overview", "Light_Key", "Light_Fill"}
+REQUIRED = {"BoxRoot", "BoxBody", "LidPivot", "LidMesh", "EyeLeftPivot", "EyeLeftMesh", "EyeRightPivot", "EyeRightMesh", "RibbonRoot", "RibbonJoint_01", "RibbonJoint_02", "RibbonJoint_03", "RibbonJoint_04", "RibbonJoint_05", "RibbonTip", "PaperPool", "PaperSpawn", "PaperExit", "PaperDeposit", "PaperReveal", "PaperVisual", "CurrentPaperAnchor", "MemorySeam", "DecorationRoot", "ShadowReceiver", "Hit_Lid", "Hit_Ribbon", "Hit_Box", "Hit_MemorySeam", "Camera_Default", "Camera_Peek", "Camera_Overview", "Light_Key", "Light_Fill"}
 EXPECTED_FLAGS = {"debug": 0, "inspect": 0, "interactive": 0, "optimize": 0, "dont_write_bytecode": 1, "no_user_site": 1, "ignore_environment": 0, "verbose": 0, "bytes_warning": 0, "quiet": 0, "hash_randomization": 0, "isolated": 0, "dev_mode": False, "utf8_mode": 1, "safe_path": False, "warn_default_encoding": 0}
+EXPECTED_ACTION_TARGETS = {
+    "idle.listen": {"BoxRoot", "LidPivot", "RibbonRoot"},
+    "capture.deposit": {"BoxRoot", "LidPivot", "PaperDeposit"},
+    "draw.reveal": {"BoxRoot", "PaperVisual"},
+}
 
 
 def require_startup_contract() -> None:
@@ -64,10 +69,30 @@ def main() -> None:
     expected_actions = {"idle.listen", "capture.deposit", "draw.reveal"}
     if actions != expected_actions:
         raise RuntimeError(f"unexpected actions: {actions}")
+    action_targets: dict[str, list[str]] = {}
+    action_frame_ranges: dict[str, list[int]] = {}
+    action_channel_counts: dict[str, int] = {}
     for name, end in (("idle.listen", 60), ("capture.deposit", 34), ("draw.reveal", 45)):
         clip = bpy.data.actions[name]
         if not clip.slots or not clip.layers or tuple(round(value) for value in clip.frame_range) != (0, end):
             raise RuntimeError(f"{name} lacks the expected motion curve and frame range")
+        try:
+            slots = json.loads(clip["coreBoxActionSlots"])
+        except (KeyError, TypeError, json.JSONDecodeError) as error:
+            raise RuntimeError(f"{name} lacks action-slot metadata") from error
+        if set(slots) != EXPECTED_ACTION_TARGETS[name]:
+            raise RuntimeError(f"{name} animates the wrong objects: {sorted(slots)}")
+        strip = clip.layers[0].strips[0]
+        channels = [curve for bag in strip.channelbags for curve in bag.fcurves]
+        if len(channels) <= 1:
+            raise RuntimeError(f"{name} lacks multi-object transform curves")
+        for curve in channels:
+            frames = [round(point.co.x) for point in curve.keyframe_points]
+            if not frames or frames[0] != 0 or frames[-1] != end:
+                raise RuntimeError(f"{name} channel does not span its proof action")
+        action_targets[name] = sorted(slots)
+        action_frame_ranges[name] = [0, end]
+        action_channel_counts[name] = len(channels)
     for name in ("Camera_Default", "Camera_Peek", "Camera_Overview"):
         if bpy.data.objects[name].type != "CAMERA":
             raise RuntimeError(f"{name} is not a camera")
@@ -89,6 +114,8 @@ def main() -> None:
         "collections": sorted(collections), "actions": sorted(actions),
         "boxRootScale": list(root.scale), "ribbonRootTranslation": list(ribbon.location),
         "ribbonRootScreenX": ribbon_screen_x, "rightEyeSafeMaxX": eye_screen_x + 0.025,
+        "actionTargets": action_targets, "actionFrameRanges": action_frame_ranges,
+        "actionChannelCounts": action_channel_counts,
         "configAssetVersion": config["assetVersion"],
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

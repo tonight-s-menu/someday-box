@@ -17,6 +17,11 @@ CONFIG = REPOSITORY_ROOT / "Assets/CoreBoxCharacter/export-config.json"
 
 EXPECTED_COLLECTIONS = {"SOURCE_SHARED", "EXPORT_FULL", "EXPORT_LITE"}
 EXPECTED_ACTIONS = {"idle.listen", "capture.deposit", "draw.reveal"}
+EXPECTED_ACTION_TARGETS = {
+    "idle.listen": {"BoxRoot", "LidPivot", "RibbonRoot"},
+    "capture.deposit": {"BoxRoot", "LidPivot", "PaperDeposit"},
+    "draw.reveal": {"BoxRoot", "PaperVisual"},
+}
 
 
 def run_blender_preflight() -> dict[str, object]:
@@ -59,6 +64,15 @@ class BlendSourceTests(unittest.TestCase):
         self.assertEqual(tuple(report["boxRootScale"]), (1.0, 1.0, 1.0))
         self.assertAlmostEqual(report["ribbonRootTranslation"][0], 0.132, places=4)
         self.assertGreater(report["ribbonRootScreenX"], report["rightEyeSafeMaxX"])
+        self.assertEqual(report["actionTargets"], {
+            name: sorted(targets) for name, targets in EXPECTED_ACTION_TARGETS.items()
+        })
+        self.assertEqual(report["actionFrameRanges"], {
+            "idle.listen": [0, 60],
+            "capture.deposit": [0, 34],
+            "draw.reveal": [0, 45],
+        })
+        self.assertTrue(all(count > 1 for count in report["actionChannelCounts"].values()))
 
 
 if __name__ == "__main__":

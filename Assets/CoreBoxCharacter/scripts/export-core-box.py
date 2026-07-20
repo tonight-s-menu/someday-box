@@ -44,6 +44,25 @@ def export_usda(output: Path, collection: str, *, animation: bool, materials: bo
         raise RuntimeError(f"USD export failed: {output.name}")
 
 
+def activate_action(action: bpy.types.Action) -> None:
+    """Bind each recorded object slot so USD export evaluates the complete clip."""
+    try:
+        slot_identifiers = json.loads(action["coreBoxActionSlots"])
+    except (KeyError, TypeError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"{action.name} lacks action-slot metadata") from error
+    for obj in bpy.data.objects:
+        if obj.animation_data is not None:
+            obj.animation_data.action = None
+    for object_name, slot_identifier in slot_identifiers.items():
+        obj = bpy.data.objects.get(object_name)
+        slot = action.slots.get(slot_identifier)
+        if obj is None or slot is None:
+            raise RuntimeError(f"{action.name} has an unresolved animation slot")
+        obj.animation_data_create()
+        obj.animation_data.action = action
+        obj.animation_data.action_slot = slot
+
+
 def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, object]], output_root: Path) -> dict[str, object]:
     tier_config = config["tiers"][tier]
     collection = tier_config["collection"]
@@ -54,9 +73,6 @@ def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, obje
     resource_name = tier_config["resourceName"]
     output = stage / Path(resource_name).with_suffix(".usda")
     export_usda(output, collection, animation=False, materials=True)
-    root = bpy.data.objects.get("BoxRoot")
-    if root is None:
-        raise RuntimeError("BoxRoot is missing")
     action_paths = []
     for clip in clips:
         name = clip["name"]
@@ -64,8 +80,7 @@ def export_tier(config: dict[str, object], tier: str, clips: list[dict[str, obje
         end = clip["authoringFrameCount"]
         if action is None or tuple(round(value) for value in action.frame_range) != (0, end):
             raise RuntimeError(f"invalid proof action: {name}")
-        root.animation_data_create()
-        root.animation_data.action = action
+        activate_action(action)
         bpy.context.scene.frame_start = 0
         bpy.context.scene.frame_end = end
         action_output = stage / "clips" / f"{name.replace('.', '_')}.usda"

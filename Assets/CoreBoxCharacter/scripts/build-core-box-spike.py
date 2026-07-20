@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import os
 import sys
@@ -102,15 +103,28 @@ def attach_runtime_maps(material: bpy.types.Material, textures: Path) -> None:
     links.new(roughness.outputs["Color"], shader.inputs["Roughness"])
 
 
-def action(name: str, obj: bpy.types.Object, end: int, rotation: float = 0.0) -> None:
-    """Author a real non-looping root channel that returns to rest."""
-    obj.animation_data_clear()
-    for frame, value in ((0, 0.0), (end // 2, rotation), (end, 0.0)):
-        obj.rotation_euler.x = value
-        obj.keyframe_insert(data_path="rotation_euler", index=0, frame=frame)
-    clip = obj.animation_data.action
+def action(
+    name: str,
+    poses: dict[bpy.types.Object, tuple[tuple[int, tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]], ...]],
+) -> None:
+    """Bind one action to every animated proof object through Blender action slots."""
+    clip = bpy.data.actions.new(name)
     clip.name = name
     clip.use_fake_user = True
+    slots: dict[str, str] = {}
+    for obj, object_poses in poses.items():
+        obj.animation_data_create()
+        obj.animation_data.action = clip
+        slot = clip.slots.new("OBJECT", obj.name)
+        obj.animation_data.action_slot = slot
+        slots[obj.name] = slot.identifier
+        for frame, location, rotation, scale in object_poses:
+            obj.location = location
+            obj.rotation_euler = rotation
+            obj.scale = scale
+            for property_name in ("location", "rotation_euler", "scale"):
+                obj.keyframe_insert(data_path=property_name, frame=frame)
+    clip["coreBoxActionSlots"] = json.dumps(slots, sort_keys=True, separators=(",", ":"))
 
 
 def build(output: Path) -> None:
@@ -140,8 +154,15 @@ def build(output: Path) -> None:
     for index, offset in enumerate(((0.011, -0.003, 0.0), (0.011, -0.006, 0.0), (0.011, -0.009, 0.0), (0.011, -0.012, 0.0), (0.011, -0.015, 0.0)), 1):
         parent = empty(f"RibbonJoint_{index:02d}", offset, shared, parent)
     empty("RibbonTip", (0.055, -0.030, 0.0), shared, parent)
+    anchor_positions = {
+        "PaperPool": (0.0, 0.0, 0.0),
+        "PaperSpawn": (0.0, 0.115, 0.0),
+        "PaperExit": (0.11, 0.17, 0.15),
+        "PaperDeposit": (0.0, 0.19, 0.0),
+        "PaperReveal": (0.0, 0.22, 0.20),
+    }
     for name in ("PaperPool", "PaperSpawn", "PaperExit", "PaperDeposit", "PaperReveal", "CurrentPaperAnchor", "MemorySeam", "DecorationRoot", "ShadowReceiver", "Hit_Lid", "Hit_Ribbon", "Hit_Box", "Hit_MemorySeam", "Camera_Default", "Camera_Peek", "Camera_Overview", "Light_Key", "Light_Fill"):
-        empty(name, (0.0, 0.0, 0.0), shared, root)
+        empty(name, anchor_positions.get(name, (0.0, 0.0, 0.0)), shared, root)
     paper_pool = bpy.data.objects["PaperPool"]
     for index in range(24):
         collection = shared if index < 10 else full
@@ -149,6 +170,7 @@ def build(output: Path) -> None:
 
     # The visible proof meshes keep all collision and lighting proxies explicit.
     ribbon_mesh = cube("RibbonMesh", (0.082, 0.008, 0.018), (0.042, -0.018, 0.0), shared, ribbon)
+    paper_visual = cube("PaperVisual", (0.085, 0.006, 0.055), anchor_positions["PaperSpawn"], shared, root)
     seam_mesh = cube("MemorySeamMesh", (0.18, 0.003, 0.004), (0.0, 0.045, 0.111), shared, bpy.data.objects["MemorySeam"])
     shadow_mesh = cube("ShadowReceiverMesh", (0.240, 0.002, 0.105), (0.0, 0.001, 0.012), shared, bpy.data.objects["ShadowReceiver"])
     for name in ("Hit_Lid", "Hit_Ribbon", "Hit_Box", "Hit_MemorySeam"):
@@ -191,6 +213,7 @@ def build(output: Path) -> None:
     body.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
     lid.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
     ribbon_mesh.data.materials.append(bpy.data.materials["MAT_SageRibbon"])
+    paper_visual.data.materials.append(bpy.data.materials["MAT_MaplePaper"])
     seam_mesh.data.materials.append(bpy.data.materials["MAT_InteriorMemory"])
     shadow_mesh.data.materials.append(bpy.data.materials["MAT_ContactShadow"])
     textures = output.parent / "textures"
@@ -199,9 +222,23 @@ def build(output: Path) -> None:
         make_texture(textures / filename, color)
     attach_runtime_maps(bpy.data.materials["MAT_MaplePaper"], textures)
 
-    action("idle.listen", root, 60, 0.026)
-    action("capture.deposit", root, 34, 0.012)
-    action("draw.reveal", root, 45, 0.020)
+    rest_location = (0.0, 0.0, 0.0)
+    rest_rotation = (0.0, 0.0, 0.0)
+    rest_scale = (1.0, 1.0, 1.0)
+    action("idle.listen", {
+        root: ((0, rest_location, rest_rotation, rest_scale), (30, rest_location, (math.radians(1.5), 0.0, 0.0), rest_scale), (60, rest_location, rest_rotation, rest_scale)),
+        lid_pivot: ((0, lid_pivot.location[:], rest_rotation, rest_scale), (30, lid_pivot.location[:], (math.radians(3.0), 0.0, 0.0), rest_scale), (60, lid_pivot.location[:], rest_rotation, rest_scale)),
+        ribbon: ((0, ribbon.location[:], rest_rotation, rest_scale), (6, ribbon.location[:], rest_rotation, rest_scale), (33, ribbon.location[:], (0.0, 0.0, math.radians(2.0)), rest_scale), (60, ribbon.location[:], rest_rotation, rest_scale)),
+    })
+    action("capture.deposit", {
+        root: ((0, rest_location, rest_rotation, rest_scale), (17, rest_location, rest_rotation, (1.0, 0.988, 1.0)), (34, rest_location, rest_rotation, rest_scale)),
+        lid_pivot: ((0, lid_pivot.location[:], rest_rotation, rest_scale), (17, lid_pivot.location[:], (math.radians(2.0), 0.0, 0.0), rest_scale), (34, lid_pivot.location[:], rest_rotation, rest_scale)),
+        bpy.data.objects["PaperDeposit"]: ((0, (0.0, 0.24, 0.08), rest_rotation, rest_scale), (34, anchor_positions["PaperDeposit"], rest_rotation, rest_scale)),
+    })
+    action("draw.reveal", {
+        root: ((0, rest_location, rest_rotation, rest_scale), (22, rest_location, (math.radians(1.5), 0.0, 0.0), rest_scale), (45, rest_location, rest_rotation, rest_scale)),
+        paper_visual: ((0, anchor_positions["PaperSpawn"], rest_rotation, rest_scale), (22, anchor_positions["PaperExit"], rest_rotation, rest_scale), (45, anchor_positions["PaperReveal"], rest_rotation, rest_scale)),
+    })
     root["core_box_ribbon_pull"] = '{"0.0": [0, 0, 0], "0.72": [0.01, 0, 0], "1.0": [0.02, 0, 0]}'
     bpy.context.view_layer.objects.active = root
     root.select_set(True)
