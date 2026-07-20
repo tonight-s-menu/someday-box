@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # The only permitted launcher for a Blender process that executes Python.
 #
-# Usage: run-core-box-blender.sh <absolute-blender-python-script> [args...]
+# Usage: run-core-box-blender.sh <Blender arguments including --python SCRIPT>
 #
 # Verifies the full toolchain contract (config/provenance pins plus live
 # Xcode, Blender, macOS, and Apple USD identity) before ever starting
@@ -16,20 +16,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BLENDER_BIN="${BLENDER_BIN:-/Applications/Blender.app/Contents/MacOS/Blender}"
 
-if [ "$#" -lt 1 ]; then
-    echo "usage: run-core-box-blender.sh <absolute-blender-python-script> [args...]" >&2
+if [ "$#" -lt 2 ]; then
+    echo "usage: run-core-box-blender.sh <Blender arguments including --python SCRIPT>" >&2
     exit 64
 fi
 
-BLENDER_SCRIPT="$1"
-shift
+BLENDER_SCRIPT=""
+EXPECT_SCRIPT=0
+for ARGUMENT in "$@"; do
+    if [ "${EXPECT_SCRIPT}" = 1 ]; then
+        BLENDER_SCRIPT="${ARGUMENT}"
+        break
+    fi
+    if [ "${ARGUMENT}" = "--python" ]; then
+        EXPECT_SCRIPT=1
+    fi
+done
 
 case "${BLENDER_SCRIPT}" in
     /*) ;;
-    *)
-        echo "run-core-box-blender.sh requires an absolute Blender Python script path" >&2
-        exit 64
-        ;;
+    *) echo "run-core-box-blender.sh requires --python followed by an absolute script path" >&2; exit 64 ;;
 esac
 
 case "${BLENDER_BIN}" in
@@ -70,4 +76,4 @@ exec env -i \
     PYTHONPATH= \
     PYTHONHOME= \
     PYTHONUSERBASE= \
-    "${BLENDER_BIN}" --background --factory-startup --python "${BLENDER_SCRIPT}" -- "$@"
+    "${BLENDER_BIN}" "$@"
