@@ -1,0 +1,130 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assetVersion",
+    "animationEncoding",
+    "aoIntegration",
+    "packagingComplianceMode",
+    "schemaVersion",
+    "appleUSDTools",
+    "aoSourceSHA256",
+    "tiers"
+  ],
+  "properties": {
+    "assetVersion": { "type": "string", "const": "core-box-character-v1" },
+    "animationEncoding": { "type": "string", "const": "usdNamedResourcesV1" },
+    "aoIntegration": { "type": "string", "const": "bakedIntoBasecolorLinearMultiplyV1" },
+    "packagingComplianceMode": { "type": "string", "const": "preAndPostUsdcheckerStrictV1" },
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "aoSourceSHA256": { "$ref": "#/$defs/sha256" },
+    "appleUSDTools": { "$ref": "#/$defs/appleUSDTools" },
+    "tiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full", "lite"],
+      "properties": {
+        "full": { "$ref": "#/$defs/tier" },
+        "lite": { "$ref": "#/$defs/tier" }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "toolEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "appleUSDTools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["macOSBuild", "versionOutput", "usdcat", "usdchecker", "usdzip"],
+      "properties": {
+        "macOSBuild": { "type": "string", "minLength": 1 },
+        "versionOutput": { "type": "string", "minLength": 1 },
+        "usdcat": { "$ref": "#/$defs/toolEntry" },
+        "usdchecker": { "$ref": "#/$defs/toolEntry" },
+        "usdzip": { "$ref": "#/$defs/toolEntry" }
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "durationMilliseconds", "authoringFrameCount"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "durationMilliseconds": { "type": "integer", "minimum": 1 },
+        "authoringFrameCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "samples", "entities"],
+      "properties": {
+        "name": { "type": "string", "const": "ribbon.pull" },
+        "samples": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+        },
+        "entities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "textureEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "textures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basecolor", "normal", "roughness"],
+      "properties": {
+        "basecolor": { "$ref": "#/$defs/textureEntry" },
+        "normal": { "$ref": "#/$defs/textureEntry" },
+        "roughness": { "$ref": "#/$defs/textureEntry" }
+      }
+    },
+    "tier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourceName", "byteCount", "sha256", "clips", "channels", "textures"],
+      "properties": {
+        "resourceName": { "type": "string", "minLength": 1 },
+        "byteCount": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "clips": {
+          "type": "array",
+          "minItems": 13,
+          "maxItems": 13,
+          "items": { "$ref": "#/$defs/clip" }
+        },
+        "channels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/channel" }
+        },
+        "textures": { "$ref": "#/$defs/textures" }
+      }
+    }
+  }
+}

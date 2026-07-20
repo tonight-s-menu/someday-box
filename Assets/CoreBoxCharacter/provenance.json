@@ -1,0 +1,32 @@
+{
+  "blender": {
+    "applicationIdentifier": "org.blenderfoundation.blender",
+    "binaryPath": "/Applications/Blender.app/Contents/MacOS/Blender",
+    "binarySHA256": "60ba7a9b6743f7acf101274361fa76409e382ae07cd2007ce07dea30f6b129f2",
+    "buildHash": "fbe6228777e7",
+    "installerSHA256": "ed4d8390166dec5ea0a2813a03db6221f206ce016442be7f59f41d760972568a",
+    "installerURL": "https://download.blender.org/release/Blender5.2/blender-5.2.0-macos-arm64.dmg",
+    "version": "5.2.0 LTS"
+  },
+  "homebrew": {
+    "caskSourceSHA256": "b47d0595fcfa7d7bd8b05c777d7aaede4da2befdd8b0fca2d74e2019f23f995c",
+    "tapCommit": "a61ec1d1ae76cff8cf10f792b617f5b4f7a49a84"
+  },
+  "appleUSDTools": {
+    "macOSBuild": "25D125",
+    "versionOutput": "Apple USD Tools (0.25.2)",
+    "usdcat": {
+      "path": "/usr/bin/usdcat",
+      "sha256": "3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4"
+    },
+    "usdchecker": {
+      "path": "/usr/bin/usdchecker",
+      "sha256": "333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371"
+    },
+    "usdzip": {
+      "path": "/usr/bin/usdzip",
+      "sha256": "ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1"
+    }
+  },
+  "xcode": "26.6 (17F113)"
+}

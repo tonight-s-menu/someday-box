@@ -1,0 +1,154 @@
+{
+  "assetVersion": "core-box-character-v1",
+  "animationEncoding": "usdNamedResourcesV1",
+  "aoIntegration": "bakedIntoBasecolorLinearMultiplyV1",
+  "packagingComplianceMode": "preAndPostUsdcheckerStrictV1",
+  "schemaVersion": 1,
+  "manifestCanonicalizationVersion": "raw-utf8-v1",
+  "authoringTreeDigestVersion": "path-sha256-v1",
+  "blender": {
+    "version": "5.2.0 LTS",
+    "buildHash": "fbe6228777e7",
+    "binarySHA256": "60ba7a9b6743f7acf101274361fa76409e382ae07cd2007ce07dea30f6b129f2"
+  },
+  "appleUSDTools": {
+    "macOSBuild": "25D125",
+    "versionOutput": "Apple USD Tools (0.25.2)",
+    "usdcat": {
+      "path": "/usr/bin/usdcat",
+      "sha256": "3a16e9ff866d145669d41de552ce8d64bfd3454570881481a4a12ed48efdd9a4"
+    },
+    "usdchecker": {
+      "path": "/usr/bin/usdchecker",
+      "sha256": "333cd7aefbda685fb232d7b4d2d025fa385b4022aa639b92653a5a6476d5b371"
+    },
+    "usdzip": {
+      "path": "/usr/bin/usdzip",
+      "sha256": "ee1d296ce79bea5897ed6adb568b215235819cc355b82620cb8a2e952a506ac1"
+    }
+  },
+  "coordinateSystem": {
+    "metersPerUnit": 1.0,
+    "upAxis": "Y",
+    "rootEntity": "BoxRoot"
+  },
+  "requiredEntities": [
+    "BoxRoot",
+    "BoxBody",
+    "LidPivot",
+    "LidMesh",
+    "EyeLeftPivot",
+    "EyeLeftMesh",
+    "EyeRightPivot",
+    "EyeRightMesh",
+    "RibbonRoot",
+    "RibbonJoint_01",
+    "RibbonJoint_02",
+    "RibbonJoint_03",
+    "RibbonJoint_04",
+    "RibbonJoint_05",
+    "RibbonTip",
+    "PaperPool",
+    "PaperSpawn",
+    "PaperExit",
+    "PaperDeposit",
+    "PaperReveal",
+    "CurrentPaperAnchor",
+    "MemorySeam",
+    "DecorationRoot",
+    "ShadowReceiver",
+    "Hit_Lid",
+    "Hit_Ribbon",
+    "Hit_Box",
+    "Hit_MemorySeam",
+    "Camera_Default",
+    "Camera_Peek",
+    "Camera_Overview",
+    "Light_Key",
+    "Light_Fill"
+  ],
+  "clips": [
+    { "name": "idle.blink", "durationMilliseconds": 340, "authoringFrameCount": 21 },
+    { "name": "idle.listen", "durationMilliseconds": 1000, "authoringFrameCount": 60 },
+    { "name": "idle.paperRustle", "durationMilliseconds": 900, "authoringFrameCount": 54 },
+    { "name": "idle.currentGlance", "durationMilliseconds": 820, "authoringFrameCount": 50 },
+    { "name": "react.touch", "durationMilliseconds": 200, "authoringFrameCount": 12 },
+    { "name": "react.notice.single", "durationMilliseconds": 460, "authoringFrameCount": 28 },
+    { "name": "react.notice.aggregate", "durationMilliseconds": 620, "authoringFrameCount": 38 },
+    { "name": "capture.receive", "durationMilliseconds": 300, "authoringFrameCount": 18 },
+    { "name": "capture.deposit", "durationMilliseconds": 560, "authoringFrameCount": 34 },
+    { "name": "draw.reveal", "durationMilliseconds": 750, "authoringFrameCount": 45 },
+    { "name": "current.attach", "durationMilliseconds": 420, "authoringFrameCount": 26 },
+    { "name": "paper.return", "durationMilliseconds": 500, "authoringFrameCount": 30 },
+    { "name": "memory.stamp", "durationMilliseconds": 650, "authoringFrameCount": 39 }
+  ],
+  "exportProfiles": {
+    "pipeline-spike-v1": {
+      "artifactKind": "proof",
+      "clipSelection": {
+        "mode": "named",
+        "names": ["idle.listen", "capture.deposit", "draw.reveal"]
+      },
+      "textureDimensions": {
+        "full": { "basecolor": 64, "normal": 64, "roughness": 64 },
+        "lite": { "basecolor": 64, "normal": 64, "roughness": 64 }
+      }
+    },
+    "production-v1": {
+      "artifactKind": "runtime",
+      "clipSelection": {
+        "mode": "allConfigured",
+        "names": []
+      },
+      "textureDimensions": {
+        "full": { "basecolor": 2048, "normal": 512, "roughness": 512 },
+        "lite": { "basecolor": 1024, "normal": 512, "roughness": 512 }
+      }
+    }
+  },
+  "parameterizedChannels": [
+    {
+      "name": "ribbon.pull",
+      "samples": [0.0, 0.72, 1.0],
+      "entities": [
+        "BoxRoot",
+        "RibbonRoot",
+        "RibbonJoint_01",
+        "RibbonJoint_02",
+        "RibbonJoint_03",
+        "RibbonJoint_04",
+        "RibbonJoint_05",
+        "RibbonTip"
+      ]
+    }
+  ],
+  "tiers": {
+    "full": {
+      "collection": "EXPORT_FULL",
+      "resourceName": "CoreBoxCharacterFull.usdz",
+      "paperRestCount": 24,
+      "triangleCeiling": 60000,
+      "renderableEntityCeiling": 80,
+      "materialSlotCeiling": 8,
+      "shadowCastingLightCeiling": 1,
+      "dynamicLightCeiling": 2,
+      "largestTextureDimensionCeiling": 2048,
+      "residentTextureByteCeiling": 33554432,
+      "packageByteCeiling": 16777216
+    },
+    "lite": {
+      "collection": "EXPORT_LITE",
+      "resourceName": "CoreBoxCharacterLite.usdz",
+      "paperRestCount": 10,
+      "triangleCeiling": 25000,
+      "renderableEntityCeiling": 36,
+      "materialSlotCeiling": 6,
+      "shadowCastingLightCeiling": 0,
+      "dynamicLightCeiling": 1,
+      "largestTextureDimensionCeiling": 2048,
+      "residentTextureByteCeiling": 16777216,
+      "packageByteCeiling": 8388608
+    }
+  },
+  "aggregatePackageByteCeiling": 20971520
+}
