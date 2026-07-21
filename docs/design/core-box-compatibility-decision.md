@@ -29,11 +29,11 @@ path, the three representative recipe terminals, ribbon samples at 0, 0.72,
 and 1, plus a forced structural rejection that keeps the seven 2D actions
 available.
 
-On 2026-07-20, `CoreBoxCompatibilityUITests` passed both cases on the
-iPhone 17 Pro Simulator using the `Task 5 Compatibility` Xcode test plan:
+On 2026-07-21, `make core-box-compatibility-test` passed both cases on the
+iPhone 17 Pro Simulator running iOS 26.5:
 
 - Simulator result tree (`xcresult-tree-sha256-v1`):
-  `ceafdde8ab8c37860e3f5d3bcb62002d11af0001f28edfd595d5522627a8bfd3`
+  `bde0a38a8fcf33b7ad170b40723478500734f18b00e0d21ec1d74430ca91344a`
 - Physical-device result tree (`xcresult-tree-sha256-v1`): pending final
   acceptance rerun.
 
