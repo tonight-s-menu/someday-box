@@ -58,7 +58,7 @@ Settings exposes bounded file export, validated full-replacement restore, journa
 
 | Command | Purpose |
 | --- | --- |
-| `make audit` | Scan production source and project configuration for prohibited local-only dependencies, APIs, and capabilities. |
+| `make audit` | Scan production source and project configuration for prohibited local-only dependencies, APIs, and capabilities, and check scene-layer placement. |
 | `make test` | Run deterministic domain-policy verification on the host toolchain. |
 | `make check` | Run the static audit and host verification, then iOS tests when full Xcode is selected. |
 | `make ci-check` | Require full Xcode after the host gates and run the shared scheme's simulator tests. |

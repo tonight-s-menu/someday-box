@@ -4,7 +4,7 @@
 
 | Field | Decision |
 | --- | --- |
-| Document status | Development contract for the second selected post-MVP expansion; **no implementation exists yet** |
+| Document status | Development contract for the second selected post-MVP expansion; implementation status lives only in the [readiness ledger](../release/lived-in-box-readiness.md) |
 | Feature name | `Lived-in Box` in English; `有空箱·盒子生活感` in Simplified Chinese |
 | Source concept | 「有空箱」核心盒子生活感设计说明, provided by the product owner on 2026-08-16; translated and bounded by this document |
 | Parent baseline | [Product requirements and technical foundation](../product-requirements-and-technical-foundation.md) — every MVP contract remains in force unless this document names an explicit, bounded exception |
@@ -299,7 +299,7 @@ Closing the lid returns the camera to the front idle state. Emotional peek and f
 
 ### 7.5 Result, lifecycle, and memories in the scene
 
-- The drawn paper unfolds facing the camera; title, note, duration, and the fit explanation render in a SwiftUI attachment card (Dynamic Type applies). Actions are the existing three: **就做这个 / Do this**, **换一张 / Draw another**, dismiss.
+- The drawn paper unfolds facing the camera; title, note, duration, and the fit explanation render in a SwiftUI result card above the scene (§15.3; Dynamic Type applies). Actions are the existing three: **就做这个 / Do this**, **换一张 / Draw another**, dismiss.
 - Accept clips the paper under the lid's inner edge — the visible home of the Current Pick. Home overlay keeps the existing **Done / Put back** actions.
 - Complete plays stamp-then-slide: a date stamp presses onto the paper, and it slides into the memory seam. The underlying transaction is the existing atomic completion (LIFE-04); the animation is presentation of a persisted result.
 - Put back drops the paper back into the stack (its seeded resting place).
@@ -487,7 +487,7 @@ Lived-in must never mean slower. Contracts:
 
 - The 3D scene is exposed to assistive technologies as one summary element — "盒子里有 12 张可抽的纸条…" including drawable count, Current Pick presence, and memory count — plus custom actions: 放进一张、抽一张、看看盒内、打开当前纸条.
 - Every 3D gesture has a visible control equivalent (§3.2); Voice Control names cover all of them.
-- Essential text is never rendered only as 3D content; titles, notes, chips, echoes, and errors live in SwiftUI overlays/attachments with full Dynamic Type up to accessibility sizes, with scrims guaranteeing contrast over the animated backdrop.
+- Essential text is never rendered only as 3D content; titles, notes, chips, echoes, and errors live in SwiftUI overlays above the scene (§15.3) with full Dynamic Type up to accessibility sizes, with scrims guaranteeing contrast over the animated backdrop.
 - VoiceOver announces a draw result only after content is stable (unchanged); peek announces the impression summary, never paper text.
 - Automated accessibility audits extend to the scene Home, peek, reveal, and the recovery surface.
 
@@ -523,7 +523,8 @@ BoxSceneRoot
 │                     MemorySeam, LetterSlot, BottomSeam)
 ├── PaperStack       (≤32 idle / ≤48 peek instanced paper entities,
 │                     seeded transforms per §6.3)
-├── FocusPaper       (reveal/unfold rig + SwiftUI attachment card)
+├── FocusPaper       (reveal/unfold rig; its result card is a SwiftUI
+│                     overlay above the scene, not an in-scene attachment)
 └── CameraRig        (FrontIdle | CaptureLid | Peek | RevealFocus | SlotFocus)
 ```
 
@@ -532,7 +533,7 @@ Data flow is one-directional: product snapshot → pure `BoxSceneStateReducer` (
 ### 15.3 Interaction plumbing
 
 - Strap, lid, dial, and peek gestures are SwiftUI/RealityKit gesture recognizers resolving to entity hits; thresholds and cancels per §7.2.
-- Text-bearing UI (capture sheet, result card, reason sheets) is SwiftUI — attachments anchored in the scene or conventional overlays — so localization, Dynamic Type, and accessibility behave exactly as today.
+- Text-bearing UI (capture sheet, result card, reason sheets) is SwiftUI composited **above** the `RealityView` in the same container, so localization, Dynamic Type, and accessibility behave exactly as today. **Platform constraint (WP-01 spike, 2026-08-16):** iOS has no `RealityView` attachment API — `attachments:` and `ViewAttachmentComponent` are visionOS-only in the iOS 26.5 SDK and absent at the iOS 18.0 floor — so scene-anchored text is not an option and every earlier reference to "attachments" in this document means an overlay. A card that must track a moving entity projects the entity's position into view space and positions the overlay itself.
 - All entity mutation happens on the main actor; the reducer's derivation pass is O(n) over the product snapshot with a measured budget (§15.5).
 
 ### 15.4 Assets
@@ -866,7 +867,7 @@ Recorded 2026-08-16; verify against current documentation before each phase begi
 
 - RealityView (RealityKit, SwiftUI hosting on iOS 18+): <https://developer.apple.com/documentation/realitykit/realityview>
 - RealityKit: <https://developer.apple.com/documentation/realitykit>
-- RealityView attachments: <https://developer.apple.com/documentation/realitykit/realityviewattachments>
+- RealityView attachments (**visionOS only** — unavailable on iOS, see §15.3): <https://developer.apple.com/documentation/realitykit/realityviewattachments>
 - Reality Composer Pro packages: <https://developer.apple.com/documentation/realitycomposerpro>
 - Core Haptics: <https://developer.apple.com/documentation/corehaptics>
 - AVFAudio session categories (ambient, mix with others): <https://developer.apple.com/documentation/avfaudio/avaudiosession>

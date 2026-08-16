@@ -42,6 +42,11 @@ report_matches \
     "${PRODUCTION_SOURCE_ROOTS[@]}"
 
 report_matches \
+    "production Swift opens no AR or camera-tracking session" \
+    '(^|[^[:alnum:]_])(ARSession|ARView|ARConfiguration|ARWorldTrackingConfiguration|SpatialTrackingSession|spatialTracking)([^[:alnum:]_]|$)|^[[:space:]]*import[[:space:]]+ARKit([[:space:]]|$)' \
+    "${PRODUCTION_SOURCE_ROOTS[@]}"
+
+report_matches \
     "production Swift contains no user-content logging surface" \
     '(^|[^[:alnum:]_])(print|debugPrint|dump|NSLog|os_log|Logger)[[:space:]]*\(' \
     "${PRODUCTION_SOURCE_ROOTS[@]}"

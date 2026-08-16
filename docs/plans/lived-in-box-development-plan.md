@@ -27,7 +27,7 @@ Read before any WP. These rules are binding for every session that implements th
 
 - **Docs-first:** if implementation reveals the spec is wrong or incomplete, stop, update the spec (and its decision ledger) in the same change, and say so. Never silently diverge.
 - **Persistence discipline:** the feature as specified needs no new persisted records; schema v2, backup v2, and `mvp-v1` stay unchanged by design, not prohibition. The project is pre-release, so if implementation genuinely needs a persisted change, stop, update the spec and version the identifier first (docs-first), then implement — never change persistence silently or ride it through an unrelated WP.
-- **Layering:** `Domain/` stays Foundation-only. Nothing in `Domain/` or `Application/` imports RealityKit, SwiftUI, AVFAudio, or CoreHaptics. Scene code lives in `Features/Home/Scene/`.
+- **Layering:** nothing in `Domain/` or `Application/` imports RealityKit, SwiftUI, AVFAudio, or CoreHaptics, and rendering/audio/haptics frameworks appear only inside `Features/Home/Scene/`. `scripts/audit-scene-layering.sh` (part of `make audit`) enforces this, and also fails when a scene source file is missing from the hand-maintained Xcode project.
 - **Truth before animation:** every mutation commits through existing use cases before its presentation plays. Never reorder.
 - **Accessible equivalence, one surface:** any flow you attach to a gesture must remain reachable through a visible, accessible control in the same WP. There is no 2D product mode and no mode switch (spec LB-D19) — never build one, even as scaffolding you intend to ship behind; degradation work targets the in-scene quality tiers only.
 - **No content in diagnostics:** no `print`/`Logger` additions that could carry titles, notes, URLs, or UUIDs; the audit greps for logging surfaces and must stay green.
@@ -128,7 +128,7 @@ Parallel lanes assume separate agents; coordinate through the readiness ledger t
 
 - **Goal:** the `draw-dial-v1` control surface: four detents + Custom + Not sure, prefill, snap statement.
 - **Spec contracts:** §7.3; acceptance DIAL-01…06; copy §17.
-- **Files:** `Features/Home/Scene/DialControl.swift` (SwiftUI overlay/attachment); integrate with the existing draw-context flow currently presented from `Features/Home/HomeView.swift` / `App/RootTabView.swift`; reuse WP-02 `DrawDialMapping`.
+- **Files:** `Features/Home/Scene/DialControl.swift` (SwiftUI overlay above the scene); integrate with the existing draw-context flow currently presented from `Features/Home/HomeView.swift` / `App/RootTabView.swift`; reuse WP-02 `DrawDialMapping`.
 - **Steps:** detent control with light haptic ticks; Custom minutes wheel (10–480, step 5) with the snap statement line; Not sure as the quiet adjacent option; persist last selection to presentation preferences; the dial overlay is the single context surface — the legacy draw-context sheet retires with the legacy Home in WP-14.
 - **Tests/evidence:** UI test that each detent/Custom path creates a session with the exact expected `availableTimeRaw`; accessibility adjustable-control pass; DIAL-04 test that prefill cannot auto-commit.
 - **Done when:** every context path produces exactly the expected persisted sessions.
@@ -147,7 +147,7 @@ Parallel lanes assume separate agents; coordinate through the readiness ledger t
 - **Goal:** the signature interaction: strap state machine → existing draw use cases → persisted-then-revealed paper with actions.
 - **Spec contracts:** §7.2, §7.5, §6.4 gates; acceptance PULL-01…07, SCN-07/08, MOT-02.
 - **Files:** `StrapInteraction.swift`, `RevealPresenter.swift` in the scene module; integration with `Application/DrawUseCases.swift` exactly as the current UI calls it (no use-case changes).
-- **Steps:** drag recognizer with slack/tension/threshold and cancel spring-back; threshold haptic; on commit, disable input, call the draw use case, and only on persisted success play slide-out and unfold with the SwiftUI attachment result card (title/note/duration/fit chips per DIAL-03); wire 就做这个 / 换一张 / dismiss to existing resolutions; empty-pool soft shake + existing reasons sheet; Current-Pick stowed strap; unresolved-attempt resumption presented in the scene before tabs.
+- **Steps:** drag recognizer with slack/tension/threshold and cancel spring-back; threshold haptic; on commit, disable input, call the draw use case, and only on persisted success play slide-out and unfold with the SwiftUI result-card overlay (title/note/duration/fit chips per DIAL-03; iOS has no in-scene attachments — spec §15.3); wire 就做这个 / 换一张 / dismiss to existing resolutions; empty-pool soft shake + existing reasons sheet; Current-Pick stowed strap; unresolved-attempt resumption presented in the scene before tabs.
 - **Tests/evidence:** extend the forced-termination persist-before-reveal test through this entry point; UI tests for cancel-below-threshold (no session created), single-candidate, exhausted-session, and empty-pool paths; VoiceOver announcement timing per AXS-04.
 - **Done when:** every DRW acceptance rule in the baseline passes through the strap flow, and the visible draw button drives the identical path.
 
@@ -306,4 +306,34 @@ Budgets: audio total ≤ 1.5 MB; B1 total new bundle weight ≤ 10 MB; authored 
 
 ### WP-01 findings log
 
-_Empty — populated by the first rendering spike._
+Recorded 2026-08-16 against Xcode 26.6 (iOS 26.5 SDK), deployment floor iOS 18.0. Availability was read from the SDK's `.swiftinterface` files, not from documentation.
+
+**Scaffolding as merged**
+
+- Scene module: `Features/Home/Scene/BoxSceneView.swift` (SwiftUI host, `#Preview` harness) and `BoxSceneRealityLayer.swift` (placeholder entity graph named per spec §15.2).
+- Both files are wrapped in `#if SOMEDAYBOX_SCENE_SPIKE`, defined only in the app target's **Debug** configuration (`SWIFT_ACTIVE_COMPILATION_CONDITIONS`). Release builds contain none of the spike, and no shipped view references it. **WP-03 removes the flag** when the scene becomes the Home surface; it must not accumulate more call sites in the meantime.
+- The Xcode project lists sources explicitly, so every new scene file needs a `PBXFileReference`, a `PBXBuildFile`, membership in the app target's Sources phase, and an entry in the `Scene` group. `scripts/audit-scene-layering.sh` fails the audit when that registration is missing.
+
+**API findings that change later work packages**
+
+1. **`RealityView` on iOS is the `RealityViewCameraContent` family.** The `RealityViewContent` initializers are visionOS-only. The iOS initializer is `init(make:update:placeholder:)`, where `make` is `async` and `@MainActor`. WP-03's "async scene construction with a calm placeholder" is therefore a first-class API, not a hand-rolled loading state.
+2. **iOS has no attachment API.** Neither `attachments:` nor `ViewAttachmentComponent` exists in the iOS SDK at any version. All text-bearing UI must be SwiftUI composited above the `RealityView`. Spec §7.5, §14.1, §15.2, §15.3, §23 and WP-05/WP-07 in this plan were corrected in the WP-01 change.
+3. **`RealityViewCameraContent.animate(body:completion:)` is iOS 26.0+** — unusable at the iOS 18.0 floor. Scene motion (WP-04, WP-06, WP-07, WP-16) must use `Entity.move(to:relativeTo:duration:timingFunction:)` and `AnimationResource`, which is also what LB-D15's determinism requires.
+4. **The camera must stay `.virtual`.** The spatial-tracking camera mode starts an AR session and would need a camera usage description the product does not have. `scripts/audit-local-only.sh` now fails on any AR/camera-tracking symbol in production Swift; the spike sets `content.camera = .virtual` explicitly rather than relying on the default.
+5. **Quality-tier knobs exist at iOS 18 on the content itself:** `content.renderingEffects` (`motionBlur`, `depthOfField`, `cameraGrain`, `antialiasing`, `dynamicRange`) and `content.environment` (`.default` / `.skybox`). WP-11 should reach for these before touching materials or instance caps, since they need no entity-graph diff.
+6. **Entity building blocks are all available at the floor:** `PerspectiveCamera`, `DirectionalLight`, `ModelEntity`, `MeshResource.generateBox(width:height:depth:cornerRadius:)`, `PhysicallyBasedMaterial` (iOS 13–15), and `ImageBasedLightComponent` (iOS 18.0 exactly — the spec §15.2 image-based light sits on the floor with no margin).
+
+**Answered by running the spike (iPhone 17 Pro simulator, iOS 26.5)**
+
+7. **The scene's own `PerspectiveCamera` wins.** With `content.camera = .virtual`, a `PerspectiveCamera` entity anywhere in the added graph drives the view — moving it visibly re-framed the render. WP-03 can therefore build the camera-state machine (`FrontIdle | CaptureLid | Peek | RevealFocus | SlotFocus`) by animating one camera entity, without `cameraTarget` tricks. Reference framing that fills the frame sensibly for a 0.26 × 0.13 × 0.19 m box: 42° FOV, eye at `[0, 0.34, 0.98]`, looking at the origin.
+8. **`RealityView` has no background of its own on iOS.** `content.environment = .default` lights the scene but paints nothing; everything the box does not cover is the SwiftUI view behind it. The spec's abstract backdrop and the §9.1 time-of-day sky are therefore WP-03's explicit work — a SwiftUI layer beneath the `RealityView`, scene geometry, or `.skybox`, decided there. Nothing about it is free.
+9. **`DirectionalLight` casts no shadow by default.** The spike's box meets its ground plane with no contact shadow, which reads as floating. WP-04 must set `DirectionalLightComponent.Shadow` (and budget it — shadow maps are the first thing WP-11's Q1 tier should drop).
+
+**Still open for WP-03/WP-13**
+
+- On the very first launch after install the screen showed no scene content, while later launches rendered immediately. Whether that was the placeholder or a cold-start first-frame delay is unmeasured — it is exactly what WP-13's first-frame signposts and the §15.5 budgets (≤ 400 ms interactive / ≤ 1.5 s first frame) exist to settle. Do not assume it is benign.
+- Light intensity, material values, and box proportions in the spike are unreviewed placeholders. They belong to WP-04's art-direction gate, not to any decision made here.
+
+**Environment notes**
+
+Verification needs the iOS platform component (`xcodebuild -downloadPlatform iOS`) **and** at least one simulator device, which the runtime install does not create: `xcrun simctl create "iPhone 17 Pro" com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro com.apple.CoreSimulator.SimRuntime.iOS-26-5` matches the Makefile's default `SIMULATOR_DESTINATION`. The spike's own rendering was confirmed by temporarily pointing the app entry point at `BoxSceneView`, screenshotting, and reverting — the harness is deliberately not committed, because WP-01 ships zero reachable surface.

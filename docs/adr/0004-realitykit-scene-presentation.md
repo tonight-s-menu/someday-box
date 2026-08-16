@@ -1,7 +1,7 @@
 # ADR 0004: RealityKit `RealityView` renders a presentation-only box scene
 
 - Status: Accepted for Lived-in Box implementation
-- Implementation status: Not started — B0 contract freeze only
+- Implementation status: tracked in the [Lived-in Box readiness ledger](../release/lived-in-box-readiness.md), never here
 - Date: 2026-08-16
 - Feature contract: [Lived-in Box](../features/lived-in-box.md)
 
