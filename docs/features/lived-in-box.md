@@ -203,9 +203,13 @@ The visible paper stack derives from the persisted drawable count (BOX-01 defini
 
 The numeric drawable count remains displayed in the Home overlay and the accessibility summary; the stack is an honest impression, never the authority.
 
+When the drawable count exceeds the band's instance count, the visible set is an even stride across the ordered stack (§6.3) with both ends included — never its top slice. A box that is mostly long-kept therefore looks mostly sunk, and the newest paper still has a place.
+
 ### 6.3 Stable seeded layout
 
-Each visible paper's resting transform (position jitter, rotation, slight bend) derives from a deterministic 64-bit hash of its item UUID. The same record set therefore produces the same arrangement across relaunches; membership changes move only entering/leaving papers. No unseeded randomness appears in layout, so scene derivation is unit-testable.
+Each visible paper's resting transform (position jitter, rotation, slight bend) derives from a deterministic 64-bit hash of its item UUID. The same record set therefore produces the same arrangement across relaunches; membership changes move only entering/leaving papers. No unseeded randomness appears in layout, so scene derivation is unit-testable. The hash is a fixed function written for this purpose — never the standard library's per-process hasher, which would rearrange the box on every launch.
+
+Stack order is derived too, never stored. From the bottom up: age tier first (long-kept deepest, then aged, settled, fresh on top, per §8), then `createdAt` ascending so the older paper lies deeper, with UUID byte order breaking exact ties. The order is total, and independent of the order records happen to arrive in.
 
 ### 6.4 Locked and gated states
 
@@ -345,6 +349,8 @@ The backdrop is deliberately abstract: a soft ground plane, a gently graded spac
 ### 9.1 Time of day
 
 A deterministic function of the device clock drives the light rig: four anchor bands — dawn 05:00–08:00, day 08:00–17:00, dusk 17:00–20:00, night 20:00–05:00 — with smooth interpolation of direction, color temperature (≈ 2700 K–6500 K), intensity, and shadow softness. The same wall-clock time always produces the same rig (unit-testable).
+
+Each band's anchor sits at its centre — 00:30, 06:30, 12:30, 18:30 — and the rig interpolates linearly between the two anchors surrounding the current minute, wrapping across midnight so no seam appears at any hour. The anchor values themselves are presentation tuning and sit outside `box-scene-v1`, which versions the derivation rules in §6.2–§6.4, §8, and §10; retuning the light needs no version bump, changing a band boundary does.
 
 ### 9.2 Season accents
 
