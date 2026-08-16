@@ -13,6 +13,26 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Memories"].exists)
     }
 
+    /// FST-01: the scene builds asynchronously, so the controls layered over it must be
+    /// usable immediately — not after the stage is ready. The elapsed ceiling here is loose
+    /// because simulator timing is indicative; the 400 ms budget is a device gate (WP-13).
+    @MainActor
+    func testOverlayControlsRespondWhileTheSceneIsStillBuilding() {
+        let app = XCUIApplication()
+        app.launch()
+        openBoxIfNeeded(app)
+
+        let started = Date()
+        let capture = app.buttons["Put in an idea"]
+        XCTAssertTrue(capture.waitForExistence(timeout: 5))
+        XCTAssertTrue(capture.isHittable)
+        capture.tap()
+
+        let title = app.textFields["Paper title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        XCTAssertLessThan(Date().timeIntervalSince(started), 4)
+    }
+
     @MainActor
     func testCaptureCannotSaveWithoutDuration() {
         let app = XCUIApplication()

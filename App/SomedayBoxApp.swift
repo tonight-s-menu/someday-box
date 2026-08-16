@@ -129,6 +129,14 @@ final class AppModel {
     var hasSeenIntroduction: Bool {
         didSet { UserDefaults.standard.set(hasSeenIntroduction, forKey: "hasSeenIntroduction") }
     }
+    /// Lived-in Box §16.2. The Settings row that lets the user turn this off arrives with
+    /// WP-10; the scene already honours the value.
+    var ambientChangesEnabled: Bool {
+        didSet { UserDefaults.standard.set(ambientChangesEnabled, forKey: "presentation.ambientChangesEnabled") }
+    }
+    /// True only while a restore or erase replaces every authority at once. The scene shows
+    /// its locked state from this; it changes no gating logic of its own (§6.4, SCN-07).
+    private(set) var isReplacingProductData = false
 
     init(
         repository: GenerationProductRepository,
@@ -143,6 +151,8 @@ final class AppModel {
         )
         hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
+        ambientChangesEnabled =
+            UserDefaults.standard.object(forKey: "presentation.ambientChangesEnabled") as? Bool ?? true
         let arbiter = MutationArbiter(repository: repository)
         captureUseCase = CapturePaperUseCase(arbiter: arbiter)
         editUseCase = EditPaperUseCase(arbiter: arbiter)
@@ -452,7 +462,11 @@ final class AppModel {
     ) async -> Bool {
         guard !isMutating else { return false }
         isMutating = true
-        defer { isMutating = false }
+        isReplacingProductData = true
+        defer {
+            isMutating = false
+            isReplacingProductData = false
+        }
         do {
             state = try await operation()
             errorMessage = nil

@@ -3,77 +3,34 @@ import UniformTypeIdentifiers
 
 struct HomeView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var presentsCapture: Bool
     @Binding var presentsDrawContext: Bool
     @State private var presentsSettings = false
+    @State private var snapshot = BoxSceneStateReducer.reduce(
+        BoxSceneInput(state: PersistedProductState(items: []), now: .now)
+    )
+    @State private var interactionTick = 0
+    @State private var isAmbientPaused = false
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 28) {
-                    boxIllustration
-
-                    VStack(spacing: 8) {
-                        Text("Put it in. Draw it out.")
-                            .font(.largeTitle.bold())
-                            .multilineTextAlignment(.center)
-                        Text(drawableSummary)
-                            .foregroundStyle(.primary)
-                    }
-
-                    if let current = appModel.currentItem {
-                        currentPaper(current)
-                    }
-
-                    VStack(spacing: 12) {
-                        Button {
-                            presentsDrawContext = true
-                        } label: {
-                            Label("Draw a paper", systemImage: "sparkles")
-                                .frame(maxWidth: .infinity, minHeight: 54)
-                        }
-                        .buttonStyle(SomedayPrimaryActionButtonStyle())
-                        .disabled(appModel.drawableCount == 0 || appModel.currentItem != nil)
-
-                        Button {
-                            presentsCapture = true
-                        } label: {
-                            Label("Put in an idea", systemImage: "plus")
-                                .frame(maxWidth: .infinity, minHeight: 50)
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    .frame(maxWidth: 440)
-
-                    if !recentMemories.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent memories")
-                                .font(.headline)
-                            ForEach(recentMemories) { memory in
-                                HStack(spacing: 12) {
-                                    Image(systemName: "heart.fill")
-                                        .foregroundStyle(SomedayBoxBrand.tint)
-                                        .accessibilityHidden(true)
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(memory.titleSnapshot)
-                                        Text(memory.completedAt, format: .dateTime.month().day())
-                                            .font(.caption)
-                                            .foregroundStyle(.primary)
-                                    }
-                                    Spacer()
-                                }
-                            }
-                        }
-                        .frame(maxWidth: 520, alignment: .leading)
-                    }
-                }
-                .padding(24)
+            ZStack {
+                EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
+                    .ignoresSafeArea()
+                BoxSceneView(snapshot: snapshot)
+                    .ignoresSafeArea()
+                sceneControls
             }
-            .background(SomedayBoxBrand.canvas)
             .navigationTitle("Someday Box")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Settings", systemImage: "gearshape") { presentsSettings = true }
+                    Button("Settings", systemImage: "gearshape") {
+                        noteInteraction()
+                        presentsSettings = true
+                    }
                 }
             }
             .sheet(isPresented: $presentsSettings) { SettingsView() }
@@ -81,6 +38,112 @@ struct HomeView: View {
                 appModel.hapticsEnabled && newValue > oldValue
             }
         }
+        .task { refreshSnapshot() }
+        .onChange(of: appModel.state) { _, _ in refreshSnapshot() }
+        .onChange(of: appModel.isReplacingProductData) { _, _ in refreshSnapshot() }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                noteInteraction()
+                refreshSnapshot()
+            } else {
+                isAmbientPaused = true
+            }
+        }
+        // Ambient quiet: 10 s without interaction pauses the environment, and leaving the
+        // foreground pauses it outright (§15.5, PRF-03).
+        .task(id: interactionTick) {
+            isAmbientPaused = false
+            try? await Task.sleep(for: .seconds(10))
+            guard !Task.isCancelled else { return }
+            isAmbientPaused = true
+        }
+        // The clock rig is the only thing that moves in the B1 stage, so pausing ambience
+        // cancels this loop outright rather than letting a timer keep waking the app.
+        .task(id: isAmbienceRunning) {
+            guard isAmbienceRunning else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                guard !Task.isCancelled else { return }
+                refreshSnapshot()
+            }
+        }
+    }
+
+    private var isAmbienceRunning: Bool {
+        !isAmbientPaused && scenePhase == .active
+    }
+
+    /// The visible, accessible equivalents that share the scene surface (§3.2). Every
+    /// product action reachable through a future 3D gesture is reachable here first.
+    private var sceneControls: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            if let current = appModel.currentItem {
+                currentPaper(current)
+            }
+
+            VStack(spacing: 10) {
+                Text(drawableSummary)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+
+                Button {
+                    noteInteraction()
+                    presentsDrawContext = true
+                } label: {
+                    Label("Draw a paper", systemImage: "sparkles")
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                }
+                .buttonStyle(SomedayPrimaryActionButtonStyle())
+                .disabled(isLocked || appModel.drawableCount == 0 || appModel.currentItem != nil)
+
+                Button {
+                    noteInteraction()
+                    presentsCapture = true
+                } label: {
+                    Label("Put in an idea", systemImage: "plus")
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isLocked)
+            }
+            .padding(18)
+            // An opaque scrim, not a material: contrast over an animated backdrop has to be
+            // guaranteed rather than dependent on what the scene happens to render behind
+            // it (AXS-03). The controls keep the exact substrate they are audited on.
+            .background {
+                // The shadow belongs to the scrim shape alone. Applying it to the panel
+                // would also shadow the controls' own text and fills.
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(SomedayBoxBrand.canvas)
+                    .shadow(color: .black.opacity(0.12), radius: 18, y: 6)
+            }
+            .frame(maxWidth: 440)
+        }
+        .padding(20)
+    }
+
+    /// During an exclusive data operation every scene-initiated mutation affordance is
+    /// disabled; this visualises the existing arbiter gate and adds no gating logic (SCN-07).
+    private var isLocked: Bool {
+        snapshot.gate == .exclusiveDataOperation
+    }
+
+    private func noteInteraction() {
+        interactionTick &+= 1
+    }
+
+    private func refreshSnapshot() {
+        snapshot = BoxSceneStateReducer.reduce(
+            BoxSceneInput(
+                state: appModel.state,
+                now: .now,
+                timeZone: .current,
+                isExclusiveDataOperationInProgress: appModel.isReplacingProductData,
+                ambienceFollowsClock: appModel.ambientChangesEnabled
+            )
+        )
     }
 
     private var drawableSummary: String {
@@ -89,33 +152,6 @@ struct HomeView: View {
         } else {
             String(localized: "\(appModel.drawableCount) papers are ready for a surprise.")
         }
-    }
-
-    private var recentMemories: [CompletionMemory] {
-        Array(appModel.state.memories.sorted { $0.completedAt > $1.completedAt }.prefix(2))
-    }
-
-    private var boxIllustration: some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 28)
-                .fill(SomedayBoxBrand.box)
-                .frame(width: 210, height: 145)
-                .overlay(alignment: .top) {
-                    Capsule()
-                        .fill(.black.opacity(0.14))
-                        .frame(width: 106, height: 12)
-                        .padding(.top, 24)
-                }
-            ForEach(0..<min(appModel.drawableCount, 5), id: \.self) { index in
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(SomedayBoxBrand.paper)
-                    .frame(width: 52, height: 34)
-                    .rotationEffect(.degrees(Double(index - 2) * 7))
-                    .offset(x: CGFloat(index - 2) * 17, y: -CGFloat(index % 2) * 5)
-            }
-        }
-        .padding(.top, 18)
-        .accessibilityHidden(true)
     }
 
     private func currentPaper(_ item: BoxItem) -> some View {

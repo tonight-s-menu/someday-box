@@ -100,7 +100,7 @@ Every guardrail in baseline sections 3, 5, 9, 10, and 12 continues to apply verb
 | --- | --- | --- |
 | **B1 — Tangible core** | RealityKit Home scene (box, lid, strap, paper stack, abstract backdrop); capture through the lid; draw through the strap; time dial (`draw-dial-v1`, four detents + Custom + Not sure); peek-inside camera; result presentation on the drawn paper; in-scene quality-tier ladder and data-safety recovery surface; sound/haptic core; animation tiers and fast paths; accessibility closure; performance gates | Full MVP + Share ingestion regression evidence |
 | **B2 — States and traces** | Paper forms and age tiers; Current Pick clipped at the lid; completion stamp-and-slide into the memory seam; first-completion seam discovery; letter-slot visuals for share ingestion with burst coalescing; wear/stamp traces (`traces-v1`); waited-days line on reveal | B1 accepted |
-| **B3 — Growth and echoes** | Bottom long-kept compartment and "Long kept" Box filter; night quietness; anniversary echo; hidden quick gestures with one-time discovery hints; micro-mementos; season accents | B2 accepted |
+| **B3 — Growth and echoes** | Bottom long-kept compartment and "Long kept" Box filter; night quietness; anniversary echo; hidden quick gestures with one-time discovery hints; micro-mementos | B2 accepted |
 
 The core hypothesis can be evaluated internally after B1. B2 and B3 are only worth building if B1 evidence shows the box is treated as the primary interaction surface rather than bypassed through buttons.
 
@@ -172,6 +172,7 @@ Every material idea in the source concept brief, with its binding resolution. Im
 | LB-D18 | Root navigation | **Three root tabs remain.** The scene replaces Home's content only; Box and Memories stay reachable as today | IA stability; peek and seams link into the existing tabs |
 | LB-D19 | Concept §18 proposed a 2D simplified/low-performance mode | **Rejected by owner decision (2026-08-16): the 3D box is the sole development target and the sole Home surface.** Degradation is an in-scene quality-tier ladder (§14.2); catastrophic scene failure exposes only a minimal data-safety recovery surface (§15.6). Accessibility — Reduce Motion, VoiceOver, Voice Control, Dynamic Type — is served inside the 3D-hosted experience | A maintained parallel mode would split the experience, double every acceptance surface, and invite regression to the administrative look this release replaces. Accepted consequences: the oldest supported device must hold the frame floor at the lowest tier (hard B1 gate), and a scene-layer failure leaves data safety but no product surface |
 | LB-D20 | Asset sourcing unstated | **Procedural-first, self-authored only.** No third-party 3D/audio assets without an explicit license review recorded in the release manifest | Extends the zero-third-party-dependency ethos to content |
+| LB-D21 | Season accents (spring sprout, summer light, autumn slip, winter pool) | **Removed from this generation by owner decision (2026-08-16).** A season derived from the calendar month asserts a hemisphere, which is a location fact the device does not hold; §9.4 forbids the environment claiming such facts. Ambience in B1–B3 therefore derives from the clock alone (§9.1). A season or hemisphere accent may return only through the future-roadmap contract that also governs weather (LB-D05, §4.4) | Discovered while implementing WP-02: for a southern-hemisphere user, month-derived seasons are simply inverted, and guessing the hemisphere from a time zone is an inference this release does not make. Dropping the accent costs one background flourish and removes an untruth |
 
 ---
 
@@ -344,7 +345,7 @@ Lifecycle expression: Active papers live in the stack; the Current Pick is clipp
 
 ## 9. Ambient environment
 
-The backdrop is deliberately abstract: a soft ground plane, a gently graded space boundary, one light rig, at most one restrained particle accent. It never becomes a room, desk, or scene to decorate.
+The backdrop is deliberately abstract: a soft ground plane, a gently graded space boundary, and one light rig. It never becomes a room, desk, or scene to decorate.
 
 ### 9.1 Time of day
 
@@ -352,9 +353,9 @@ A deterministic function of the device clock drives the light rig: four anchor b
 
 Each band's anchor sits at its centre — 00:30, 06:30, 12:30, 18:30 — and the rig interpolates linearly between the two anchors surrounding the current minute, wrapping across midnight so no seam appears at any hour. The anchor values themselves are presentation tuning and sit outside `box-scene-v1`, which versions the derivation rules in §6.2–§6.4, §8, and §10; retuning the light needs no version bump, changing a band boundary does.
 
-### 9.2 Season accents
+### 9.2 Season accents — removed from this generation
 
-Derived from the device calendar date, expressed as at most one abstract accent at a time: a small paper sprout (spring), brighter ambient light (summer), an occasional drifting paper-leaf slip (autumn), a warmer and more focused pool of light (winter). Accents are background only; they never gain UI, copy, or function.
+Season accents are **not part of B1–B3** (LB-D21, owner decision 2026-08-16). Deriving a season from the calendar month asserts which hemisphere the user is in, and the device holds no such fact; presenting an inverted season to a southern-hemisphere user is exactly the kind of untruth §9.4 exists to prevent. Ambience in this generation derives from the clock alone (§9.1). Nothing in the scene, the preferences, or the quality tiers refers to a season.
 
 ### 9.3 Night quietness (B3)
 
@@ -503,8 +504,8 @@ No 2D product mode exists (LB-D19). The scene degrades within itself along a fix
 
 | Tier | Presentation | Entered when |
 | --- | --- | --- |
-| Q0 — Full | All effects: soft shadows, particle accent, season accents, full instance caps | Default on capable devices |
-| Q1 — Reduced | Particles and soft shadows off; simplified materials; instance caps halved | One frame-floor breach; thermal `.serious`; Low Power Mode |
+| Q0 — Full | All effects: soft shadows, full instance caps | Default on capable devices |
+| Q1 — Reduced | Soft shadows off; simplified materials; instance caps halved | One frame-floor breach; thermal `.serious`; Low Power Mode |
 | Q2 — Minimal | Flat lighting, static camera between states, instance cap 12, motion reduced to functional transitions | A further breach while at Q1; thermal `.critical`; the oldest-device default when B1 evidence requires it |
 
 Tier changes are automatic, lossless, reversible, and unannounced; no user-facing mode switch exists. Reduce Motion applies orthogonally at every tier (§11.3).
@@ -524,7 +525,7 @@ RealityKit `RealityView` hosted in SwiftUI (iOS 18 API surface), per [ADR 0004](
 ```text
 BoxSceneRoot
 ├── Environment      (light rig: one directional + image-based light,
-│                     ground plane, ≤1 season accent, ≤1 particle emitter)
+│                     ground plane, graded backdrop)
 ├── Box              (Body, LidPivot → Lid, StrapAnchor → Strap,
 │                     MemorySeam, LetterSlot, BottomSeam)
 ├── PaperStack       (≤32 idle / ≤48 peek instanced paper entities,
@@ -594,7 +595,7 @@ The feature, as specified, needs none of the following to change. Pre-release, t
 | Key | Type / default | Meaning |
 | --- | --- | --- |
 | `presentation.soundEffectsEnabled` | Bool, `true` | §12.1 |
-| `presentation.ambientChangesEnabled` | Bool, `true` | §9 clock/season variation |
+| `presentation.ambientChangesEnabled` | Bool, `true` | §9.1 clock variation |
 | `presentation.fastAnimations` | Bool, `false` | §11.2 minimal tiers |
 | `draw.lastDialDetent` / `draw.lastCustomMinutes` | raw string / Int? | Prefill and the labeled repeat control (§13) |
 | `discovery.<trace-id>` | Bool flags | One-time hint bookkeeping (§10) |

@@ -1,39 +1,128 @@
-#if SOMEDAYBOX_SCENE_SPIKE
 import RealityKit
 import SwiftUI
 
-/// WP-01 rendering spike: hosts a `RealityView` inside the app's own SwiftUI shell so the
-/// ADR 0004 presentation seam is proven before WP-03 makes the scene the Home surface.
+/// The entity graph the RealityKit layer owns. It is built once and then diff-applied from
+/// `BoxSceneSnapshot`; it holds no product truth and opens no ModelContext (ADR 0004).
 ///
-/// This file compiles only when `SOMEDAYBOX_SCENE_SPIKE` is defined — the app target's
-/// Debug configuration. No shipped surface references it and a Release build contains
-/// none of it, so the spike cannot change user-visible behaviour.
+/// WP-04 attaches the box, paper stack, and focus rigs to the same root.
+@MainActor
+final class BoxSceneStage {
+    enum NodeName {
+        static let root = "BoxSceneRoot"
+    }
+
+    private var environment: EnvironmentRig?
+    private var camera: CameraRig?
+    private var appliedLight: LightRig?
+    private var appliedCameraState: BoxSceneCameraState?
+
+    func build() throws -> Entity {
+        let root = Entity()
+        root.name = NodeName.root
+
+        let environment = try EnvironmentRig()
+        let camera = CameraRig()
+        root.addChild(environment.root)
+        root.addChild(camera.root)
+
+        self.environment = environment
+        self.camera = camera
+        appliedLight = nil
+        appliedCameraState = .frontIdle
+        return root
+    }
+
+    /// Applies only what changed.
+    func apply(snapshot: BoxSceneSnapshot, cameraState: BoxSceneCameraState, reduceMotion: Bool) {
+        if appliedLight != snapshot.light {
+            environment?.apply(snapshot.light)
+            appliedLight = snapshot.light
+        }
+        if appliedCameraState != cameraState {
+            camera?.apply(cameraState, animated: !reduceMotion)
+            appliedCameraState = cameraState
+        }
+    }
+}
+
+/// Hosts the box scene inside the app's SwiftUI shell.
+///
+/// The scene builds asynchronously behind a calm placeholder so the overlay controls above
+/// it stay interactive from the first frame (§15.5, FST-01), and a construction failure is
+/// contained here rather than reaching any product data path (§15.6, DGR-04).
 struct BoxSceneView: View {
+    let snapshot: BoxSceneSnapshot
+    var cameraState: BoxSceneCameraState = .frontIdle
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var stage = BoxSceneStage()
+    @State private var buildAttempt = 0
+    @State private var constructionFailed = false
+    @State private var transitionVeil = 0.0
+
     var body: some View {
+        if constructionFailed {
+            BoxSceneRecoveryPlaceholder(retry: retry)
+        } else {
+            scene
+        }
+    }
+
+    private var scene: some View {
         RealityView { content in
-            // The camera stays virtual. The spatial-tracking camera mode opens an AR
-            // session and would require a camera capability this product does not have
-            // (specification §3.1); the local-only audit fails if it ever appears here.
+            // The camera stays virtual. The spatial-tracking mode opens an AR session and
+            // would need a camera capability this product does not have (§3.1).
             content.camera = .virtual
             content.environment = .default
-            content.add(BoxSceneRealityLayer.makePlaceholderScene())
+            do {
+                content.add(try stage.build())
+                stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion)
+            } catch {
+                constructionFailed = true
+            }
+        } update: { _ in
+            stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion)
         } placeholder: {
-            BoxScenePlaceholder()
+            EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
         }
-        .ignoresSafeArea()
+        .id(buildAttempt)
+        .overlay {
+            // Reduce Motion cuts the camera instead of travelling; the veil carries the cut
+            // as a cross-fade so the change still reads as one continuous surface (§11.3).
+            EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
+                .opacity(transitionVeil)
+                .allowsHitTesting(false)
+        }
+        .onChange(of: cameraState) { _, _ in
+            guard reduceMotion else { return }
+            withAnimation(.easeOut(duration: 0.12)) { transitionVeil = 1 }
+            withAnimation(.easeIn(duration: 0.18).delay(0.12)) { transitionVeil = 0 }
+        }
+        // WP-12 replaces this with the §14.1 scene summary element and its custom actions.
+        // Until then every product action lives in the visible overlay controls.
+        .accessibilityHidden(true)
+    }
+
+    private func retry() {
+        stage = BoxSceneStage()
+        constructionFailed = false
+        buildAttempt += 1
     }
 }
 
-/// The calm stand-in `RealityView` shows while its asynchronous `make` closure builds the
-/// scene. WP-03 keeps this seam: overlay controls must stay interactive within 400 ms of
-/// cold launch while the scene is still loading (specification §15.5).
-private struct BoxScenePlaceholder: View {
+/// The containment skeleton for §15.6. WP-11 replaces it with the full data-safety recovery
+/// surface — retry plus the complete Settings data controls — and its §17 copy. The strings
+/// used here are existing, already-translated product copy.
+private struct BoxSceneRecoveryPlaceholder: View {
+    let retry: () -> Void
+
     var body: some View {
-        SomedayBoxBrand.canvas
+        ContentUnavailableView {
+            Label("Your Box needs attention", systemImage: "shippingbox.and.arrow.backward")
+        } actions: {
+            Button("Try again", action: retry)
+                .buttonStyle(.borderedProminent)
+        }
     }
 }
-
-#Preview {
-    BoxSceneView()
-}
-#endif

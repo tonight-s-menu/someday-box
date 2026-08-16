@@ -110,9 +110,9 @@ Parallel lanes assume separate agents; coordinate through the readiness ledger t
 
 - **Goal:** the living stage: hosting view, camera states, light rig driven by WP-02, abstract backdrop, async load with placeholder, pause rules.
 - **Spec contracts:** §9.1–§9.4 ambience, §15.2–§15.3, §15.5 idle/background pause; acceptance FST-01, PRF-03, DGR-04 (containment skeleton).
-- **Files:** extend `Features/Home/Scene/`; add `CameraRig.swift`, `EnvironmentRig.swift`; wire `BoxSceneView` in as the Home content of `Features/Home/HomeView.swift` (the legacy Home layout remains only as unshipped scaffolding until WP-14 removes it; it is not a product mode).
+- **Files:** extend `Features/Home/Scene/`; add `CameraRig.swift`, `EnvironmentRig.swift`; wire `BoxSceneView` in as the Home content of `Features/Home/HomeView.swift`. **Correction (WP-03, 2026-08-16):** the legacy 2D Home layout was removed here rather than held as scaffolding until WP-14. Plan §0.2 and spec LB-D19 forbid keeping a parallel Home even as unshipped scaffolding, and the alternative was dead view code with no reader. The visible controls the contract requires — draw, capture, Current Pick, Settings — moved onto the scene surface intact. WP-14 therefore has no scaffolding left to delete; its regression and evidence duties are unchanged.
 - **Steps:** async scene construction with a calm placeholder so overlay controls stay interactive ≤ 400 ms; camera state enum with transition durations and Reduce Motion cross-fades; ambient pause after 10 s idle and full pause on background; catch scene-construction failure and route to the recovery-surface placeholder (completed in WP-11).
-- **Open decision this WP must raise, not settle:** spec §9.2 names seasons (spring sprout, summer light, autumn slip, winter pool), but a season derived from the month asserts a hemisphere — a location fact the device does not hold, which §9.4 forbids claiming. Options are to drop season accents from this generation, derive the hemisphere from the device time-zone region as a locally-held approximation, or make the accent season-neutral. Put it to the owner before implementing §9.2; §9.1 time-of-day light is unaffected and lands from WP-02 as specified.
+- **Settled before this WP began:** season accents are out of this generation (LB-D21, owner decision 2026-08-16) because a month-derived season asserts a hemisphere the device does not hold. Ambience is the §9.1 clock rig alone; build no season code, preference, or tier entry.
 - **Tests/evidence:** UI test asserting overlay controls respond before scene readiness; light-driver rig values already unit-tested in WP-02; manual simulator recording attached.
 - **Done when:** Home shows the (still boxless) stage with overlay controls fully functional and zero data-path regression.
 
@@ -209,7 +209,7 @@ Parallel lanes assume separate agents; coordinate through the readiness ledger t
 ### WP-14 — B1 regression and evidence closure
 
 - **Goal:** close phase B1 per spec §20.
-- **Steps:** remove the legacy Home scaffolding so the scene is the only Home surface in the shipped target; run the full existing MVP + Share ingestion regression suites at Q0 and forced Q2; assemble the evidence bundle (test results, recordings, Instruments traces including the oldest-device tier gate, tier matrix + equivalence audits); update every B1 ledger row with links; request the owner's §1.1 experience sign-off.
+- **Steps:** confirm the scene is the only Home surface in the shipped target (the legacy layout was already removed in WP-03); run the full existing MVP + Share ingestion regression suites at Q0 and forced Q2; assemble the evidence bundle (test results, recordings, Instruments traces including the oldest-device tier gate, tier matrix + equivalence audits); update every B1 ledger row with links; request the owner's §1.1 experience sign-off.
 - **Done when:** the ledger's B1 rows are green with immutable evidence and the owner has signed the phase exit. No B2 WP starts before this.
 
 ---
