@@ -1,15 +1,20 @@
-# someday-box / 改天盲盒
+# someday-box / 有空箱
 
-Native, local-only iPhone app for capturing an idea now and drawing a suitable one later. The product contract is in [docs/product-requirements-and-technical-foundation.md](docs/product-requirements-and-technical-foundation.md).
+Native, local-only iPhone app for capturing an idea now and drawing a suitable one later. The Simplified Chinese product name 有空箱 was adopted with the Lived-in Box generation (decision LB-D01; formerly 改天盲盒). The product contract is in [docs/product-requirements-and-technical-foundation.md](docs/product-requirements-and-technical-foundation.md).
 
 ## Product documents
 
+Start at the [documentation guide](docs/README.md) for structure, conventions, and long-term maintenance rules.
+
 - [MVP product and technical baseline](docs/product-requirements-and-technical-foundation.md)
-- [Share to Box feature specification](docs/features/share-to-box.md) — selected post-MVP feature; S1–S5 implemented with release evidence still open, S6 blocked on a signed physical-device candidate
+- [Share to Box feature specification](docs/features/share-to-box.md) — selected post-MVP feature 1; S1–S5 implemented with release evidence still open, S6 blocked on a signed physical-device candidate
 - [Share to Box readiness ledger](docs/release/share-to-box-readiness.md) — separates local source/test proof from the remaining packaged acceptance gates
 - [Share Extension local-mailbox authority decision](docs/adr/0003-share-extension-local-import-mailbox.md) — accepted implementation boundary
+- [Lived-in Box feature specification](docs/features/lived-in-box.md) — selected post-MVP feature 2: the tangible RealityKit box experience; B0 contract accepted with the full decision ledger owner-approved, no implementation yet
+- [Lived-in Box development plan](docs/plans/lived-in-box-development-plan.md) and [readiness ledger](docs/release/lived-in-box-readiness.md) — code-agent execution guide and evidence tracking
+- [RealityKit scene presentation decision](docs/adr/0004-realitykit-scene-presentation.md) — accepted rendering-layer boundary
 
-The feature specification is a development contract, not current-runtime evidence. The implementation and verification boundaries below describe the repository as it exists today.
+Feature specifications are development contracts, not current-runtime evidence. The implementation and verification boundaries below describe the repository as it exists today.
 
 ## Development setup
 
@@ -45,6 +50,7 @@ The repository currently contains:
 - A connected persisted core workflow for capture, relaunch/refetch, draw/reveal, redraw, accept/dismiss, complete, put back, edit, archive/restore, permanent-delete closure, Box browsing, and Memories.
 - The Share to Box URL/text extension now publishes atomic local envelopes, the main app ingests them through the product mutation gate, Source References persist in schema v2, and backup v2, coordinated restore/erase, and Shared Capture Recovery are implemented. Signed real-host and physical-device acceptance remain open and are not represented by simulator or unsigned-archive evidence.
 - Unit, application, persistence, backup, and launch-test sources in the shared Xcode scheme.
+- Lived-in Box (the RealityKit scene experience) exists only as a frozen B0 development contract; no scene, dial, audio, or trace code exists in the repository yet.
 
 Settings exposes bounded file export, validated full-replacement restore, journaled empty-generation erase, and version/count status. Restore and erase use an independently reopened generation and a durable manifest boundary, but rollback exports, disk-space preflight, and the full forced-termination injection matrix are still open. Source presence and host checks also do not prove the connected workflow in an iOS runtime, accessibility, offline behavior, physical-device behavior, or a signed packaged candidate. Xcode tests, runtime journeys, remaining recovery closure, and packaged acceptance stay open until candidate-specific evidence is recorded in [the release checklist](docs/release/acceptance-checklist.md).
 

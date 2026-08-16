@@ -11,7 +11,7 @@
 | Minimum deployment target | iOS 18.0 |
 | Runtime model | Fully on-device; no account, server, sync, analytics, ads, or LLM |
 | MVP language support | Simplified Chinese and English |
-| Last reviewed | 2026-07-19 |
+| Last reviewed | 2026-08-16 |
 
 This document translates the initial concept into a bounded product specification and an implementation-oriented technical foundation. It is deliberately more specific than a concept brief: ambiguous behaviors are resolved, source-of-truth boundaries are stated, and acceptance evidence is defined. It does not contain implementation code.
 
@@ -23,7 +23,7 @@ This document translates the initial concept into a bounded product specificatio
 - **Verification and operation:** Sections 17–19 define tests, delivery gates, release evidence, rollback, and recovery.
 - **Product validation and readiness:** Sections 20–23 define scenarios, risks, Definition of Done, and the final MVP acceptance statement.
 - **Platform sources:** Section 24 records the dated Apple references behind the technical baseline.
-- **Selected post-MVP feature:** [Share to Box](features/share-to-box.md) defines the first major expansion without changing the original MVP acceptance claim.
+- **Selected post-MVP features:** [Share to Box](features/share-to-box.md) and [Lived-in Box](features/lived-in-box.md) define the first two major expansions without changing the original MVP acceptance claim.
 
 ---
 
@@ -190,11 +190,15 @@ The next releases should be chosen from observed user friction, not from the siz
 | Long-term ideas and manual next actions | Later | Users repeatedly try to capture projects that cannot be expressed as one finite paper |
 | Attachments | Later | Text and optional pasted source text are insufficient |
 | On-device heuristics | Later, separate decision | Rule-based MVP evidence shows a concrete classification burden |
-| Any LLM or cloud capability | Not on this product roadmap | It is outside the local, no-LLM product boundary and must not appear as an enhancement or fallback |
+| LLM and networked capabilities | Future scope by owner decision (2026-08-16) | A dedicated replacement product, privacy, and architecture contract that truthfully revises the local-only claims it touches; until such a contract ships, nothing networked or LLM-backed may appear in any feature, enhancement, or fallback |
 
-### 4.4 Selected post-MVP feature
+### 4.4 Selected post-MVP features
 
 Share to Box is the first selected major expansion. Its complete product, interaction, data, privacy, migration, rollback, and acceptance contract is maintained in [the feature specification](features/share-to-box.md), with the cross-process authority decision recorded in [ADR 0003](adr/0003-share-extension-local-import-mailbox.md).
+
+Lived-in Box is the second selected major expansion: it re-renders Home as a tangible RealityKit box — capture through the lid, draw through a soft strap, peek inside, quiet traces and echoes; by owner decision the 3D scene is the sole Home surface, degrading only through in-scene quality tiers — while leaving schema v2, backup format v2, and selection policy `mvp-v1` untouched. Its complete contract is maintained in [the feature specification](features/lived-in-box.md), with the rendering-layer decision recorded in [ADR 0004](adr/0004-realitykit-scene-presentation.md). As of 2026-08-16 it is a frozen development contract (B0) with no implementation; status is tracked only in [its readiness ledger](release/lived-in-box-readiness.md). That specification also adopts 有空箱 as the product's Simplified Chinese name going forward (decision LB-D01); documents that record MVP acceptance keep 改天盲盒 as the name under which that claim was made.
+
+On 2026-08-16 the owner additionally re-scoped LLM and networked capabilities from permanent non-goals to future roadmap scope, and confirmed that pre-release data-migration compatibility is not a current design constraint. Both consequences are bounded in [the Lived-in Box specification's future-roadmap boundary](features/lived-in-box.md) and the revised §4.3 row; shipped generations remain fully local until a replacement contract exists.
 
 This selection does not retroactively add Share to Box to the original MVP acceptance claim. S1–S5 are now implemented in source with passing local automated evidence. Their physical-device, real-host, manual accessibility, performance, interruption, and privacy-report exit evidence remains open. S6 has an unsigned Release archive structure check only and remains blocked until a signed candidate completes the packaged device matrix. The first feature release accepts only system-provided HTTP(S) URLs and plain text, requires the same explicit title-plus-duration truth as manual capture, and adds no webpage fetching, attachment, automatic classification, inferred context, platform account access, or LLM path.
 
