@@ -52,9 +52,9 @@ struct EnvironmentRig {
         // Without an explicit shadow the box floats off its ground plane (WP-01 finding).
         // Soft shadows are a Q0 effect; WP-11 turns them off at Q1.
         key.shadow = DirectionalLightComponent.Shadow(
-            // The subject is a 0.26 m box, so a tight projection keeps the shadow map
-            // sharp instead of smearing it across metres of empty ground.
-            shadowProjection: .automatic(maximumDistance: 0.8),
+            // Keep the open lid's shadow local to the 0.26 m box instead of projecting a
+            // broad grey smear across the stage during capture and peek sequences.
+            shadowProjection: .automatic(maximumDistance: 0.45),
             depthBias: 1.0
         )
         root.addChild(key)

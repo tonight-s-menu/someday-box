@@ -89,8 +89,17 @@ enum AppComposition {
         return AppModel(
             repository: repository,
             shareGroupContainerURL: groupContainerURL,
-            sharedJournalStore: sharedJournalStore
+            sharedJournalStore: sharedJournalStore,
+            captureFailureInjected: captureFailureInjected
         )
+    }
+
+    private static var captureFailureInjected: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--ui-test-force-capture-failure")
+#else
+        false
+#endif
     }
 }
 
@@ -115,6 +124,7 @@ final class AppModel {
     private let shareMailboxReader = ShareMailboxReader()
     private let shareMailboxMaintenance = ShareMailboxMaintenance()
     private let sharedJournalStore: SharedProductDataJournalStore
+    private let captureFailureInjected: Bool
     private var isRefreshingSharedCaptures = false
 
     var state = PersistedProductState(items: [])
@@ -141,7 +151,8 @@ final class AppModel {
     init(
         repository: GenerationProductRepository,
         shareGroupContainerURL: URL? = nil,
-        sharedJournalStore: SharedProductDataJournalStore? = nil
+        sharedJournalStore: SharedProductDataJournalStore? = nil,
+        captureFailureInjected: Bool = false
     ) {
         self.repository = repository
         self.shareGroupContainerURL = shareGroupContainerURL
@@ -149,6 +160,7 @@ final class AppModel {
             applicationSupportURL: FileManager.default.temporaryDirectory
                 .appendingPathComponent("SomedayBox-\(UUID().uuidString)", isDirectory: true)
         )
+        self.captureFailureInjected = captureFailureInjected
         hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true
         hasSeenIntroduction = UserDefaults.standard.bool(forKey: "hasSeenIntroduction")
         ambientChangesEnabled =
@@ -218,7 +230,11 @@ final class AppModel {
     }
 
     func capture(title: String, note: String?, duration: DurationBucket) async -> Bool {
-        await mutate {
+        if captureFailureInjected {
+            errorMessage = String(localized: "Something went wrong locally. Your previous state was kept.")
+            return false
+        }
+        return await mutate {
             _ = try await self.captureUseCase.execute(
                 title: title,
                 note: note,

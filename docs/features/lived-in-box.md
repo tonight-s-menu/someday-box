@@ -597,6 +597,7 @@ The feature, as specified, needs none of the following to change. Pre-release, t
 | `presentation.soundEffectsEnabled` | Bool, `true` | §12.1 |
 | `presentation.ambientChangesEnabled` | Bool, `true` | §9.1 clock variation |
 | `presentation.fastAnimations` | Bool, `false` | §11.2 minimal tiers |
+| `animation.<sequence>.completedCount` / `animation.<sequence>.lastCompletedAt` | Int / Date? | Non-authoritative §11.2 first-three and 30-second repeat history; `<sequence>` is a stable presentation identifier such as `capture-drop` |
 | `draw.lastDialDetent` / `draw.lastCustomMinutes` | raw string / Int? | Prefill and the labeled repeat control (§13) |
 | `discovery.<trace-id>` | Bool flags | One-time hint bookkeeping (§10) |
 | `echo.lastAnniversaryDay` | `yyyy-MM-dd` string | At-most-daily anniversary echo (§10.3) |

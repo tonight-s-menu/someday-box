@@ -4,7 +4,8 @@ import UniformTypeIdentifiers
 struct RootTabView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.scenePhase) private var scenePhase
-    @State private var presentsCapture = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var lidCapture = LidCaptureCoordinator()
     @State private var presentsDrawContext = false
 
     var body: some View {
@@ -30,7 +31,7 @@ struct RootTabView: View {
             } else {
                 TabView {
                     HomeView(
-                        presentsCapture: $presentsCapture,
+                        lidCapture: lidCapture,
                         presentsDrawContext: $presentsDrawContext
                     )
                     .tabItem { Label("Home", systemImage: "shippingbox") }
@@ -39,8 +40,17 @@ struct RootTabView: View {
                     MemoriesView()
                         .tabItem { Label("Memories", systemImage: "heart.text.square") }
                 }
-                .sheet(isPresented: $presentsCapture) {
-                    CaptureView()
+                .sheet(
+                    isPresented: Binding(
+                        get: { lidCapture.presentsCaptureSheet },
+                        set: { presented in
+                            if !presented {
+                                lidCapture.captureSheetDismissed(reduceMotion: reduceMotion)
+                            }
+                        }
+                    )
+                ) {
+                    CaptureView(lidCapture: lidCapture)
                         .interactiveDismissDisabled(appModel.isMutating)
                 }
                 .sheet(isPresented: $presentsDrawContext) {
@@ -56,7 +66,11 @@ struct RootTabView: View {
         .alert(
             "Your Box was not changed",
             isPresented: Binding(
-                get: { appModel.errorMessage != nil && !appModel.loadFailed },
+                get: {
+                    appModel.errorMessage != nil
+                        && !appModel.loadFailed
+                        && !lidCapture.presentsCaptureSheet
+                },
                 set: { if !$0 { appModel.clearError() } }
             )
         ) {

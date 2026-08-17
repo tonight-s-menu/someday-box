@@ -139,8 +139,9 @@ Parallel lanes assume separate agents; coordinate through the readiness ledger t
 
 - **Goal:** lid-tap capture with rise/fold/drop sequences and all failure states; fast path.
 - **Spec contracts:** §7.1, §11.2 capture tiers; acceptance LID-01…06 (LID-05 lands in WP-17), FST-02/04.
-- **Files:** `LidCaptureCoordinator.swift` in the scene module; touch `Features/Home/HomeView.swift` only to route; the capture sheet itself is unchanged.
+- **Files:** `LidCaptureCoordinator.swift` in the scene module; `Features/Home/HomeView.swift` and `App/RootTabView.swift` only route presentation outcomes; the capture form fields and persisted use case stay unchanged.
 - **Steps:** lid tap and long-press recognizers on the lid entity plus the existing visible capture button; play open/rise, present the existing capture sheet, then fold/drop/close on success or hover-and-hold on failure; tier logic (first-3 full, ≤ 30 s repeat minimal) reading the shared tier engine (small utility, also used by WP-07/16).
+- **Findings (WP-06, 2026-08-17):** RealityKit gestures only target entities that carry both input-target and collision components, so the lid owns those components while the box remains presentation-only. The §11.2 tier history requires two non-authoritative, backup-excluded presentation values per stable sequence identifier; §16.2 now names those keys explicitly. The open-lid shadow projection was tightened from 0.8 m to 0.45 m to keep the cast shadow local to the object; final material/shadow judgment remains part of the open WP-04 owner review and later device evidence.
 - **Tests/evidence:** existing CAP UI tests re-run through both entries; forced-failure test keeps the hovering draft; timing assertions for tier budgets where measurable in UI tests.
 - **Done when:** capture via lid, button, and long-press all satisfy CAP-01…08 with the new presentation.
 

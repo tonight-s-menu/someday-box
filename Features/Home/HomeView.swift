@@ -5,7 +5,8 @@ struct HomeView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
-    @Binding var presentsCapture: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let lidCapture: LidCaptureCoordinator
     @Binding var presentsDrawContext: Bool
     @State private var presentsSettings = false
     @State private var snapshot = BoxSceneStateReducer.reduce(
@@ -19,7 +20,13 @@ struct HomeView: View {
             ZStack {
                 EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
                     .ignoresSafeArea()
-                BoxSceneView(snapshot: snapshot)
+                BoxSceneView(
+                    snapshot: snapshot,
+                    cameraState: captureCameraState,
+                    lidCapturePhase: lidCapture.phase,
+                    onLidTap: beginNormalCapture,
+                    onLidLongPress: beginFastCapture
+                )
                     .ignoresSafeArea()
                 sceneControls
             }
@@ -98,15 +105,26 @@ struct HomeView: View {
                 .buttonStyle(SomedayPrimaryActionButtonStyle())
                 .disabled(isLocked || appModel.drawableCount == 0 || appModel.currentItem != nil)
 
-                Button {
-                    noteInteraction()
-                    presentsCapture = true
-                } label: {
-                    Label("Put in an idea", systemImage: "plus")
-                        .frame(maxWidth: .infinity, minHeight: 50)
+                ZStack {
+                    Button {
+                        beginNormalCapture()
+                    } label: {
+                        Label("Put in an idea", systemImage: "plus")
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLocked || lidCapture.phase != .idle)
+
+                    Color.clear
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .contentShape(Rectangle())
+                        .onTapGesture(perform: beginNormalCapture)
+                        .onLongPressGesture(minimumDuration: 0.45, perform: beginFastCapture)
+                        .accessibilityHidden(true)
+                        .allowsHitTesting(!isLocked && lidCapture.phase == .idle)
                 }
-                .buttonStyle(.bordered)
-                .disabled(isLocked)
             }
             .padding(18)
             // An opaque scrim, not a material: contrast over an animated backdrop has to be
@@ -132,6 +150,22 @@ struct HomeView: View {
 
     private func noteInteraction() {
         interactionTick &+= 1
+    }
+
+    private var captureCameraState: BoxSceneCameraState {
+        lidCapture.phase == .idle ? .frontIdle : .captureLid
+    }
+
+    private func beginNormalCapture() {
+        guard !isLocked else { return }
+        noteInteraction()
+        lidCapture.beginNormalCapture(reduceMotion: reduceMotion)
+    }
+
+    private func beginFastCapture() {
+        guard !isLocked else { return }
+        noteInteraction()
+        lidCapture.beginFastCapture()
     }
 
     private func refreshSnapshot() {
@@ -184,6 +218,8 @@ struct HomeView: View {
 struct CaptureView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let lidCapture: LidCaptureCoordinator
     @FocusState private var titleFocused: Bool
     @State private var title = ""
     @State private var note = ""
@@ -243,17 +279,34 @@ struct CaptureView: View {
                     Button("Put it in the Box") {
                         guard let duration else { return }
                         Task {
-                            if await appModel.capture(
+                            let captured = await appModel.capture(
                                 title: title,
                                 note: showsNote && !note.isEmpty ? note : nil,
                                 duration: duration
-                            ) { dismiss() }
+                            )
+                            if captured {
+                                lidCapture.captureSucceeded(reduceMotion: reduceMotion)
+                                dismiss()
+                            } else {
+                                lidCapture.captureFailed()
+                            }
                         }
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || duration == nil || appModel.isMutating)
                 }
             }
             .onAppear { titleFocused = true }
+            .alert(
+                "Your Box was not changed",
+                isPresented: Binding(
+                    get: { appModel.errorMessage != nil },
+                    set: { if !$0 { appModel.clearError() } }
+                )
+            ) {
+                Button("OK", role: .cancel) { appModel.clearError() }
+            } message: {
+                Text(appModel.errorMessage ?? "")
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ final class BoxSceneStage {
     private var camera: CameraRig?
     private(set) var box: BoxGeometry?
     private var papers: PaperStackLayer?
+    private var lidCapture: LidCaptureSceneAnimator?
     private var appliedLight: LightRig?
     private var appliedColorScheme: ColorScheme?
     private var appliedCameraState: BoxSceneCameraState?
@@ -28,17 +29,20 @@ final class BoxSceneStage {
         let camera = CameraRig()
         let box = BoxGeometry()
         let papers = PaperStackLayer()
+        let lidCapture = LidCaptureSceneAnimator(box: box)
 
         root.addChild(environment.root)
         root.addChild(camera.root)
         root.addChild(box.root)
         // The stack rides inside the box, so opening the lid or moving the box carries it.
         box.root.addChild(papers.root)
+        box.root.addChild(lidCapture.root)
 
         self.environment = environment
         self.camera = camera
         self.box = box
         self.papers = papers
+        self.lidCapture = lidCapture
         appliedLight = nil
         appliedColorScheme = nil
         appliedCameraState = .frontIdle
@@ -50,6 +54,7 @@ final class BoxSceneStage {
     func apply(
         snapshot: BoxSceneSnapshot,
         cameraState: BoxSceneCameraState,
+        lidCapturePhase: LidCapturePhase,
         reduceMotion: Bool,
         colorScheme: ColorScheme
     ) {
@@ -66,6 +71,7 @@ final class BoxSceneStage {
             camera?.apply(cameraState, animated: !reduceMotion)
             appliedCameraState = cameraState
         }
+        lidCapture?.apply(lidCapturePhase, reduceMotion: reduceMotion)
     }
 }
 
@@ -77,6 +83,9 @@ final class BoxSceneStage {
 struct BoxSceneView: View {
     let snapshot: BoxSceneSnapshot
     var cameraState: BoxSceneCameraState = .frontIdle
+    var lidCapturePhase: LidCapturePhase = .idle
+    var onLidTap: () -> Void = {}
+    var onLidLongPress: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -101,16 +110,44 @@ struct BoxSceneView: View {
             content.environment = .default
             do {
                 content.add(try stage.build())
-                stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion, colorScheme: colorScheme)
+                stage.apply(
+                    snapshot: snapshot,
+                    cameraState: cameraState,
+                    lidCapturePhase: lidCapturePhase,
+                    reduceMotion: reduceMotion,
+                    colorScheme: colorScheme
+                )
             } catch {
                 constructionFailed = true
             }
         } update: { _ in
-            stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion, colorScheme: colorScheme)
+            stage.apply(
+                snapshot: snapshot,
+                cameraState: cameraState,
+                lidCapturePhase: lidCapturePhase,
+                reduceMotion: reduceMotion,
+                colorScheme: colorScheme
+            )
         } placeholder: {
             EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
         }
         .id(buildAttempt)
+        .gesture(
+            SpatialTapGesture()
+                .targetedToAnyEntity()
+                .onEnded { value in
+                    guard value.entity.isPartOfLid else { return }
+                    onLidTap()
+                }
+        )
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.45)
+                .targetedToAnyEntity()
+                .onEnded { value in
+                    guard value.entity.isPartOfLid else { return }
+                    onLidLongPress()
+                }
+        )
         .overlay {
             // Reduce Motion cuts the camera instead of travelling; the veil carries the cut
             // as a cross-fade so the change still reads as one continuous surface (§11.3).
@@ -132,6 +169,17 @@ struct BoxSceneView: View {
         stage = BoxSceneStage()
         constructionFailed = false
         buildAttempt += 1
+    }
+}
+
+private extension Entity {
+    var isPartOfLid: Bool {
+        var candidate: Entity? = self
+        while let entity = candidate {
+            if entity.name == BoxGeometry.NodeName.lid { return true }
+            candidate = entity.parent
+        }
+        return false
     }
 }
 

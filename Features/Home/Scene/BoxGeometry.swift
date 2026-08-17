@@ -68,6 +68,8 @@ struct BoxGeometry {
         )
         lid.name = NodeName.lid
         lid.position = [0, Metrics.lidThickness / 2, (Metrics.bodyDepth + Metrics.lidOverhang) / 2]
+        lid.components.set(InputTargetComponent())
+        lid.generateCollisionShapes(recursive: false)
         lidPivot.addChild(lid)
         root.addChild(lidPivot)
 

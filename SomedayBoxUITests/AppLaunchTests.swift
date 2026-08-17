@@ -49,6 +49,68 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertFalse(save.isEnabled)
     }
 
+    /// LID-04 / FST-02: long-pressing the visible equivalent bypasses the lid preamble
+    /// and the existing sheet still owns focus and validation.
+    @MainActor
+    func testLongPressCaptureOpensTheFocusedSheetWithoutPreamble() {
+        let app = XCUIApplication()
+        app.launch()
+        openBoxIfNeeded(app)
+
+        let capture = app.buttons["Put in an idea"]
+        XCTAssertTrue(capture.waitForExistence(timeout: 5))
+        capture.press(forDuration: 0.55)
+
+        let released = Date()
+        let title = app.textFields["Paper title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 1))
+        XCTAssertLessThan(Date().timeIntervalSince(released), 1.2)
+        title.typeText("Fast capture draft")
+        XCTAssertEqual(title.value as? String, "Fast capture draft")
+    }
+
+    /// LID-01: tapping the rendered lid itself routes through the RealityKit input target
+    /// and opens the same focused capture surface as the visible equivalent.
+    @MainActor
+    func testTappingTheRenderedLidOpensTheFocusedCaptureSheet() {
+        let app = XCUIApplication()
+        app.launch()
+        openBoxIfNeeded(app)
+        XCTAssertTrue(app.buttons["Put in an idea"].waitForExistence(timeout: 5))
+
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42)).tap()
+
+        let title = app.textFields["Paper title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        title.typeText("Lid capture draft")
+        XCTAssertEqual(title.value as? String, "Lid capture draft")
+    }
+
+    /// LID-03 / LID-06: a forced local commit failure must leave the sheet and draft
+    /// intact; the scene coordinator's companion unit fixture proves the focus paper stays
+    /// hovering with the lid open.
+    @MainActor
+    func testCaptureFailureKeepsTheDraftIntact() {
+        let app = XCUIApplication()
+        app.launchArguments.append("--ui-test-force-capture-failure")
+        app.launch()
+        openBoxIfNeeded(app)
+        app.buttons["Put in an idea"].tap()
+
+        let title = app.textFields["Paper title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        title.typeText("Keep this draft")
+        app.buttons["Up to 10 minutes"].tap()
+        app.buttons["Put it in the Box"].tap()
+
+        let alert = app.alerts["Your Box was not changed"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 3))
+        alert.buttons["OK"].tap()
+        XCTAssertTrue(title.exists)
+        XCTAssertEqual(title.value as? String, "Keep this draft")
+        XCTAssertTrue(app.buttons["Put it in the Box"].isEnabled)
+    }
+
     @MainActor
     func testSettingsExposesExplicitLocalDataControls() {
         let app = XCUIApplication()
