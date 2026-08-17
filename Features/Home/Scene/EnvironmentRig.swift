@@ -17,7 +17,9 @@ struct EnvironmentRig {
     }
 
     private enum Metrics {
-        static let groundSize: Float = 1.8
+        /// Large enough that its far edge never draws a hard horizon inside any camera
+        /// state's frustum; the graded boundary above it is the SwiftUI backdrop.
+        static let groundSize: Float = 6.0
         static let groundThickness: Float = 0.002
         static let groundDrop: Float = -0.066
         static let lightDistance: Float = 1.2
@@ -28,11 +30,14 @@ struct EnvironmentRig {
         static let floor: Float = 900
         static let span: Float = 3_400
         static let fillFraction: Float = 0.22
+        /// How far the whole rig drops in the dark appearance.
+        static let darkAppearance: Float = 0.5
     }
 
     let root: Entity
     private let keyLight: DirectionalLight
     private let fillLight: DirectionalLight
+    private let ground: ModelEntity
 
     /// Throws so the scene boundary has a real failure path to contain (§15.6, DGR-04).
     /// The B1 stage is procedural and does not fail today; WP-04 and WP-09 load assets
@@ -44,6 +49,14 @@ struct EnvironmentRig {
         let key = DirectionalLight()
         key.name = NodeName.keyLight
         key.light.isRealWorldProxy = false
+        // Without an explicit shadow the box floats off its ground plane (WP-01 finding).
+        // Soft shadows are a Q0 effect; WP-11 turns them off at Q1.
+        key.shadow = DirectionalLightComponent.Shadow(
+            // The subject is a 0.26 m box, so a tight projection keeps the shadow map
+            // sharp instead of smearing it across metres of empty ground.
+            shadowProjection: .automatic(maximumDistance: 0.8),
+            depthBias: 1.0
+        )
         root.addChild(key)
 
         // A dim opposing light so the box's shadow side keeps its form at every hour.
@@ -59,7 +72,7 @@ struct EnvironmentRig {
                 depth: Metrics.groundSize,
                 cornerRadius: Metrics.groundThickness / 2
             ),
-            materials: [Self.groundMaterial()]
+            materials: [BoxMaterials.ceramic(BoxMaterials.Tone.ground)]
         )
         ground.name = NodeName.ground
         ground.position = [0, Metrics.groundDrop, 0]
@@ -68,17 +81,32 @@ struct EnvironmentRig {
         self.root = root
         keyLight = key
         fillLight = fill
+        self.ground = ground
     }
 
     /// Applies a derived rig. Elevation and azimuth place the light; temperature and
     /// intensity tint and drive it.
-    func apply(_ rig: LightRig) {
+    ///
+    /// The system appearance sets the base palette and the clock rig modulates within it
+    /// (§9.4), so the ground and the light level both answer to `colorScheme`. RealityKit
+    /// resolves a material colour once, at creation, so a dynamic `UIColor` would silently
+    /// freeze at whichever appearance happened to be current — the tone is applied here.
+    func apply(_ rig: LightRig, colorScheme: ColorScheme) {
+        ground.model?.materials = [BoxMaterials.ceramic(Self.groundTone(for: colorScheme))]
+        apply(rig, dimming: colorScheme == .dark ? Intensity.darkAppearance : 1)
+    }
+
+    private static func groundTone(for colorScheme: ColorScheme) -> UIColor {
+        colorScheme == .dark ? BoxMaterials.Tone.groundDark : BoxMaterials.Tone.ground
+    }
+
+    private func apply(_ rig: LightRig, dimming: Float) {
         let keyDirection = Self.direction(
             elevationRadians: rig.elevationRadians,
             azimuthRadians: rig.azimuthRadians
         )
         keyLight.light.color = Self.color(kelvin: rig.colorTemperatureKelvin)
-        keyLight.light.intensity = Intensity.floor + Intensity.span * rig.relativeIntensity
+        keyLight.light.intensity = (Intensity.floor + Intensity.span * rig.relativeIntensity) * dimming
         keyLight.look(at: .zero, from: keyDirection * Metrics.lightDistance, relativeTo: nil)
 
         let fillDirection = Self.direction(
@@ -87,7 +115,7 @@ struct EnvironmentRig {
         )
         fillLight.light.color = Self.color(kelvin: rig.colorTemperatureKelvin)
         fillLight.light.intensity =
-            (Intensity.floor + Intensity.span * rig.relativeIntensity) * Intensity.fillFraction
+            (Intensity.floor + Intensity.span * rig.relativeIntensity) * Intensity.fillFraction * dimming
         fillLight.look(at: .zero, from: fillDirection * Metrics.lightDistance, relativeTo: nil)
     }
 
@@ -109,14 +137,6 @@ struct EnvironmentRig {
             bottom = Color(hue: 0.09, saturation: 0.10 + 0.06 * warmth, brightness: 0.82 + 0.12 * light)
         }
         return LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom)
-    }
-
-    private static func groundMaterial() -> PhysicallyBasedMaterial {
-        var material = PhysicallyBasedMaterial()
-        material.baseColor = .init(tint: UIColor(white: 0.92, alpha: 1))
-        material.roughness = 0.94
-        material.metallic = 0.0
-        return material
     }
 
     private static func direction(elevationRadians: Float, azimuthRadians: Float) -> SIMD3<Float> {

@@ -1,5 +1,6 @@
 import Foundation
 import RealityKit
+import SwiftUI
 import XCTest
 @testable import SomedayBox
 
@@ -31,15 +32,30 @@ final class BoxSceneStageTests: XCTestCase {
         let environment = try EnvironmentRig()
         let key = try XCTUnwrap(environment.root.findEntity(named: EnvironmentRig.NodeName.keyLight) as? DirectionalLight)
 
-        environment.apply(rig(intensity: 0.2, kelvin: 2_700))
+        environment.apply(rig(intensity: 0.2, kelvin: 2_700), colorScheme: .light)
         let night = key.light.intensity
         let nightColor = key.light.color
 
-        environment.apply(rig(intensity: 1.0, kelvin: 6_500))
+        environment.apply(rig(intensity: 1.0, kelvin: 6_500), colorScheme: .light)
         let noon = key.light.intensity
 
         XCTAssertGreaterThan(noon, night)
         XCTAssertNotEqual(nightColor, key.light.color)
+    }
+
+    /// §9.4: the system appearance sets the base palette, so the same rig must land
+    /// differently in the dark. RealityKit resolves material colours once, which makes this
+    /// easy to get silently wrong.
+    func testTheSameRigIsDimmerInTheDarkAppearance() throws {
+        let environment = try EnvironmentRig()
+        let key = try XCTUnwrap(environment.root.findEntity(named: EnvironmentRig.NodeName.keyLight) as? DirectionalLight)
+        let noon = rig(intensity: 1.0, kelvin: 6_500)
+
+        environment.apply(noon, colorScheme: .light)
+        let day = key.light.intensity
+        environment.apply(noon, colorScheme: .dark)
+
+        XCTAssertLessThan(key.light.intensity, day)
     }
 
     func testStageBuildsTheEnvironmentAndCameraNodes() throws {

@@ -13,8 +13,12 @@ final class BoxSceneStage {
 
     private var environment: EnvironmentRig?
     private var camera: CameraRig?
+    private(set) var box: BoxGeometry?
+    private var papers: PaperStackLayer?
     private var appliedLight: LightRig?
+    private var appliedColorScheme: ColorScheme?
     private var appliedCameraState: BoxSceneCameraState?
+    private var appliedPapers: [BoxScenePaper]?
 
     func build() throws -> Entity {
         let root = Entity()
@@ -22,21 +26,41 @@ final class BoxSceneStage {
 
         let environment = try EnvironmentRig()
         let camera = CameraRig()
+        let box = BoxGeometry()
+        let papers = PaperStackLayer()
+
         root.addChild(environment.root)
         root.addChild(camera.root)
+        root.addChild(box.root)
+        // The stack rides inside the box, so opening the lid or moving the box carries it.
+        box.root.addChild(papers.root)
 
         self.environment = environment
         self.camera = camera
+        self.box = box
+        self.papers = papers
         appliedLight = nil
+        appliedColorScheme = nil
         appliedCameraState = .frontIdle
+        appliedPapers = nil
         return root
     }
 
     /// Applies only what changed.
-    func apply(snapshot: BoxSceneSnapshot, cameraState: BoxSceneCameraState, reduceMotion: Bool) {
-        if appliedLight != snapshot.light {
-            environment?.apply(snapshot.light)
+    func apply(
+        snapshot: BoxSceneSnapshot,
+        cameraState: BoxSceneCameraState,
+        reduceMotion: Bool,
+        colorScheme: ColorScheme
+    ) {
+        if appliedLight != snapshot.light || appliedColorScheme != colorScheme {
+            environment?.apply(snapshot.light, colorScheme: colorScheme)
             appliedLight = snapshot.light
+            appliedColorScheme = colorScheme
+        }
+        if appliedPapers != snapshot.visiblePapers {
+            papers?.apply(papers: snapshot.visiblePapers)
+            appliedPapers = snapshot.visiblePapers
         }
         if appliedCameraState != cameraState {
             camera?.apply(cameraState, animated: !reduceMotion)
@@ -77,12 +101,12 @@ struct BoxSceneView: View {
             content.environment = .default
             do {
                 content.add(try stage.build())
-                stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion)
+                stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion, colorScheme: colorScheme)
             } catch {
                 constructionFailed = true
             }
         } update: { _ in
-            stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion)
+            stage.apply(snapshot: snapshot, cameraState: cameraState, reduceMotion: reduceMotion, colorScheme: colorScheme)
         } placeholder: {
             EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
         }
