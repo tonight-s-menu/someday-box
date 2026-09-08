@@ -64,8 +64,8 @@ final class BoxRenderingTests: XCTestCase {
 
     // MARK: - Growth structures (TRC-08)
 
-    func testGrowthStructuresAreHiddenUntilTheirPredicatesHold() {
-        let box = BoxGeometry()
+    func testGrowthStructuresAreHiddenUntilTheirPredicatesHold() throws {
+        let box = try BoxGeometry()
         for name in [
             BoxGeometry.NodeName.memorySeam,
             BoxGeometry.NodeName.letterSlot,
@@ -75,8 +75,8 @@ final class BoxRenderingTests: XCTestCase {
         }
     }
 
-    func testAStructureDisappearsAgainWhenItsPredicateStopsHolding() {
-        let box = BoxGeometry()
+    func testAStructureDisappearsAgainWhenItsPredicateStopsHolding() throws {
+        let box = try BoxGeometry()
         box.setStructure(BoxGeometry.NodeName.memorySeam, visible: true)
         XCTAssertTrue(box.isStructureVisible(BoxGeometry.NodeName.memorySeam))
         box.setStructure(BoxGeometry.NodeName.memorySeam, visible: false)
@@ -86,7 +86,7 @@ final class BoxRenderingTests: XCTestCase {
     // MARK: - Box shell
 
     func testTheBoxIsAContainerRatherThanASolidBlock() throws {
-        let box = BoxGeometry()
+        let box = try BoxGeometry()
         let body = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.body))
         XCTAssertNotNil(body.findEntity(named: "Floor"))
         for wall in ["WallFront", "WallBack", "WallLeft", "WallRight"] {
@@ -95,15 +95,64 @@ final class BoxRenderingTests: XCTestCase {
     }
 
     func testLidOpensOnItsHingeAndReturns() throws {
-        let box = BoxGeometry()
+        let box = try BoxGeometry()
         let pivot = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.lidPivot))
         let closed = pivot.transform.rotation
 
         box.setLid(openness: 1)
         XCTAssertNotEqual(pivot.transform.rotation.angle, closed.angle)
 
+        let front = try XCTUnwrap(box.root.findEntity(named: "FrontFlapPivot"))
+        XCTAssertGreaterThan(front.orientation.angle, Float.pi / 2, "Front flap must fold outward, clear of capture paper.")
         box.setLid(openness: 0)
         XCTAssertEqual(pivot.transform.rotation.angle, closed.angle, accuracy: 1e-5)
+        XCTAssertEqual(front.orientation.angle, 0, accuracy: 1e-5)
+    }
+
+    func testIdlePerformanceSettlesAndKeepsGroundContact() {
+        for time in stride(from: 0.0, through: 10.0, by: 0.025) {
+            let pose = BoxIdlePose.sample(at: time)
+            XCTAssertGreaterThanOrEqual(pose.lift, 0)
+            XCTAssertGreaterThan(pose.stretch, 0.9)
+            XCTAssertGreaterThan(pose.eyeOpen, 0)
+        }
+        for time in [0.0, 10.0, 100.0] {
+            let pose = BoxIdlePose.sample(at: time)
+            XCTAssertEqual(pose.stretch, 1)
+            XCTAssertEqual(pose.lift, 0)
+            XCTAssertEqual(pose.tilt, 0)
+            XCTAssertEqual(pose.eyeOpen, 1)
+        }
+    }
+
+    func testIdleResetRestoresFaceAndDoesNotTouchCaptureHinge() throws {
+        let box = try BoxGeometry()
+        let animator = BoxIdleAnimator(box: box)
+        let eye = try XCTUnwrap(box.root.findEntity(named: "EyeLeft"))
+        let rest = eye.transform
+        box.setLid(openness: 1)
+        let pivot = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.lidPivot))
+        let openAngle = pivot.orientation.angle
+        animator.apply(time: 1.44)
+        XCTAssertLessThan(eye.scale.y, rest.scale.y * 0.2)
+        animator.apply(time: 6.1)
+        XCTAssertGreaterThan(box.root.position.y, 0)
+        animator.apply(time: 0)
+        XCTAssertEqual(eye.transform, rest)
+        XCTAssertEqual(box.root.position, .zero)
+        XCTAssertEqual(box.root.scale, .one)
+        XCTAssertEqual(pivot.orientation.angle, openAngle, accuracy: 1e-5)
+    }
+
+    func testCartonUsesTexturedThinFlapsWithoutTheFabricTab() throws {
+        let box = try BoxGeometry()
+        XCTAssertNil(box.root.findEntity(named: "Strap"))
+        XCTAssertNil(box.root.findEntity(named: "StrapAnchor"))
+        for name in ["FrontFlap", "RearFlap", "WallFront"] {
+            let panel = try XCTUnwrap(box.root.findEntity(named: name) as? ModelEntity)
+            let surface = try XCTUnwrap(panel.model?.materials.first as? PhysicallyBasedMaterial)
+            XCTAssertNotNil(surface.baseColor.texture)
+        }
     }
 
     // MARK: - Fixtures

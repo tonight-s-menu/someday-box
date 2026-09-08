@@ -19,9 +19,9 @@ struct EnvironmentRig {
     private enum Metrics {
         /// Large enough that its far edge never draws a hard horizon inside any camera
         /// state's frustum; the graded boundary above it is the SwiftUI backdrop.
-        static let groundSize: Float = 6.0
+        static let groundSize: Float = 200.0
         static let groundThickness: Float = 0.002
-        static let groundDrop: Float = -0.066
+        static let groundDrop: Float = -BoxGeometry.Metrics.bodyHeight / 2 - groundThickness / 2
         static let lightDistance: Float = 1.2
     }
 

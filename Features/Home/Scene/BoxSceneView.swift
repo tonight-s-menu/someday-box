@@ -16,6 +16,7 @@ final class BoxSceneStage {
     private(set) var box: BoxGeometry?
     private var papers: PaperStackLayer?
     private var lidCapture: LidCaptureSceneAnimator?
+    private var idleAnimator: BoxIdleAnimator?
     private var appliedLight: LightRig?
     private var appliedColorScheme: ColorScheme?
     private var appliedCameraState: BoxSceneCameraState?
@@ -27,7 +28,7 @@ final class BoxSceneStage {
 
         let environment = try EnvironmentRig()
         let camera = CameraRig()
-        let box = BoxGeometry()
+        let box = try BoxGeometry()
         let papers = PaperStackLayer()
         let lidCapture = LidCaptureSceneAnimator(box: box)
 
@@ -43,11 +44,16 @@ final class BoxSceneStage {
         self.box = box
         self.papers = papers
         self.lidCapture = lidCapture
+        idleAnimator = BoxIdleAnimator(box: box)
         appliedLight = nil
         appliedColorScheme = nil
         appliedCameraState = .frontIdle
         appliedPapers = nil
         return root
+    }
+
+    func animateIdle(at time: TimeInterval) {
+        idleAnimator?.apply(time: time)
     }
 
     /// Applies only what changed.
@@ -71,6 +77,9 @@ final class BoxSceneStage {
             camera?.apply(cameraState, animated: !reduceMotion)
             appliedCameraState = cameraState
         }
+        if reduceMotion || cameraState != .frontIdle || lidCapturePhase != .idle {
+            idleAnimator?.apply(time: 0)
+        }
         lidCapture?.apply(lidCapturePhase, reduceMotion: reduceMotion)
     }
 }
@@ -88,6 +97,7 @@ struct BoxSceneView: View {
     var onLidLongPress: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
     @State private var stage = BoxSceneStage()
     @State private var buildAttempt = 0
@@ -100,6 +110,10 @@ struct BoxSceneView: View {
         } else {
             scene
         }
+    }
+
+    private var canAnimateIdle: Bool {
+        scenePhase == .active && !reduceMotion && cameraState == .frontIdle && lidCapturePhase == .idle
     }
 
     private var scene: some View {
@@ -132,6 +146,22 @@ struct BoxSceneView: View {
             EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)
         }
         .id(buildAttempt)
+        .task(id: canAnimateIdle) {
+            guard canAnimateIdle else {
+                stage.animateIdle(at: 0)
+                return
+            }
+            let clock = ContinuousClock()
+            let start = clock.now
+            defer { stage.animateIdle(at: 0) }
+            while !Task.isCancelled {
+                let duration = start.duration(to: clock.now).components
+                let elapsed = Double(duration.seconds) + Double(duration.attoseconds) / 1e18
+                guard elapsed < 10 else { return }
+                stage.animateIdle(at: elapsed)
+                do { try await Task.sleep(for: .milliseconds(33)) } catch { return }
+            }
+        }
         .gesture(
             SpatialTapGesture()
                 .targetedToAnyEntity()

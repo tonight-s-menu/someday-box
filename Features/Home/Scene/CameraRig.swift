@@ -13,7 +13,7 @@ enum BoxSceneCameraState: String, Equatable, Sendable, CaseIterable {
 
     var eye: SIMD3<Float> {
         switch self {
-        case .frontIdle: [0, 0.34, 0.98]
+        case .frontIdle: [0.18, 0.34, 1.04]
         case .captureLid: [0, 0.46, 0.74]
         case .peek: [0, 1.05, 0.10]
         case .revealFocus: [0, 0.30, 0.62]

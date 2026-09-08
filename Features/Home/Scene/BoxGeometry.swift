@@ -1,7 +1,7 @@
 import Foundation
 import RealityKit
 
-/// The box itself, built parametrically: body, a lid on its own pivot, the draw strap, and
+/// The box itself, built parametrically: a hollow body, two folding top flaps, and
 /// the structures that only appear once their §10.1 predicates hold.
 ///
 /// Entity names follow specification §15.2 so later work packages address parts by name
@@ -13,8 +13,6 @@ struct BoxGeometry {
         static let body = "Body"
         static let lidPivot = "LidPivot"
         static let lid = "Lid"
-        static let strapAnchor = "StrapAnchor"
-        static let strap = "Strap"
         static let memorySeam = "MemorySeam"
         static let letterSlot = "LetterSlot"
         static let bottomSeam = "BottomSeam"
@@ -23,13 +21,11 @@ struct BoxGeometry {
     /// Box dimensions in metres. The scene is authored at real-object scale so motion
     /// curves and camera distances read as a physical object on a table.
     enum Metrics {
-        static let bodyWidth: Float = 0.26
-        static let bodyHeight: Float = 0.13
+        static let bodyWidth: Float = 0.24
+        static let bodyHeight: Float = 0.17
         static let bodyDepth: Float = 0.19
-        static let cornerRadius: Float = 0.014
-        static let wallThickness: Float = 0.010
-        static let lidThickness: Float = 0.016
-        static let lidOverhang: Float = 0.008
+        static let wallThickness: Float = 0.0045
+        static let lidThickness: Float = 0.0035
         /// The lid's open angle, in radians, when a sequence lifts it (WP-06, WP-08).
         static let lidOpenAngle: Float = -1.25
 
@@ -40,16 +36,17 @@ struct BoxGeometry {
 
     let root: Entity
     private let lidPivot: Entity
+    private let frontFlapPivot: Entity
     /// Structures that exist in the graph from the first frame but stay hidden until their
     /// predicates hold: the memory seam (WP-16), the letter slot (WP-17), and the bottom
     /// compartment seam (WP-21). Hidden-by-default is TRC-08's floor.
     private let growthStructures: [String: Entity]
 
-    init() {
+    init() throws {
         let root = Entity()
         root.name = NodeName.box
 
-        root.addChild(Self.makeBody())
+        root.addChild(try Self.makeBody())
 
         // The lid hangs off a pivot at the rear top edge, so opening it is a rotation of
         // the pivot rather than a transform the geometry has to compensate for.
@@ -57,23 +54,17 @@ struct BoxGeometry {
         lidPivot.name = NodeName.lidPivot
         lidPivot.position = [0, Metrics.bodyHeight / 2, -Metrics.bodyDepth / 2]
 
-        let lid = ModelEntity(
-            mesh: .generateBox(
-                width: Metrics.bodyWidth + Metrics.lidOverhang,
-                height: Metrics.lidThickness,
-                depth: Metrics.bodyDepth + Metrics.lidOverhang,
-                cornerRadius: Metrics.cornerRadius
-            ),
-            materials: [BoxMaterials.ceramic(BoxMaterials.Tone.lid)]
-        )
-        lid.name = NodeName.lid
-        lid.position = [0, Metrics.lidThickness / 2, (Metrics.bodyDepth + Metrics.lidOverhang) / 2]
-        lid.components.set(InputTargetComponent())
-        lid.generateCollisionShapes(recursive: false)
-        lidPivot.addChild(lid)
+        lidPivot.addChild(try Self.makeFlap(front: false))
         root.addChild(lidPivot)
 
-        root.addChild(Self.makeStrap())
+        let frontFlapPivot = Entity()
+        frontFlapPivot.name = "FrontFlapPivot"
+        frontFlapPivot.position = [0, Metrics.bodyHeight / 2, Metrics.bodyDepth / 2]
+        frontFlapPivot.addChild(try Self.makeFlap(front: true))
+        root.addChild(frontFlapPivot)
+        self.frontFlapPivot = frontFlapPivot
+
+        root.addChild(BoxCharacter.makeFace())
 
         var structures: [String: Entity] = [:]
         for structure in [Self.makeMemorySeam(), Self.makeLetterSlot(), Self.makeBottomSeam()] {
@@ -91,14 +82,16 @@ struct BoxGeometry {
     /// open; the sequences that drive it arrive with WP-06 and WP-08.
     func setLid(openness: Float, animatedOver duration: TimeInterval = 0) {
         let angle = Metrics.lidOpenAngle * min(max(openness, 0), 1)
-        let target = Transform(
-            rotation: simd_quatf(angle: angle, axis: [1, 0, 0]),
-            translation: lidPivot.position
-        )
-        if duration > 0 {
-            lidPivot.move(to: target, relativeTo: lidPivot.parent, duration: duration, timingFunction: .easeInOut)
-        } else {
-            lidPivot.transform = target
+        for (pivot, rotation) in [(lidPivot, angle), (frontFlapPivot, -angle * 2.1)] {
+            let target = Transform(
+                rotation: simd_quatf(angle: rotation, axis: [1, 0, 0]),
+                translation: pivot.position
+            )
+            if duration > 0 {
+                pivot.move(to: target, relativeTo: pivot.parent, duration: duration, timingFunction: .easeInOut)
+            } else {
+                pivot.transform = target
+            }
         }
     }
 
@@ -117,20 +110,20 @@ struct BoxGeometry {
     /// A real container, not a solid block: a floor and four walls enclosing the cavity the
     /// paper stack rests in. RealityKit has no boolean subtraction, so the box is assembled
     /// from rounded slabs — which also keeps every edge soft, per the §15.4 material brief.
-    private static func makeBody() -> Entity {
+    private static func makeBody() throws -> Entity {
         let body = Entity()
         body.name = NodeName.body
 
-        let material = BoxMaterials.ceramic(BoxMaterials.Tone.body)
-        let wallHeight = Metrics.bodyHeight - Metrics.wallThickness
-        let wallCentreY = Metrics.interiorFloor + wallHeight / 2
+        let material = try BoxMaterials.cardboard(BoxMaterials.Tone.body)
+        let wallHeight = Metrics.bodyHeight
+        let wallCentreY: Float = 0
         let slabRadius = Metrics.wallThickness / 2
 
         let floor = ModelEntity(
             mesh: .generateBox(
-                width: Metrics.bodyWidth,
+                width: Metrics.interiorWidth,
                 height: Metrics.wallThickness,
-                depth: Metrics.bodyDepth,
+                depth: Metrics.interiorDepth,
                 cornerRadius: slabRadius
             ),
             materials: [material]
@@ -175,23 +168,114 @@ struct BoxGeometry {
             body.addChild(wall)
         }
 
+        let tail = ModelEntity(
+            mesh: .generateBox(width: 0.039, height: 0.027, depth: 0.00035, cornerRadius: 0.0002),
+            materials: [try BoxMaterials.packingTape()]
+        )
+        tail.name = "TapeEnd"
+        tail.position = [0, Metrics.bodyHeight / 2 - 0.0135, Metrics.bodyDepth / 2 + 0.0002]
+        body.addChild(tail)
+        for side: Float in [-1, 1] {
+            let fold = ModelEntity(
+                mesh: .generateBox(width: 0.0006, height: Metrics.bodyHeight - 0.004, depth: 0.0003),
+                materials: [BoxMaterials.paper(BoxMaterials.Tone.recess)]
+            )
+            fold.name = side < 0 ? "LeftFold" : "RightFold"
+            fold.position = [side * (Metrics.bodyWidth / 2 - 0.003), 0, Metrics.bodyDepth / 2 + 0.0001]
+            body.addChild(fold)
+        }
         return body
     }
 
-    /// A short fabric pull-tab at the lower front — visible but small (§7.2).
-    private static func makeStrap() -> Entity {
-        let anchor = Entity()
-        anchor.name = NodeName.strapAnchor
-        anchor.position = [0, -Metrics.bodyHeight / 2 + 0.030, Metrics.bodyDepth / 2]
-
-        let strap = ModelEntity(
-            mesh: .generateBox(width: 0.032, height: 0.046, depth: 0.006, cornerRadius: 0.003),
-            materials: [BoxMaterials.fabric(BoxMaterials.Tone.strap)]
+    /// Two thin half-depth flaps meet along a visible centre seam, without an overhanging cap.
+    private static func makeFlap(front: Bool) throws -> Entity {
+        let lid = Entity()
+        lid.name = NodeName.lid
+        let direction: Float = front ? -1 : 1
+        let depth = Metrics.bodyDepth / 2 - 0.0007
+        let panel = ModelEntity(
+            mesh: .generateBox(width: Metrics.bodyWidth, height: Metrics.lidThickness, depth: depth, cornerRadius: 0.0006),
+            materials: [try BoxMaterials.cardboard(front ? BoxMaterials.Tone.lid : BoxMaterials.Tone.body)]
         )
-        strap.name = NodeName.strap
-        strap.position = [0, 0, 0.002]
-        anchor.addChild(strap)
-        return anchor
+        panel.name = front ? "FrontFlap" : "RearFlap"
+        panel.position = [0, Metrics.lidThickness / 2, direction * depth / 2]
+        panel.components.set(InputTargetComponent())
+        panel.generateCollisionShapes(recursive: false)
+        lid.addChild(panel)
+
+        let tape = ModelEntity(
+            mesh: front ? try makeWrappedTape(depth: depth) : .generateBox(
+                width: 0.039, height: 0.00035, depth: depth, cornerRadius: 0.0001
+            ),
+            materials: [try BoxMaterials.packingTape()]
+        )
+        tape.name = "PackingTape"
+        tape.position = front ? .zero : [0, Metrics.lidThickness + 0.0002, direction * depth / 2]
+        tape.components.set(InputTargetComponent())
+        tape.generateCollisionShapes(recursive: false)
+        lid.addChild(tape)
+
+        // Short exposed flutes on the cut edge make the thickness read as corrugated stock.
+        let edgeMaterial = BoxMaterials.paper(BoxMaterials.Tone.recess)
+        for index in 0..<48 {
+            let flute = ModelEntity(
+                mesh: .generateBox(width: 0.0015, height: 0.0013, depth: 0.0004, cornerRadius: 0.0002),
+                materials: [edgeMaterial]
+            )
+            flute.name = "Flute\(index)"
+            flute.position = [-Metrics.bodyWidth / 2 + 0.0025 + Float(index) * 0.005,
+                              Metrics.lidThickness / 2, direction * depth]
+            lid.addChild(flute)
+        }
+        return lid
+    }
+
+    /// One solid ribbon crosses the flap edge and meets the fixed front tape below
+    /// the hinge. The wrapped part follows the flap when opened, leaving the tail on the body.
+    private static func makeWrappedTape(depth: Float) throws -> MeshResource {
+        let radius: Float = 0.0008
+        let top = Metrics.lidThickness + 0.0002
+        var path: [(SIMD3<Float>, SIMD3<Float>)] = [([0, top, -depth], [0, 1, 0])]
+        for step in 0...8 {
+            let angle = Float(step) / 8 * .pi / 2
+            path.append((
+                [0, top - radius + radius * cos(angle), 0.0002 - radius + radius * sin(angle)],
+                [0, cos(angle), sin(angle)]
+            ))
+        }
+        // Slight overlap hides the joint without attaching the fixed tail to a moving flap.
+        path.append(([0, -0.00015, 0.0002], [0, 0, 1]))
+
+        var vertices: [SIMD3<Float>] = []
+        var normals: [SIMD3<Float>] = []
+        var uv: [SIMD2<Float>] = []
+        var triangles: [UInt32] = []
+        var distance: Float = 0
+        for (index, sample) in path.enumerated() {
+            if index > 0 { distance += simd_distance(sample.0, path[index - 1].0) }
+            for surface: Float in [1, -1] {
+                for side: Float in [-1, 1] {
+                    vertices.append(sample.0 + [side * 0.039 / 2, 0, 0] + sample.1 * (surface * 0.000175))
+                    normals.append(sample.1 * surface)
+                    uv.append([(side + 1) / 2, distance / depth])
+                }
+            }
+            guard index > 0 else { continue }
+            let a = UInt32((index - 1) * 4)
+            let b = UInt32(index * 4)
+            triangles += [a, b, a + 1, a + 1, b, b + 1]
+            triangles += [a + 2, a + 3, b + 2, a + 3, b + 3, b + 2]
+            triangles += [a, a + 2, b, a + 2, b + 2, b]
+            triangles += [a + 1, b + 1, a + 3, a + 3, b + 1, b + 3]
+        }
+        let end = UInt32(vertices.count - 4)
+        triangles += [0, 1, 2, 1, 3, 2, end, end + 2, end + 1, end + 1, end + 2, end + 3]
+        var mesh = MeshDescriptor(name: "WrappedPackingTape")
+        mesh.positions = MeshBuffers.Positions(vertices)
+        mesh.normals = MeshBuffers.Normals(normals)
+        mesh.textureCoordinates = MeshBuffers.TextureCoordinates(uv)
+        mesh.primitives = .triangles(triangles)
+        return try MeshResource.generate(from: [mesh])
     }
 
     private static func makeMemorySeam() -> Entity {

@@ -143,7 +143,7 @@ final class LidCaptureCoordinatorTests: XCTestCase {
     }
 
     func testFailurePhaseKeepsTheLidOpenAndFocusPaperVisible() throws {
-        let box = BoxGeometry()
+        let box = try BoxGeometry()
         let animator = LidCaptureSceneAnimator(box: box)
         let pivot = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.lidPivot))
         let focus = try XCTUnwrap(animator.root.findEntity(named: "CapturePaper"))
@@ -159,11 +159,13 @@ final class LidCaptureCoordinatorTests: XCTestCase {
     }
 
     func testLidHasTargetingAndCollisionComponents() throws {
-        let box = BoxGeometry()
-        let lid = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.lid))
-
-        XCTAssertNotNil(lid.components[InputTargetComponent.self])
-        XCTAssertNotNil(lid.components[CollisionComponent.self])
+        let box = try BoxGeometry()
+        for name in ["FrontFlap", "RearFlap"] {
+            let flap = try XCTUnwrap(box.root.findEntity(named: name))
+            XCTAssertNotNil(flap.components[InputTargetComponent.self])
+            XCTAssertNotNil(flap.components[CollisionComponent.self])
+            XCTAssertEqual(flap.parent?.name, BoxGeometry.NodeName.lid)
+        }
     }
 
     private func makeFixture() -> (store: AnimationTierHistoryStore, now: Date) {
