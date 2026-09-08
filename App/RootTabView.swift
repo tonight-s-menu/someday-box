@@ -24,6 +24,7 @@ struct RootTabView: View {
                 }
             } else if appModel.unresolvedAttempt != nil {
                 DrawRevealGate()
+                    .id(appModel.unresolvedAttempt?.id)
             } else if appModel.currentShareRecovery != nil {
                 SharedCaptureRecoveryView()
             } else if !appModel.hasSeenIntroduction {
@@ -313,6 +314,7 @@ struct DrawContextView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(selection == nil || appModel.isMutating)
+                    .accessibilityIdentifier("confirm-draw")
                 }
                 .padding(24)
             }
@@ -334,7 +336,14 @@ struct DrawContextView: View {
 struct DrawRevealGate: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isRevealed = false
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var elapsed: TimeInterval = 0
+    private var isRevealed: Bool { elapsed >= DrawPaperAnimator.handoffTime }
+    @State private var sceneSnapshot: BoxSceneSnapshot?
+    private var snapshot: BoxSceneSnapshot {
+        sceneSnapshot ?? BoxSceneStateReducer.reduce(BoxSceneInput(state: appModel.state, now: .now))
+    }
 
     private var canRedraw: Bool {
         guard let version = appModel.unresolvedAttempt?.policyVersion else { return false }
@@ -343,39 +352,46 @@ struct DrawRevealGate: View {
 
     var body: some View {
         ZStack {
-            SomedayBoxBrand.canvas.ignoresSafeArea()
-            VStack(spacing: 24) {
-                Spacer()
-                Image(systemName: "doc.text.fill")
-                    .font(.system(size: 52))
-                    .foregroundStyle(SomedayBoxBrand.paperInk)
-                    .symbolEffect(.bounce, value: isRevealed)
-                    .accessibilityHidden(true)
-
+            EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme).ignoresSafeArea()
+            BoxSceneView(snapshot: snapshot, drawTime: elapsed)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+            Color.black.opacity(isRevealed ? 0.18 : 0).ignoresSafeArea()
+                .allowsHitTesting(false)
+            VStack(spacing: 18) {
+                Spacer(minLength: 0)
                 if let item = appModel.unresolvedItem {
-                    VStack(spacing: 14) {
-                        Text(item.title)
-                            .font(.title.bold())
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if let note = item.note, !note.isEmpty {
-                            Text(note)
-                                .foregroundStyle(.secondary)
+                    ScrollView {
+                        VStack(spacing: 14) {
+                            Text(item.title)
+                                .font(.title.bold())
+                                .multilineTextAlignment(.center)
                                 .fixedSize(horizontal: false, vertical: true)
+                            if let note = item.note, !note.isEmpty {
+                                Text(note)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Text(item.durationLabel)
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(SomedayBoxBrand.tint.opacity(0.13), in: Capsule())
                         }
-                        Text(item.durationLabel)
-                            .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 7)
-                            .background(SomedayBoxBrand.tint.opacity(0.13), in: Capsule())
+                        .padding(28)
+                        .frame(maxWidth: 520)
                     }
-                    .padding(28)
-                    .frame(maxWidth: 520)
-                    .background(SomedayBoxBrand.paper, in: RoundedRectangle(cornerRadius: 28))
+                    .scrollBounceBehavior(.basedOnSize)
+                    .frame(maxWidth: 520, maxHeight: 440)
+                    .background(SomedayBoxBrand.paper, in: RoundedRectangle(cornerRadius: 12))
+                    .foregroundStyle(SomedayBoxBrand.paperInk)
                     .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
-                    .scaleEffect(isRevealed ? 1 : 0.94)
+                    .scaleEffect(isRevealed ? 1 : 0.92)
+                    .rotation3DEffect(.degrees(isRevealed ? 0 : -12), axis: (x: 1, y: 0, z: 0))
                     .opacity(isRevealed ? 1 : 0)
-                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("drawn-paper-content")
+                    .accessibilityHidden(!isRevealed)
+                    .accessibilityElement(children: .contain)
                     .accessibilityLabel(
                         String(
                             format: String(localized: "Drawn paper: %@, %@"),
@@ -416,17 +432,35 @@ struct DrawRevealGate: View {
                     .frame(minHeight: 44)
                 }
                 .frame(maxWidth: 420)
-                .disabled(appModel.isMutating)
-                Spacer()
+                .padding(16)
+                .background(SomedayBoxBrand.canvas, in: RoundedRectangle(cornerRadius: 22))
+                .opacity(isRevealed ? 1 : 0)
+                .accessibilityHidden(!isRevealed)
+                .disabled(appModel.isMutating || elapsed < DrawPaperAnimator.duration)
+                Spacer(minLength: 0)
             }
             .padding(24)
+            .animation(.easeOut(duration: 0.22), value: isRevealed)
         }
-        .onAppear {
-            if reduceMotion {
-                withAnimation(.easeOut(duration: 0.2)) { isRevealed = true }
-            } else {
-                withAnimation(.spring(duration: 0.65, bounce: 0.18)) { isRevealed = true }
+        .task(id: scenePhase) {
+            sceneSnapshot = BoxSceneStateReducer.reduce(BoxSceneInput(state: appModel.state, now: .now))
+            guard scenePhase == .active, !reduceMotion else {
+                elapsed = DrawPaperAnimator.duration
+                return
             }
+            guard elapsed < DrawPaperAnimator.duration else { return }
+            let clock = ContinuousClock()
+            let start = clock.now
+            while !Task.isCancelled {
+                guard !reduceMotion else { elapsed = DrawPaperAnimator.duration; return }
+                let parts = start.duration(to: clock.now).components
+                elapsed = min(Double(parts.seconds) + Double(parts.attoseconds) / 1e18, DrawPaperAnimator.duration)
+                if elapsed >= DrawPaperAnimator.duration { return }
+                do { try await Task.sleep(for: .milliseconds(16)) } catch { return }
+            }
+        }
+        .onChange(of: reduceMotion) { _, reduced in
+            if reduced { elapsed = DrawPaperAnimator.duration }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: isRevealed) { _, newValue in
             appModel.hapticsEnabled && newValue

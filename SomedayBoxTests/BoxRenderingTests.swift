@@ -155,6 +155,28 @@ final class BoxRenderingTests: XCTestCase {
         }
     }
 
+    func testDrawFlightLeavesTheBoxAndSettlesInFrontOfCamera() throws {
+        let box = try BoxGeometry()
+        let animator = DrawPaperAnimator(box: box)
+        let paper = try XCTUnwrap(animator.root.findEntity(named: "DrawnPaper"))
+        animator.apply(time: 0.3)
+        XCTAssertFalse(paper.isEnabled)
+        XCTAssertNotEqual(box.root.orientation.angle, 0)
+        animator.apply(time: 1.3)
+        XCTAssertTrue(paper.isEnabled)
+        XCTAssertGreaterThan(paper.position.y, BoxGeometry.Metrics.bodyHeight / 2)
+        animator.apply(time: DrawPaperAnimator.handoffTime)
+        let camera = BoxSceneCameraState.frontIdle
+        let forward = simd_normalize(camera.target - camera.eye)
+        XCTAssertEqual(simd_dot(paper.position - camera.eye, forward), 0.42, accuracy: 0.001)
+        animator.apply(time: DrawPaperAnimator.duration)
+        XCTAssertFalse(paper.isEnabled)
+        XCTAssertEqual(box.root.position, .zero)
+        XCTAssertEqual(box.root.orientation.angle, 0, accuracy: 1e-5)
+        let hinge = try XCTUnwrap(box.root.findEntity(named: BoxGeometry.NodeName.lidPivot))
+        XCTAssertEqual(hinge.orientation.angle, 0, accuracy: 1e-5)
+    }
+
     // MARK: - Fixtures
 
     private func papers(count: Int) -> [BoxScenePaper] {

@@ -16,6 +16,7 @@ final class BoxSceneStage {
     private(set) var box: BoxGeometry?
     private var papers: PaperStackLayer?
     private var lidCapture: LidCaptureSceneAnimator?
+    private var drawAnimator: DrawPaperAnimator?
     private var idleAnimator: BoxIdleAnimator?
     private var appliedLight: LightRig?
     private var appliedColorScheme: ColorScheme?
@@ -38,6 +39,10 @@ final class BoxSceneStage {
         // The stack rides inside the box, so opening the lid or moving the box carries it.
         box.root.addChild(papers.root)
         box.root.addChild(lidCapture.root)
+
+        let drawAnimator = DrawPaperAnimator(box: box)
+        root.addChild(drawAnimator.root)
+        self.drawAnimator = drawAnimator
 
         self.environment = environment
         self.camera = camera
@@ -62,7 +67,8 @@ final class BoxSceneStage {
         cameraState: BoxSceneCameraState,
         lidCapturePhase: LidCapturePhase,
         reduceMotion: Bool,
-        colorScheme: ColorScheme
+        colorScheme: ColorScheme,
+        drawTime: TimeInterval? = nil
     ) {
         if appliedLight != snapshot.light || appliedColorScheme != colorScheme {
             environment?.apply(snapshot.light, colorScheme: colorScheme)
@@ -81,6 +87,7 @@ final class BoxSceneStage {
             idleAnimator?.apply(time: 0)
         }
         lidCapture?.apply(lidCapturePhase, reduceMotion: reduceMotion)
+        if let drawTime { drawAnimator?.apply(time: drawTime) }
     }
 }
 
@@ -93,6 +100,7 @@ struct BoxSceneView: View {
     let snapshot: BoxSceneSnapshot
     var cameraState: BoxSceneCameraState = .frontIdle
     var lidCapturePhase: LidCapturePhase = .idle
+    var drawTime: TimeInterval? = nil
     var onLidTap: () -> Void = {}
     var onLidLongPress: () -> Void = {}
 
@@ -113,7 +121,7 @@ struct BoxSceneView: View {
     }
 
     private var canAnimateIdle: Bool {
-        scenePhase == .active && !reduceMotion && cameraState == .frontIdle && lidCapturePhase == .idle
+        drawTime == nil && scenePhase == .active && !reduceMotion && cameraState == .frontIdle && lidCapturePhase == .idle
     }
 
     private var scene: some View {
@@ -129,7 +137,8 @@ struct BoxSceneView: View {
                     cameraState: cameraState,
                     lidCapturePhase: lidCapturePhase,
                     reduceMotion: reduceMotion,
-                    colorScheme: colorScheme
+                    colorScheme: colorScheme,
+                    drawTime: drawTime
                 )
             } catch {
                 constructionFailed = true
@@ -140,7 +149,8 @@ struct BoxSceneView: View {
                 cameraState: cameraState,
                 lidCapturePhase: lidCapturePhase,
                 reduceMotion: reduceMotion,
-                colorScheme: colorScheme
+                colorScheme: colorScheme,
+                    drawTime: drawTime
             )
         } placeholder: {
             EnvironmentRig.backdrop(for: snapshot.light, colorScheme: colorScheme)

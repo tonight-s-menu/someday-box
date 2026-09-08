@@ -160,6 +160,38 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(erase.waitForExistence(timeout: 3))
     }
 
+    @MainActor
+    func testDrawFlightRevealsContentAndCanBeAccepted() {
+        let app = XCUIApplication()
+        app.launch()
+        openBoxIfNeeded(app)
+        if app.buttons["Dismiss"].exists { app.buttons["Dismiss"].tap() }
+        if app.buttons["Put back"].exists { app.buttons["Put back"].tap() }
+        app.buttons["Put in an idea"].tap()
+        let title = app.textFields["Paper title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        title.typeText("Take a little sketchbook walk")
+        app.buttons["Up to 10 minutes"].tap()
+        app.buttons["Put it in the Box"].tap()
+        let draw = app.buttons["Draw a paper"]
+        XCTAssertTrue(draw.waitForExistence(timeout: 5))
+        draw.tap()
+        app.buttons["Up to 10 minutes"].tap()
+        app.buttons["confirm-draw"].tap()
+        let accept = app.buttons["Do this"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 8))
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true AND hittable == true"), object: accept)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed)
+        XCTAssertTrue(app.descendants(matching: .any)["drawn-paper-content"].exists)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Drawn paper in front of the box"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        accept.tap()
+        XCTAssertTrue(app.staticTexts["Your current paper"].waitForExistence(timeout: 5))
+        app.buttons["Put back"].tap()
+    }
+
     private var auditTypes: XCUIAccessibilityAuditType {
         [.contrast, .elementDetection, .hitRegion, .sufficientElementDescription, .textClipped, .trait]
     }
